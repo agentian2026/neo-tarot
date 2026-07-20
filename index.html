@@ -81,7 +81,7 @@
     text-shadow: 0 0 12px rgba(178,107,255,0.8), 0 0 30px rgba(178,107,255,0.4);
   }
 
-  /* 화면 전환용: 네 화면을 같은 자리에 겹쳐두고 opacity/scale로 크로스페이드.
+  /* 화면 전환용: 화면들을 같은 자리에 겹쳐두고 opacity/scale로 크로스페이드.
      세로 정렬은 justify-content:center(unsafe center)에 의존하지 않는다 — 콘텐츠가
      뷰포트보다 길어지면 상단이 스크롤 밖(음수 오프셋)으로 밀려 "아래로 내려야 보이는"
      버그가 발생하고, 이는 브라우저별로 `safe` 키워드 지원이 갈려 완전히 신뢰할 수 없다.
@@ -187,6 +187,18 @@
   .day-glow {
     text-shadow: 0 0 12px rgba(212,175,55,0.6), 0 0 24px rgba(178,107,255,0.2);
   }
+
+  /* 미드나잇 바 입장 코드 입력창 — 두 곳(랜딩 진입점/결과 화면 인라인)에서 재사용 */
+  .code-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(178,107,255,0.3);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .code-input:focus {
+    outline: none;
+    border-color: #b26bff;
+    box-shadow: 0 0 0 3px rgba(178,107,255,0.18), 0 0 18px rgba(178,107,255,0.3);
+  }
 </style>
 </head>
 <body class="font-body text-white min-h-screen overflow-x-hidden relative">
@@ -253,6 +265,15 @@
           <span class="relative z-10">🔮 내 밤의 타로 카드 뽑기</span>
         </button>
         <p class="text-xs text-purple-200/70 tracking-wide">16가지 유형 · 낮/밤 이중 카드 · 1분 소요</p>
+
+        <!-- 미드나잇 바 재입장 진입점 — 이미 결제해서 입장 코드를 갖고 있는 재방문 유저용 -->
+        <button
+          id="landing-code-link"
+          type="button"
+          class="mt-2 text-xs text-purple-200/60 hover:text-neonpurple underline underline-offset-4 tracking-wide transition-colors duration-300"
+        >
+          🔑 이미 입장 코드가 있으신가요? 바로 입장하기
+        </button>
       </div>
     </div>
   </main>
@@ -365,7 +386,39 @@
         </div>
       </div>
 
-      <!-- 4. 공유 및 액션 버튼 -->
+      <!-- 5. 미드나잇 바 입장 패널: 결제하기 + 입장 코드 인라인 검증 -->
+      <div class="w-full rounded-2xl border border-neonpurple/40 bg-gradient-to-br from-neonpurple2/15 via-white/[0.02] to-neonpink/10 p-5 flex flex-col gap-4">
+        <div class="text-center">
+          <p class="text-xs tracking-[0.25em] text-neonpurple font-semibold uppercase mb-1">🌙 Midnight Bar</p>
+          <p class="text-sm text-purple-100 leading-relaxed">
+            이 카드에 담긴 진짜 이야기는 결제 후에만 열람 가능한<br />'미드나잇 바'에서 이어집니다.
+          </p>
+        </div>
+
+        <button
+          id="pay-btn"
+          type="button"
+          class="w-full px-6 py-4 rounded-full font-bold text-sm sm:text-base tracking-wide bg-gradient-to-r from-neonpurple2 via-neonpurple to-neonpink text-white shadow-neon transition-transform duration-300 active:scale-95 hover:scale-[1.02]"
+        >
+          💳 결제하고 입장 코드 받기
+        </button>
+
+        <div class="w-full flex flex-col gap-2 pt-3 border-t border-white/10">
+          <label for="result-code-input" class="text-[11px] tracking-widest text-purple-200/70 uppercase text-center">이미 입장 코드가 있으신가요?</label>
+          <div class="flex gap-2">
+            <input
+              id="result-code-input" type="text" placeholder="예: FOOL-777X" autocomplete="off"
+              class="code-input flex-1 rounded-full px-4 py-3 text-sm text-white placeholder-white/25 tracking-widest text-center uppercase"
+            />
+            <button id="result-code-submit" type="button" class="px-5 py-3 rounded-full text-sm font-semibold bg-white/10 border border-neonpurple/40 text-purple-100 hover:bg-neonpurple/20 hover:border-neonpurple transition-all duration-300 active:scale-95">
+              입장
+            </button>
+          </div>
+          <p id="result-code-error" class="hidden text-xs text-neonpink text-center leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- 6. 공유 및 액션 버튼 -->
       <div class="w-full flex flex-col items-center gap-3 pb-4">
         <button id="share-btn" type="button" class="w-full px-8 py-4 rounded-full font-bold text-base tracking-wide bg-neonpink text-white shadow-[0_0_25px_rgba(255,94,196,0.5)] transition-transform duration-300 active:scale-95 hover:scale-[1.02]">
           카카오톡으로 공유하기 💬
@@ -377,8 +430,114 @@
     </div>
   </main>
 
+  <!-- 화면 5: 미드나잇 바 입장 코드 확인 (랜딩에서 바로 진입하는 재방문 유저용 전용 화면) -->
+  <main id="code-entry-screen" class="hidden screen relative z-10 w-full flex flex-col px-6 py-14 sm:py-16 max-w-md mx-auto sm:max-w-lg opacity-0 scale-95 pointer-events-none transition-all duration-700 ease-out">
+    <div class="screen-inner w-full flex flex-col items-center justify-center gap-8">
+      <header class="text-center">
+        <span class="tracking-[0.35em] text-xs text-neonpurple font-semibold uppercase">Midnight Bar</span>
+        <h2 class="mt-3 font-display text-xl sm:text-2xl text-white glow-text">입장 코드를 입력해주세요</h2>
+        <p class="mt-3 text-sm text-purple-200 leading-relaxed">
+          포스타입 결제 후 전달받은<br />비밀 입장 코드를 입력하시면 바로 입장하실 수 있습니다.
+        </p>
+      </header>
+
+      <div class="w-full flex flex-col gap-3">
+        <input
+          id="entry-code-input" type="text" placeholder="예: FOOL-777X" autocomplete="off"
+          class="code-input w-full rounded-full px-5 py-4 text-sm text-white placeholder-white/25 tracking-widest text-center uppercase"
+        />
+        <button id="entry-code-submit" type="button" class="w-full px-8 py-4 rounded-full font-bold text-base tracking-wide bg-gradient-to-r from-neonpurple2 via-neonpurple to-neonpink text-white shadow-neon transition-transform duration-300 active:scale-95 hover:scale-[1.02]">
+          🔮 입장하기
+        </button>
+        <p id="entry-code-error" class="hidden text-xs text-neonpink text-center leading-relaxed"></p>
+      </div>
+
+      <button id="code-entry-back-btn" type="button" class="text-xs text-purple-200/50 hover:text-white underline underline-offset-4 tracking-wide transition-colors duration-300">
+        ← 처음으로 돌아가기
+      </button>
+    </div>
+  </main>
+
+  <!-- 화면 6: 미드나잇 바 (Welcome Lounge) -->
+  <main id="midnight-bar-screen" class="hidden screen relative z-10 w-full flex flex-col px-6 py-14 sm:py-16 max-w-md mx-auto sm:max-w-lg opacity-0 scale-95 pointer-events-none transition-all duration-700 ease-out">
+    <div class="screen-inner w-full flex flex-col items-center justify-center gap-8">
+      <header class="text-center">
+        <span class="tracking-[0.35em] text-xs text-neonpurple font-semibold uppercase">🌙 Midnight Bar · Welcome Lounge</span>
+        <h1 class="mt-4 font-display text-2xl sm:text-3xl text-white glow-text leading-snug">
+          환영합니다,<br /><span id="bar-welcome-name" class="text-neonpink">황제 (Emperor)</span>님
+        </h1>
+        <p id="bar-welcome-sub" class="mt-3 text-sm text-purple-200 leading-relaxed">밤이 되면 깨어나는 철혈의 지배자</p>
+      </header>
+
+      <div class="w-32 h-32 rounded-full border border-neonpurple/50 flex items-center justify-center animate-floaty" style="background: radial-gradient(circle, rgba(178,107,255,0.18), transparent 70%);">
+        <span class="text-5xl">🥂</span>
+      </div>
+
+      <p class="text-sm sm:text-base text-purple-100 leading-relaxed text-center px-2">
+        이곳은 결제를 완료한 이들만 들어올 수 있는 은밀한 공간입니다.<br />
+        오늘 밤, 당신만을 위한 이야기가 이 라운지 안에서 이어집니다.
+      </p>
+
+      <div class="w-full rounded-2xl border border-neonpurple/30 bg-white/[0.02] p-5 flex flex-col gap-3">
+        <p class="text-xs tracking-[0.25em] text-neonpurple font-semibold uppercase text-center mb-1">오늘 밤의 메뉴</p>
+        <div class="flex items-center gap-3 text-sm text-purple-100">
+          <span class="text-lg">🔓</span><span>입장 완료 — <span id="bar-mbti-badge" class="text-neonpink font-semibold">ESTJ</span> 전용 라운지</span>
+        </div>
+        <div class="flex items-center gap-3 text-sm text-purple-200/70">
+          <span class="text-lg">📖</span><span>할로윈 시크릿 비망록 전문 — Coming Soon</span>
+        </div>
+        <div class="flex items-center gap-3 text-sm text-purple-200/70">
+          <span class="text-lg">🃏</span><span>당신의 낮/밤 이중 카드 심층 리딩 — Coming Soon</span>
+        </div>
+      </div>
+
+      <button id="bar-exit-btn" type="button" class="text-xs text-purple-200/50 hover:text-white underline underline-offset-4 tracking-wide transition-colors duration-300">
+        메인으로 돌아가기
+      </button>
+    </div>
+  </main>
+
   <script>
     const TOTAL_QUESTIONS = 12;
+
+    // 포스타입 유료 포스트 결제 페이지 — [결제하기] 버튼이 새 탭으로 여는 곳
+    const POSTYPE_URL = 'https://www.postype.com/@agent-ian';
+
+    // ─────────────────────────────────────────────
+    // 미드나잇 바 입장 코드
+    // secret-memo-backend의 masterArchive.js(남성용, TYPE01~20)에 유형별로 이미 심어둔
+    // secretCode를 그대로 재사용한다 — 별도 발급 절차 없이 그 값 그대로가 입장 코드다.
+    // INTJ/INFP/ENFJ 3종은 소울넘버(생년월일)에 따라 원고가 여러 개(TYPE 후보)로 갈라져서
+    // 코드도 여러 개인데, 이 사이트는 유저의 소울넘버를 모르는 상태(코드만 아는 상태)에서도
+    // 입장을 허용해야 하므로 그 MBTI로 나올 수 있는 코드를 전부 배열로 받아준다.
+    // ─────────────────────────────────────────────
+    const MIDNIGHT_BAR_CODES = {
+      ISTP: ['FOOL-777X'],
+      ESTP: ['CHARIOT-777X'],
+      ISTJ: ['JUSTICE-777X'],
+      ISFJ: ['EMPRESS-777X'],
+      ENTP: ['MAGICIAN-777X'],
+      ENFJ: ['LOVERS-777X', 'HIEROPHANT-777X'],
+      INFP: ['HANGEDMAN-777X', 'MOON-777X'],
+      INTJ: ['PRIESTESS-777X', 'TOWER-777X'],
+      ENFP: ['SUN-777X'],
+      INFJ: ['WHEEL-777X'],
+      INTP: ['HERMIT-777X'],
+      ISFP: ['STRENGTH-777X'],
+      ESTJ: ['COMMAND_04_EMPEROR'],
+      ESFJ: ['BOND_05_HIEROPHANT'],
+      ESFP: ['DESIRE_06_LOVERS'],
+      ENTJ: ['CONQUER_07_CHARIOT'],
+    };
+
+    // 코드 → MBTI 역방향 조회 테이블. 사용자가 입력한 코드 하나만으로 어느 MBTI인지,
+    // 그리고 resultData의 어떤 카드로 환영 메시지를 띄워야 하는지 즉시 판별할 수 있게 해준다.
+    const CODE_TO_MBTI = {};
+    Object.entries(MIDNIGHT_BAR_CODES).forEach(([mbti, codes]) => {
+      codes.forEach((code) => {
+        CODE_TO_MBTI[code] = mbti;
+      });
+    });
 
     // ─────────────────────────────────────────────
     // 결과 데이터베이스 (16유형)
@@ -663,6 +822,8 @@
     const quizScreen = document.getElementById('quiz-screen');
     const loadingScreen = document.getElementById('loading-screen');
     const resultScreen = document.getElementById('result-screen');
+    const codeEntryScreen = document.getElementById('code-entry-screen');
+    const midnightBarScreen = document.getElementById('midnight-bar-screen');
     const startBtn = document.getElementById('start-btn');
     const progressBar = document.getElementById('progress-bar');
     const progressLabel = document.getElementById('progress-label');
@@ -685,6 +846,25 @@
     const worstMatchValue = document.getElementById('worst-match-value');
     const shareBtn = document.getElementById('share-btn');
     const retryBtn = document.getElementById('retry-btn');
+
+    // 결제 + 인라인 입장 코드 (결과 화면)
+    const payBtn = document.getElementById('pay-btn');
+    const resultCodeInput = document.getElementById('result-code-input');
+    const resultCodeSubmit = document.getElementById('result-code-submit');
+    const resultCodeError = document.getElementById('result-code-error');
+
+    // 랜딩 → 코드 입력 전용 화면
+    const landingCodeLink = document.getElementById('landing-code-link');
+    const entryCodeInput = document.getElementById('entry-code-input');
+    const entryCodeSubmit = document.getElementById('entry-code-submit');
+    const entryCodeError = document.getElementById('entry-code-error');
+    const codeEntryBackBtn = document.getElementById('code-entry-back-btn');
+
+    // 미드나잇 바
+    const barWelcomeName = document.getElementById('bar-welcome-name');
+    const barWelcomeSub = document.getElementById('bar-welcome-sub');
+    const barMbtiBadge = document.getElementById('bar-mbti-badge');
+    const barExitBtn = document.getElementById('bar-exit-btn');
 
     // ─────────────────────────────────────────────
     // 화면 전환 공통 헬퍼
@@ -815,6 +995,10 @@
 
       // 카드는 항상 '밤의 모드'로 초기화된 상태로 시작
       cardFlipInner.classList.remove('is-flipped');
+
+      // 결과 화면에 진입할 때마다 입장 코드 입력창은 항상 깨끗한 상태로 초기화
+      resultCodeInput.value = '';
+      hideInlineError(resultCodeError);
     }
 
     // 낮/밤 카드 반전 인터랙션
@@ -849,6 +1033,94 @@
     // 랜딩 → 질문(Q1) 전환
     startBtn.addEventListener('click', () => {
       activateScreen(quizScreen, landingScreen, () => renderQuestion(currentIndex));
+    });
+
+    // ─────────────────────────────────────────────
+    // 결제 로직 — [결제하기] 버튼은 포스타입 유료 포스트 결제창을 새 탭으로 연다.
+    // 결제 자체(웹훅/검증)는 포스타입 쪽에서 처리되고, 구매자는 포스타입에서 전달받은
+    // 입장 코드를 들고 돌아와 아래 코드 검증 로직으로 입장한다.
+    // ─────────────────────────────────────────────
+    payBtn.addEventListener('click', () => {
+      window.open(POSTYPE_URL, '_blank', 'noopener');
+    });
+
+    // ─────────────────────────────────────────────
+    // 시크릿 코드 검증 시스템
+    // 입력값을 정규화(trim + 대문자화)한 뒤 CODE_TO_MBTI에서 조회한다.
+    // 코드 하나만으로 어떤 MBTI/카드인지 알 수 있으므로, 퀴즈를 안 풀고 코드만 들고
+    // 재방문한 유저도(resultMBTI가 null이어도) 곧바로 미드나잇 바에 입장할 수 있다.
+    // ─────────────────────────────────────────────
+    function normalizeCode(raw) {
+      return String(raw || '').trim().toUpperCase();
+    }
+
+    function showInlineError(el, message) {
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
+    function hideInlineError(el) {
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
+
+    function tryEnterMidnightBar(rawCode, prevScreenEl, errorEl) {
+      const code = normalizeCode(rawCode);
+
+      if (!code) {
+        showInlineError(errorEl, '입장 코드를 입력해주세요.');
+        return;
+      }
+
+      const matchedMbti = CODE_TO_MBTI[code];
+      if (!matchedMbti) {
+        showInlineError(errorEl, '유효하지 않은 입장 코드입니다. 결제 후 전달받은 코드를 다시 확인해주세요.');
+        return;
+      }
+
+      hideInlineError(errorEl);
+      resultMBTI = matchedMbti; // 코드만으로 입장한 경우에도 상태를 갱신해둔다 (공유하기 등에서 재사용)
+      activateScreen(midnightBarScreen, prevScreenEl, () => renderMidnightBar(matchedMbti));
+    }
+
+    function renderMidnightBar(mbti) {
+      const data = resultData[mbti] || resultData.INFP;
+      barWelcomeName.textContent = data.title;
+      barWelcomeSub.textContent = data.sub;
+      barMbtiBadge.textContent = mbti;
+    }
+
+    // 결과 화면 인라인 코드 입력
+    resultCodeSubmit.addEventListener('click', () => {
+      tryEnterMidnightBar(resultCodeInput.value, resultScreen, resultCodeError);
+    });
+    resultCodeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') resultCodeSubmit.click();
+    });
+
+    // 랜딩 → 전용 코드 입력 화면
+    landingCodeLink.addEventListener('click', () => {
+      entryCodeInput.value = '';
+      hideInlineError(entryCodeError);
+      activateScreen(codeEntryScreen, landingScreen);
+    });
+    codeEntryBackBtn.addEventListener('click', () => {
+      activateScreen(landingScreen, codeEntryScreen);
+    });
+    entryCodeSubmit.addEventListener('click', () => {
+      tryEnterMidnightBar(entryCodeInput.value, codeEntryScreen, entryCodeError);
+    });
+    entryCodeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') entryCodeSubmit.click();
+    });
+
+    // 미드나잇 바 → 메인으로 복귀 (모든 상태 초기화)
+    barExitBtn.addEventListener('click', () => {
+      currentIndex = 0;
+      answers.length = 0;
+      resultMBTI = null;
+      cardFlipInner.classList.remove('is-flipped');
+      activateScreen(landingScreen, midnightBarScreen);
     });
   </script>
 
