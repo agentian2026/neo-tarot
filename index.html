@@ -345,13 +345,22 @@
       <div class="flex flex-col items-center gap-5">
         <div class="relative animate-floaty" style="perspective: 1000px;">
           <div id="card-flip-inner" class="flip-card-inner w-44 h-64 sm:w-48 sm:h-72">
-            <div class="flip-card-face flip-card-front rounded-2xl">
-              <span id="card-night-icon" class="sigil text-5xl sm:text-6xl mb-3">🌙</span>
-              <span id="card-night-label" class="font-display text-xs sm:text-sm tracking-[0.25em] text-neonpurple uppercase">지배자</span>
+            <div class="flip-card-face flip-card-front rounded-2xl overflow-hidden">
+              <!-- public/cards/{g}_{mbti}_night_{1-4}.webp 실제 카드 아트. 로드 실패 시
+                   JS(setCardFace)가 hidden 처리하고 아래 폴백(아이콘+라벨)을 그대로 보여준다. -->
+              <img id="card-night-image" class="hidden absolute inset-0 w-full h-full object-cover rounded-2xl" alt="" />
+              <div id="card-night-fallback" class="relative z-10 flex flex-col items-center">
+                <span id="card-night-icon" class="sigil text-5xl sm:text-6xl mb-3">🌙</span>
+                <span id="card-night-label" class="font-display text-xs sm:text-sm tracking-[0.25em] text-neonpurple uppercase">지배자</span>
+              </div>
             </div>
-            <div class="flip-card-face flip-card-back rounded-2xl">
-              <span id="card-day-icon" class="day-glow text-5xl sm:text-6xl mb-3">☀️</span>
-              <span id="card-day-label" class="font-display text-xs sm:text-sm tracking-[0.25em] text-[#8a6a2f] uppercase">설계자</span>
+            <div class="flip-card-face flip-card-back rounded-2xl overflow-hidden">
+              <!-- public/cards/{g}_{mbti}_day_{1-4}.webp 실제 카드 아트 -->
+              <img id="card-day-image" class="hidden absolute inset-0 w-full h-full object-cover rounded-2xl" alt="" />
+              <div id="card-day-fallback" class="relative z-10 flex flex-col items-center">
+                <span id="card-day-icon" class="day-glow text-5xl sm:text-6xl mb-3">☀️</span>
+                <span id="card-day-label" class="font-display text-xs sm:text-sm tracking-[0.25em] text-[#8a6a2f] uppercase">설계자</span>
+              </div>
             </div>
           </div>
         </div>
@@ -595,6 +604,54 @@
 
     // 포스타입 유료 포스트 결제 페이지 — [결제하기] 버튼이 새 탭으로 여는 곳
     const POSTYPE_URL = 'https://www.postype.com/@agent-ian';
+
+    // ─────────────────────────────────────────────
+    // 256장 타로 카드 이미지 (public/cards/*.webp)
+    // 네이밍 규칙: {성별 m|f}_{mbti 소문자}_{day|night}_{1~4}.webp
+    //   예) f_intp_day_1.webp, m_estj_night_4.webp
+    // 2(성별) × 16(MBTI) × 2(낮/밤) × 4(번호) = 256장.
+    // index.html이 저장소 루트에 있고 public/cards/도 루트 기준 상대경로이므로,
+    // 배포 루트(=저장소 루트)에서 그대로 'public/cards/...'로 접근하면 된다.
+    // ─────────────────────────────────────────────
+    const CARD_IMAGE_BASE_PATH = 'public/cards/';
+    const CARD_IMAGE_VARIANT_COUNT = 4; // 유형별 낮/밤 각각 4장 중 하나를 매핑
+
+    // 1~4 중 하나를 랜덤 매핑 — 요구사항의 "랜덤 또는 순차 매핑" 중 랜덤 방식 채택
+    function pickCardVariant() {
+      return Math.floor(Math.random() * CARD_IMAGE_VARIANT_COUNT) + 1;
+    }
+
+    // (성별, MBTI, 낮/밤) → 실제 이미지 경로. gender는 'male'|'female', timeOfDay는 'day'|'night'.
+    function getCardImagePath(gender, mbti, timeOfDay) {
+      const g = gender === 'female' ? 'f' : 'm';
+      const m = String(mbti || 'INFP').toLowerCase();
+      const variant = pickCardVariant();
+      return `${CARD_IMAGE_BASE_PATH}${g}_${m}_${timeOfDay}_${variant}.webp`;
+    }
+
+    // 카드 한쪽 면(이미지 + 폴백 아이콘/라벨)의 상태를 갱신한다.
+    // 이미지 로드에 성공하면 실제 카드 아트를 보여주고, 실패(파일 없음/네트워크 오류 등)하면
+    // 기존 아이콘·라벨 폴백을 그대로 노출해 화면이 깨지지 않도록 방지한다.
+    function setCardFace(imgEl, fallbackEl, src, altText) {
+      fallbackEl.classList.remove('hidden');
+      imgEl.classList.add('hidden');
+      imgEl.alt = altText;
+      imgEl.onload = () => {
+        imgEl.classList.remove('hidden');
+        fallbackEl.classList.add('hidden');
+      };
+      imgEl.onerror = () => {
+        console.warn('[타로 카드 이미지 로드 실패]', src);
+        imgEl.classList.add('hidden');
+        fallbackEl.classList.remove('hidden');
+      };
+      // 같은 src를 다시 대입하면 브라우저가 load 이벤트를 재발생시키지 않는 경우가 있어
+      // (랜덤 변형 번호가 우연히 이전과 같을 때) 매번 새로 로드를 시도하도록 한 번 비워준다.
+      imgEl.src = '';
+      requestAnimationFrame(() => {
+        imgEl.src = src;
+      });
+    }
 
     // ─────────────────────────────────────────────
     // 미드나잇 바 입장 코드 (남성용)
@@ -1132,6 +1189,10 @@
     const cardFlipInner = document.getElementById('card-flip-inner');
     const cardNightLabel = document.getElementById('card-night-label');
     const cardDayLabel = document.getElementById('card-day-label');
+    const cardNightImage = document.getElementById('card-night-image');
+    const cardNightFallback = document.getElementById('card-night-fallback');
+    const cardDayImage = document.getElementById('card-day-image');
+    const cardDayFallback = document.getElementById('card-day-fallback');
     const flipBtn = document.getElementById('flip-btn');
     const hiddenCharmText = document.getElementById('hidden-charm-text');
     const nightFactAttackText = document.getElementById('night-fact-attack-text');
@@ -1327,6 +1388,11 @@
       // 카드 앞/뒷면 라벨: 같은 타로 아치타입(title)을 밤/낮 톤으로만 다르게 보여준다
       cardNightLabel.textContent = data.title;
       cardDayLabel.textContent = data.title;
+
+      // public/cards/의 실제 카드 아트(성별+MBTI+낮/밤, 4장 중 랜덤 매핑)를 불러온다.
+      // 로드 실패 시 setCardFace 내부에서 위 아이콘/라벨 폴백으로 자동 전환된다.
+      setCardFace(cardNightImage, cardNightFallback, getCardImagePath(gender, mbti, 'night'), `${data.title} · 밤의 카드`);
+      setCardFace(cardDayImage, cardDayFallback, getCardImagePath(gender, mbti, 'day'), `${data.title} · 낮의 카드`);
 
       hiddenCharmText.textContent = data.hiddenCharm;
       nightFactAttackText.textContent = data.nightFactAttack;
