@@ -238,7 +238,7 @@
       <!-- 메인 카피 -->
       <div class="text-center px-2">
         <h2 class="text-2xl sm:text-3xl font-extrabold leading-snug text-white glow-text">
-          당신의 밤은<br />어떤 카드로<br class="sm:hidden" /> 기록되어 있습니까?
+          낮에는 감추었던 진짜 내 모습,<br />당신의 밤은 어떤 본능을 숨기고 있나요?
         </h2>
         <p class="mt-4 text-sm sm:text-base text-purple-200 leading-relaxed">
           당신도 몰랐던 '밤의 본능'이<br />
@@ -263,7 +263,7 @@
                  text-white shadow-neonStrong animate-pulseGlow
                  transition-transform duration-300 active:scale-95 hover:scale-[1.04]"
         >
-          <span class="relative z-10">🔮 내 밤의 타로 카드 뽑기</span>
+          <span class="relative z-10">🔮 1분 만에 내 안의 밤 성향 찾기</span>
         </button>
         <p class="text-xs text-purple-200/70 tracking-wide">16가지 유형 · 낮/밤 이중 카드 · 1분 소요</p>
 
@@ -466,29 +466,42 @@
   <main id="midnight-bar-screen" class="hidden screen relative z-10 w-full flex flex-col px-6 py-14 sm:py-16 max-w-md mx-auto sm:max-w-lg opacity-0 scale-95 pointer-events-none transition-all duration-700 ease-out">
     <div class="screen-inner w-full flex flex-col items-center justify-center gap-8">
       <header class="text-center">
-        <span class="tracking-[0.35em] text-xs text-neonpurple font-semibold uppercase">🌙 Midnight Bar · Welcome Lounge</span>
+        <span class="tracking-[0.35em] text-xs text-neonpurple font-semibold uppercase">MIDNIGHT BAR · WELCOME LOUNGE</span>
         <h1 class="mt-4 font-display text-2xl sm:text-3xl text-white glow-text leading-snug">
           환영합니다,<br /><span id="bar-welcome-name" class="text-neonpink">황제 (Emperor)</span>님
         </h1>
         <p id="bar-welcome-sub" class="mt-3 text-sm text-purple-200 leading-relaxed">밤이 되면 깨어나는 철혈의 지배자</p>
       </header>
 
-      <div class="w-32 h-32 rounded-full border border-neonpurple/50 flex items-center justify-center animate-floaty" style="background: radial-gradient(circle, rgba(178,107,255,0.18), transparent 70%);">
-        <span class="text-5xl">🥂</span>
-      </div>
+      <!-- 중앙 아이콘: 칵테일 잔 → 연애비법서(마법책). 클릭 시 해당 MBTI/성별 연애비법서를
+           Blob 기반 HTML 파일로 안전하게 다운로드한다 (실제 PDF 바이너리 다운로드 방식은
+           과거 크롬이 "사이트에서 사용할 수 없는 파일"로 차단한 이력이 있어, 브라우저가
+           의심하지 않는 text/html Blob + Object URL 방식으로 대체했다). -->
+      <button
+        id="bar-book-btn" type="button"
+        class="group flex flex-col items-center gap-3 focus:outline-none"
+      >
+        <div class="w-32 h-32 rounded-full border border-neonpurple/50 flex items-center justify-center animate-floaty transition-transform duration-300 group-hover:scale-105 group-active:scale-95" style="background: radial-gradient(circle, rgba(178,107,255,0.18), transparent 70%);">
+          <span class="text-5xl">📕✨</span>
+        </div>
+        <span class="text-sm sm:text-base font-semibold text-neonpink tracking-wide group-hover:text-white transition-colors duration-300">비법서 전달</span>
+      </button>
 
       <p class="text-sm sm:text-base text-purple-100 leading-relaxed text-center px-2">
-        이곳은 결제를 완료한 이들만 들어올 수 있는 은밀한 공간입니다.<br />
-        오늘 밤, 당신만을 위한 이야기가 이 라운지 안에서 이어집니다.
+        지친 하루 끝, 온전히 나에게 집중하는 은밀하고 특별한 힐링의 공간.<br />
+        오늘 밤, 당신만을 위한 깊은 이야기가 이 라운지 안에서 시작됩니다.
       </p>
 
       <div class="w-full rounded-2xl border border-neonpurple/30 bg-white/[0.02] p-5 flex flex-col gap-3">
-        <p class="text-xs tracking-[0.25em] text-neonpurple font-semibold uppercase text-center mb-1">오늘 밤의 메뉴</p>
+        <p class="text-xs tracking-[0.3em] text-neonpurple font-semibold uppercase text-center mb-1">Tonight Menu</p>
         <div class="flex items-center gap-3 text-sm text-purple-100">
           <span class="text-lg">🔓</span><span>입장 완료 — <span id="bar-mbti-badge" class="text-neonpink font-semibold">ESTJ</span> 전용 라운지</span>
         </div>
+        <div class="flex items-center gap-3 text-sm text-purple-100">
+          <span class="text-lg">🖋️</span><span>창조주의 방 — 당신의 손길이 필요합니다.</span>
+        </div>
         <div class="flex items-center gap-3 text-sm text-purple-200/70">
-          <span class="text-lg">🃏</span><span>당신의 낮/밤 이중 카드 심층 리딩 — Coming Soon</span>
+          <span class="text-lg">🌀</span><span>NOC(네오 오컬트 클럽) 접속 — Coming Soon</span>
         </div>
       </div>
 
@@ -1156,6 +1169,7 @@
     const barMbtiBadge = document.getElementById('bar-mbti-badge');
     const barExitBtn = document.getElementById('bar-exit-btn');
     const barGuideBtn = document.getElementById('bar-guide-btn');
+    const barBookBtn = document.getElementById('bar-book-btn');
     let currentBarMbti = null; // 미드나잇 바에 입장한 MBTI — 연애비법서 레이어를 열 때 사용
     let currentBarGender = null; // 미드나잇 바에 입장한 성별('male'|'female') — 남/여 콘텐츠 분기에 사용
 
@@ -1512,6 +1526,102 @@
     }
 
     barGuideBtn.addEventListener('click', () => openGuideModal(currentBarMbti, currentBarGender));
+
+    // ─────────────────────────────────────────────
+    // 비법서 전달 — 중앙 마법책 아이콘 클릭 시 해당 MBTI/성별 연애비법서를
+    // Blob(text/html) + Object URL 방식으로 다운로드시킨다. 예전에 matplotlib으로
+    // 만든 실제 PDF 바이너리를 다운로드시켰을 때 크롬이 "사이트에서 사용할 수 없는
+    // 파일"로 차단한 이력이 있어, 브라우저가 의심하지 않는 일반 텍스트 기반(text/html)
+    // Blob 다운로드로 대체했다. 인앱 모달(openGuideModal)과 내용은 100% 동일하다.
+    // ─────────────────────────────────────────────
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function buildGuideDocument(mbti, gender) {
+      const table = gender === 'female' ? femaleResultData : resultData;
+      const safeMbti = table[mbti] ? mbti : 'INFP';
+      const data = table[safeMbti];
+      const isFemale = gender === 'female';
+      const charmLabel = isFemale ? '👑 공주 모드 · 위로의 속삭임' : '✨ 은밀한 반전 매력';
+      const factLabel = isFemale ? '🖤 마녀 모드 · 주도적 각성' : '⚡ 밤의 팩폭';
+      const codeTable = isFemale ? FEMALE_ENTRY_CODES : MALE_ENTRY_CODES;
+      const codes = codeTable[safeMbti];
+      const codeLine = codes && codes.length ? `SECRET CODE · ${codes[0]}` : '';
+
+      return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>네오-타로 · ${escapeHtml(safeMbti)} 연애비법서</title>
+<style>
+  body { margin:0; padding:48px 24px; background:#0d0b14; color:#f5f3ff; font-family:'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif; }
+  .wrap { max-width:560px; margin:0 auto; }
+  .badge { display:inline-block; padding:6px 18px; border-radius:999px; border:1px solid rgba(178,107,255,0.5); color:#b26bff; font-size:12px; letter-spacing:0.3em; }
+  h1 { font-size:28px; margin:16px 0 4px; text-shadow:0 0 20px rgba(178,107,255,0.6); }
+  .sub { color:#d9c9ff; margin:0 0 20px; }
+  .intro { line-height:1.8; margin-bottom:28px; border-top:1px solid rgba(255,255,255,0.12); padding-top:16px; }
+  .section { border-radius:16px; padding:20px; margin-bottom:16px; }
+  .section h2 { font-size:12px; letter-spacing:0.2em; text-transform:uppercase; margin:0 0 10px; }
+  .section p { line-height:1.8; margin:0; }
+  .charm { background:rgba(178,107,255,0.08); border:1px solid rgba(178,107,255,0.3); }
+  .charm h2 { color:#b26bff; }
+  .fact { background:rgba(255,94,196,0.08); border:1px solid rgba(255,94,196,0.4); }
+  .fact h2 { color:#ff5ec4; }
+  .match-grid { display:flex; gap:16px; margin-bottom:24px; }
+  .match-grid div { flex:1; text-align:center; border-radius:16px; padding:16px; border:1px solid rgba(178,107,255,0.3); }
+  .match-grid .label { font-size:11px; color:#d9c9ff; letter-spacing:0.15em; text-transform:uppercase; }
+  .match-grid .value { margin-top:6px; font-weight:700; }
+  .code { text-align:center; font-size:11px; letter-spacing:0.15em; color:#fbbf24; font-weight:600; margin-top:8px; }
+  .footer { text-align:center; margin-top:32px; font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:0.1em; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="text-align:center;">
+      <span class="badge">${escapeHtml(safeMbti)}</span>
+      <h1>${escapeHtml(data.title)}</h1>
+      <p class="sub">${escapeHtml(data.sub)}</p>
+      <p class="intro">${escapeHtml(data.intro)}</p>
+    </div>
+    <div class="section charm">
+      <h2>${escapeHtml(charmLabel)}</h2>
+      <p>${escapeHtml(data.hiddenCharm)}</p>
+    </div>
+    <div class="section fact">
+      <h2>${escapeHtml(factLabel)}</h2>
+      <p>${escapeHtml(data.nightFactAttack)}</p>
+    </div>
+    <div class="match-grid">
+      <div><div class="label">찰떡 궁합</div><div class="value">${escapeHtml(data.match)}</div></div>
+      <div><div class="label">파국 궁합</div><div class="value">${escapeHtml(data.bad)}</div></div>
+    </div>
+    ${codeLine ? `<p class="code">${escapeHtml(codeLine)}</p>` : ''}
+    <p class="footer">NEO-TAROT · neo-tarot-seven.vercel.app</p>
+  </div>
+</body>
+</html>`;
+    }
+
+    function downloadGuideDocument(mbti, gender) {
+      if (!mbti) return;
+      const html = buildGuideDocument(mbti, gender);
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `네오타로_${mbti}_연애비법서.html`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    barBookBtn.addEventListener('click', () => downloadGuideDocument(currentBarMbti, currentBarGender));
     guideModalClose.addEventListener('click', closeGuideModal);
     guideModalBackdrop.addEventListener('click', closeGuideModal);
     document.addEventListener('keydown', (e) => {
