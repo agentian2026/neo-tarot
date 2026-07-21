@@ -628,11 +628,16 @@
     }
 
     // (성별, MBTI, 낮/밤) → 실제 이미지 경로. gender는 'male'|'female', timeOfDay는 'day'|'night'.
+    // ⚠️ 실제 GitHub cards/ 폴더의 파일명은 끝에 '_result'가 붙어있다.
+    // 예: f_enfj_day_1_result.webp (단순 f_enfj_day_1.webp가 아님)
+    // 이 접미사가 빠져있어서 모든 이미지 요청이 404가 났던 것 — 반드시 유지할 것.
+    const CARD_IMAGE_FILENAME_SUFFIX = '_result';
+
     function getCardImagePath(gender, mbti, timeOfDay) {
       const g = gender === 'female' ? 'f' : 'm';
       const m = String(mbti || 'INFP').toLowerCase();
       const variant = pickCardVariant();
-      return `${CARD_IMAGE_BASE_PATH}${g}_${m}_${timeOfDay}_${variant}.webp`;
+      return `${CARD_IMAGE_BASE_PATH}${g}_${m}_${timeOfDay}_${variant}${CARD_IMAGE_FILENAME_SUFFIX}.webp`;
     }
 
     // 카드 한쪽 면(이미지 + 폴백 아이콘/라벨)의 상태를 갱신한다.
