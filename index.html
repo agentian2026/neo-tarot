@@ -346,7 +346,7 @@
         <div class="relative animate-floaty" style="perspective: 1000px;">
           <div id="card-flip-inner" class="flip-card-inner w-44 h-64 sm:w-48 sm:h-72">
             <div class="flip-card-face flip-card-front rounded-2xl overflow-hidden">
-              <!-- public/cards/{g}_{mbti}_night_{1-4}.webp 실제 카드 아트. 로드 실패 시
+              <!-- cards/{g}_{mbti}_night_{1-4}.webp 실제 카드 아트. 로드 실패 시
                    JS(setCardFace)가 hidden 처리하고 아래 폴백(아이콘+라벨)을 그대로 보여준다. -->
               <img id="card-night-image" class="hidden absolute inset-0 w-full h-full object-cover rounded-2xl" alt="" />
               <div id="card-night-fallback" class="relative z-10 flex flex-col items-center">
@@ -355,7 +355,7 @@
               </div>
             </div>
             <div class="flip-card-face flip-card-back rounded-2xl overflow-hidden">
-              <!-- public/cards/{g}_{mbti}_day_{1-4}.webp 실제 카드 아트 -->
+              <!-- cards/{g}_{mbti}_day_{1-4}.webp 실제 카드 아트 -->
               <img id="card-day-image" class="hidden absolute inset-0 w-full h-full object-cover rounded-2xl" alt="" />
               <div id="card-day-fallback" class="relative z-10 flex flex-col items-center">
                 <span id="card-day-icon" class="day-glow text-5xl sm:text-6xl mb-3">☀️</span>
@@ -606,14 +606,20 @@
     const POSTYPE_URL = 'https://www.postype.com/@agent-ian';
 
     // ─────────────────────────────────────────────
-    // 256장 타로 카드 이미지 (public/cards/*.webp)
+    // 256장 타로 카드 이미지 (cards/*.webp)
     // 네이밍 규칙: {성별 m|f}_{mbti 소문자}_{day|night}_{1~4}.webp
     //   예) f_intp_day_1.webp, m_estj_night_4.webp
     // 2(성별) × 16(MBTI) × 2(낮/밤) × 4(번호) = 256장.
-    // index.html이 저장소 루트에 있고 public/cards/도 루트 기준 상대경로이므로,
-    // 배포 루트(=저장소 루트)에서 그대로 'public/cards/...'로 접근하면 된다.
+    //
+    // ⚠️ 경로를 'public/cards/'가 아니라 'cards/'(저장소 루트 직속)로 둔다.
+    // Vercel의 무설정(zero-config) 정적 배포는 저장소에 'public'이라는 이름의 폴더가
+    // 있으면 그 폴더 "안쪽"만 배포 루트로 인식해버려서, 그 밖에 있는 index.html이
+    // 아예 서빙되지 않고 사이트 전체가 404가 나는 문제가 실제로 발생했다
+    // (빌드 로그에 "no files were prepared"로 나타남). 이미지 폴더 이름을 'public'이
+    // 아닌 다른 이름(cards)으로 두면 이 문제를 원천적으로 피할 수 있다.
+    // → GitHub 저장소 구조: index.html과 cards/ 폴더가 같은 위치(루트)에 나란히 있어야 한다.
     // ─────────────────────────────────────────────
-    const CARD_IMAGE_BASE_PATH = 'public/cards/';
+    const CARD_IMAGE_BASE_PATH = 'cards/';
     const CARD_IMAGE_VARIANT_COUNT = 4; // 유형별 낮/밤 각각 4장 중 하나를 매핑
 
     // 1~4 중 하나를 랜덤 매핑 — 요구사항의 "랜덤 또는 순차 매핑" 중 랜덤 방식 채택
@@ -1389,7 +1395,7 @@
       cardNightLabel.textContent = data.title;
       cardDayLabel.textContent = data.title;
 
-      // public/cards/의 실제 카드 아트(성별+MBTI+낮/밤, 4장 중 랜덤 매핑)를 불러온다.
+      // cards/의 실제 카드 아트(성별+MBTI+낮/밤, 4장 중 랜덤 매핑)를 불러온다.
       // 로드 실패 시 setCardFace 내부에서 위 아이콘/라벨 폴백으로 자동 전환된다.
       setCardFace(cardNightImage, cardNightFallback, getCardImagePath(gender, mbti, 'night'), `${data.title} · 밤의 카드`);
       setCardFace(cardDayImage, cardDayFallback, getCardImagePath(gender, mbti, 'day'), `${data.title} · 낮의 카드`);
