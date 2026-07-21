@@ -364,11 +364,11 @@
       <!-- 3. 하단 상세 설명: 은밀한 반전 매력 / 밤의 팩폭 -->
       <div class="w-full flex flex-col gap-4">
         <div class="rounded-2xl border border-neonpurple/30 bg-gradient-to-br from-neonpurple/10 via-white/[0.02] to-transparent p-5">
-          <p class="text-xs tracking-[0.25em] text-neonpurple font-semibold mb-2 uppercase">✨ 은밀한 반전 매력</p>
+          <p id="result-hidden-charm-label" class="text-xs tracking-[0.25em] text-neonpurple font-semibold mb-2 uppercase">✨ 은밀한 반전 매력</p>
           <p id="hidden-charm-text" class="text-sm sm:text-base text-purple-100 leading-relaxed"></p>
         </div>
         <div class="rounded-2xl border border-neonpink/40 bg-gradient-to-br from-neonpink/10 via-white/[0.02] to-transparent p-5">
-          <p class="text-xs tracking-[0.25em] text-neonpink font-semibold mb-2 uppercase">⚡ 밤의 팩폭</p>
+          <p id="result-night-fact-label" class="text-xs tracking-[0.25em] text-neonpink font-semibold mb-2 uppercase">⚡ 밤의 팩폭</p>
           <p id="night-fact-attack-text" class="text-sm sm:text-base text-purple-100 leading-relaxed"></p>
         </div>
       </div>
@@ -524,11 +524,11 @@
 
       <div class="flex flex-col gap-4 mb-6">
         <div class="rounded-2xl border border-neonpurple/30 bg-gradient-to-br from-neonpurple/10 via-white/[0.02] to-transparent p-5">
-          <p class="text-xs tracking-[0.25em] text-neonpurple font-semibold mb-2 uppercase">✨ 은밀한 반전 매력</p>
+          <p id="guide-hidden-charm-label" class="text-xs tracking-[0.25em] text-neonpurple font-semibold mb-2 uppercase">✨ 은밀한 반전 매력</p>
           <p id="guide-hidden-charm" class="text-sm text-purple-100 leading-relaxed"></p>
         </div>
         <div class="rounded-2xl border border-neonpink/40 bg-gradient-to-br from-neonpink/10 via-white/[0.02] to-transparent p-5">
-          <p class="text-xs tracking-[0.25em] text-neonpink font-semibold mb-2 uppercase">⚡ 밤의 팩폭</p>
+          <p id="guide-night-fact-label" class="text-xs tracking-[0.25em] text-neonpink font-semibold mb-2 uppercase">⚡ 밤의 팩폭</p>
           <p id="guide-night-fact" class="text-sm text-purple-100 leading-relaxed"></p>
         </div>
       </div>
@@ -578,20 +578,21 @@
   </div>
 
   <script>
-    const TOTAL_QUESTIONS = 12;
+    const TOTAL_QUESTIONS = 13; // 12문항(MBTI 4지표) + 13번째 성별 문항
 
     // 포스타입 유료 포스트 결제 페이지 — [결제하기] 버튼이 새 탭으로 여는 곳
     const POSTYPE_URL = 'https://www.postype.com/@agent-ian';
 
     // ─────────────────────────────────────────────
-    // 미드나잇 바 입장 코드
+    // 미드나잇 바 입장 코드 (남성용)
     // secret-memo-backend의 masterArchive.js(남성용, TYPE01~20)에 유형별로 이미 심어둔
     // secretCode를 그대로 재사용한다 — 별도 발급 절차 없이 그 값 그대로가 입장 코드다.
     // INTJ/INFP/ENFJ 3종은 소울넘버(생년월일)에 따라 원고가 여러 개(TYPE 후보)로 갈라져서
     // 코드도 여러 개인데, 이 사이트는 유저의 소울넘버를 모르는 상태(코드만 아는 상태)에서도
     // 입장을 허용해야 하므로 그 MBTI로 나올 수 있는 코드를 전부 배열로 받아준다.
+    // (예전 이름 MIDNIGHT_BAR_CODES → 성별 분기 도입에 맞춰 MALE_ENTRY_CODES로 개명. 값은 100% 동일.)
     // ─────────────────────────────────────────────
-    const MIDNIGHT_BAR_CODES = {
+    const MALE_ENTRY_CODES = {
       ISTP: ['FOOL-777X'],
       ESTP: ['CHARIOT-777X'],
       ISTJ: ['JUSTICE-777X'],
@@ -610,12 +611,44 @@
       ENTJ: ['CONQUER_07_CHARIOT'],
     };
 
-    // 코드 → MBTI 역방향 조회 테이블. 사용자가 입력한 코드 하나만으로 어느 MBTI인지,
-    // 그리고 resultData의 어떤 카드로 환영 메시지를 띄워야 하는지 즉시 판별할 수 있게 해준다.
-    const CODE_TO_MBTI = {};
-    Object.entries(MIDNIGHT_BAR_CODES).forEach(([mbti, codes]) => {
+    // ─────────────────────────────────────────────
+    // 미드나잇 바 입장 코드 (여성용)
+    // secret-memo-backend의 femaleArchive.js에 MBTI별로 심어둔 secretCode(SELFLOVE-*)를
+    // 그대로 재사용한다. 여성용은 소울넘버 분기가 없어 16종 전부 코드가 1개씩이다.
+    // 남성 코드(...-777X, COMMAND_04_EMPEROR 등)와 형식이 완전히 달라 문자열 충돌 없음.
+    // ─────────────────────────────────────────────
+    const FEMALE_ENTRY_CODES = {
+      ISTJ: ['SELFLOVE-ISTJ'],
+      ISFJ: ['SELFLOVE-ISFJ'],
+      INFJ: ['SELFLOVE-INFJ'],
+      INTJ: ['SELFLOVE-INTJ'],
+      ISTP: ['SELFLOVE-ISTP'],
+      ISFP: ['SELFLOVE-ISFP'],
+      INFP: ['SELFLOVE-INFP'],
+      INTP: ['SELFLOVE-INTP'],
+      ESTJ: ['SELFLOVE-ESTJ'],
+      ESFJ: ['SELFLOVE-ESFJ'],
+      ENFJ: ['SELFLOVE-ENFJ'],
+      ENTJ: ['SELFLOVE-ENTJ'],
+      ESTP: ['SELFLOVE-ESTP'],
+      ESFP: ['SELFLOVE-ESFP'],
+      ENTP: ['SELFLOVE-ENTP'],
+      ENFP: ['SELFLOVE-ENFP'],
+    };
+
+    // 코드 → { mbti, gender } 통합 역방향 조회 테이블. 사용자가 입력한 코드 하나만으로
+    // 어느 성별·어느 MBTI인지, 그리고 어떤 데이터베이스(resultData/femaleResultData)의
+    // 어떤 카드로 환영 메시지를 띄워야 하는지 즉시 판별할 수 있게 해준다.
+    // 남/여 코드 형식이 서로 겹치지 않으므로 하나의 맵에 안전하게 합칠 수 있다.
+    const CODE_TO_RESULT = {};
+    Object.entries(MALE_ENTRY_CODES).forEach(([mbti, codes]) => {
       codes.forEach((code) => {
-        CODE_TO_MBTI[code] = mbti;
+        CODE_TO_RESULT[code] = { mbti, gender: 'male' };
+      });
+    });
+    Object.entries(FEMALE_ENTRY_CODES).forEach(([mbti, codes]) => {
+      codes.forEach((code) => {
+        CODE_TO_RESULT[code] = { mbti, gender: 'female' };
       });
     });
 
@@ -776,6 +809,161 @@
     };
 
     // ─────────────────────────────────────────────
+    // 여성용 결과 데이터베이스 (16유형) — secret-memo-backend/src/data/femaleArchive.js 원고를
+    // resultData와 동일한 스키마(title/sub/intro/hiddenCharm/nightFactAttack/match/bad)로 재구성.
+    // 남성용과의 핵심 차이: '상대를 공략하는 기술'이 아니라 '나를 사랑하고 주도적으로 행복해지는'
+    // 힐링/성장 톤앤매너이며, [공주 모드](위로·에스코트형) / [마녀 모드](주도적·도파민형)
+    // 두 페르소나를 hiddenCharm(공주 모드)·nightFactAttack(마녀 모드) 필드에 나누어 담는다.
+    // 타로 카드도 데스/악마/탑 등 힐링 톤에 안 맞는 카드는 배제한, 남성용과 독립된 별도 세트다.
+    // ─────────────────────────────────────────────
+    const femaleResultData = {
+      ISTJ: {
+        title: '황후 (Empress)',
+        sub: '완벽하지 않아도 이미 충분한 흔들림 없는 안정감',
+        intro: '낮에는 원칙을 지키는 사람이지만, 당신 안에는 완벽하지 않아도 사랑받는 공주와 스스로 세운 왕국의 지배자인 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '당신은 늘 스스로에게 가장 엄격한 잣대를 들이대며 살아왔습니다. 오늘만큼은 그 잣대를 잠시 내려놓아도 괜찮습니다. 계획이 어긋나고 완벽하지 않아도, 당신은 이미 충분히 사랑받을 자격이 있는 사람입니다.',
+        nightFactAttack: '당신이 지켜온 원칙은 약점이 아니라 무기입니다. 이제 그 원칙을 지키기만 하는 사람이 아니라, 원칙을 직접 설계하는 사람이 되어보세요. 당신의 세계에서 규칙을 정하는 건 언제나 당신이어야 합니다.',
+        match: 'ENFP (설렘의 연인)',
+        bad: 'ESFP (열정의 바보)',
+      },
+      ISFJ: {
+        title: '절제 (Temperance)',
+        sub: '다정함을 이제는 나에게 돌려주는 조화의 마음',
+        intro: '낮에는 모두를 살뜰히 챙기는 사람이지만, 당신 안에는 이제는 나를 챙길 차례인 공주와 조용히 판을 움직이는 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '늘 주변 사람들의 마음부터 살피느라 정작 당신 자신을 뒷전에 두진 않았나요. 누군가를 돌보는 마음이 잘못된 건 아니지만, 오늘은 그 다정함을 온전히 당신에게 돌려줄 차례입니다.',
+        nightFactAttack: '당신의 배려는 약함이 아니라 정교한 관찰력에서 나옵니다. 그 관찰력으로 이제는 남을 맞추는 대신, 원하는 것을 정확히 얻어내 보세요. 조용한 카리스마만큼 강력한 무기는 없습니다.',
+        match: 'ESTP (변화의 수레바퀴)',
+        bad: 'ENTP (통찰의 매달린 사람)',
+      },
+      INFJ: {
+        title: '은둔자 (Hermit)',
+        sub: '혼자만의 시간 속에서 더 깊어지는 내면의 빛',
+        intro: '낮에는 다정하지만 깊은 생각에 잠기는 사람이지만, 당신 안에는 혼자여도 완전한 공주와 말없이 사람을 움직이는 신탁자 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '사람들 사이에서도 종종 혼자라는 기분을 느끼는 당신, 그 깊은 생각과 감정은 결점이 아니라 당신만의 세계입니다. 이해받지 못한다고 느껴질 때도, 그 세계는 그 자체로 충분히 아름답습니다.',
+        nightFactAttack: '당신의 직관은 이미 답을 알고 있습니다. 이제 그 직관을 의심하지 말고, 확신을 담아 말해보세요. 조용한 통찰력으로 사람들을 이끄는 것이야말로 당신만이 가진 마녀의 능력입니다.',
+        match: 'ENTP (통찰의 매달린 사람)',
+        bad: 'ISTP (고요한 힘)',
+      },
+      INTJ: {
+        title: '마법사 (Magician)',
+        sub: '치밀한 계획 너머, 나를 위해 처음 그리는 설계',
+        intro: '낮에는 치밀한 전략가이지만, 당신 안에는 애쓰지 않아도 사랑받을 자격이 있는 공주와 원하는 삶을 설계하는 건축가 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '늘 완벽한 계획으로 스스로를 증명해야 한다고 느꼈던 당신, 오늘은 아무것도 증명하지 않아도 됩니다. 결과와 상관없이, 당신이라는 존재 자체로 이미 충분합니다.',
+        nightFactAttack: '당신의 치밀함은 타인을 압박하는 도구가 아니라, 원하는 삶을 정확히 설계하는 능력입니다. 이제 그 설계도의 주인공을 다른 누구도 아닌 당신 자신으로 그려보세요.',
+        match: 'ENFP (설렘의 연인)',
+        bad: 'ISFJ (헌신의 절제)',
+      },
+      ISTP: {
+        title: '힘 (Strength)',
+        sub: '무심한 얼굴 뒤에 숨겨둔 조용하고 단단한 강인함',
+        intro: '낮에는 무심한 관찰자이지만, 당신 안에는 무심한 얼굴 뒤 여린 마음을 가진 공주와 규칙 없는 삶을 개척하는 자유로운 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '괜찮은 척, 아무렇지 않은 척이 익숙해진 당신. 사실은 그 무심함 뒤에서 혼자 많은 걸 견뎌왔다는 걸 압니다. 가끔은 힘든 걸 힘들다고 말해도, 그건 결코 약한 게 아닙니다.',
+        nightFactAttack: '당신은 원래 정해진 틀 안에 갇힐 사람이 아닙니다. 남들이 만든 기준에 맞추려 애쓰는 대신, 당신만의 방식으로 판을 새로 짜보세요. 자유로움이야말로 당신의 가장 강력한 무기입니다.',
+        match: 'ESFJ (따뜻한 태양)',
+        bad: 'ENFJ (각성의 심판)',
+      },
+      ISFP: {
+        title: '달 (Moon)',
+        sub: '섬세한 감정 하나까지 있는 그대로 아름다운 감수성',
+        intro: '낮에는 조용한 예술혼이지만, 당신 안에는 있는 그대로 아름다운 공주와 감각으로 매혹하는 은밀한 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '당신의 섬세한 감성을 유난이라 여기던 순간들이 있었나요. 그 여림은 결점이 아니라, 세상을 더 깊이 느낄 수 있는 재능입니다. 오늘은 그 감성을 마음껏 허락해주세요.',
+        nightFactAttack: '당신의 섬세함은 상대의 마음을 가장 깊은 곳까지 읽어내는 능력이기도 합니다. 이제 그 감각을 스스로를 위해 써보세요. 은은하게, 그러나 확실하게 시선을 사로잡는 법을 당신은 이미 알고 있습니다.',
+        match: 'ENFJ (각성의 심판)',
+        bad: 'ESTJ (추진의 전차)',
+      },
+      INFP: {
+        title: '별 (Star)',
+        sub: '의심 없이 품어도 되는 나만의 희망과 치유',
+        intro: '낮에는 몽상가처럼 보이지만, 당신 안에는 상상 속 세계도 소중한 공주와 내면의 불꽃으로 세상을 바꾸는 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '현실과 이상 사이에서 자주 마음이 흔들렸던 당신, 그 이상을 품는 마음은 순진한 게 아니라 세상을 더 나은 곳으로 그리는 힘입니다. 오늘은 그 꿈을 의심하지 말아주세요.',
+        nightFactAttack: '당신 안의 이상은 몽상이 아니라 아직 실현되지 않은 계획일 뿐입니다. 이제 그 이상을 조용히 품기만 하지 말고, 세상 밖으로 꺼내 보여주세요. 당신의 진심은 생각보다 훨씬 강력합니다.',
+        match: 'ESTJ (추진의 전차)',
+        bad: 'ISTJ (안정의 황후)',
+      },
+      INTP: {
+        title: '여사제 (High Priestess)',
+        sub: '머릿속 세계를 스스로 인정하는 지혜와 신비',
+        intro: '낮에는 초연한 사색가이지만, 당신 안에는 혼자만의 사색도 괜찮은 공주와 게임의 룰을 새로 짜는 지성의 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '생각이 많아 감정 표현이 서툴렀던 당신, 그게 당신이 무심해서가 아니라는 걸 압니다. 머릿속에 담아둔 마음도, 표현되지 않았을 뿐 분명히 진심입니다. 오늘은 그 진심을 스스로에게 인정해주세요.',
+        nightFactAttack: '당신의 냉철한 사고는 남을 이기기 위한 것이 아니라, 스스로 세상을 다시 정의하는 힘입니다. 이제 관찰만 하지 말고, 당신이 발견한 통찰로 판 자체를 새로 짜보세요.',
+        match: 'ENTJ (정복의 세계)',
+        bad: 'ESFJ (따뜻한 태양)',
+      },
+      ESTJ: {
+        title: '전차 (Chariot)',
+        sub: '완벽한 통제를 내려놓아도 빛나는 추진력',
+        intro: '낮에는 빈틈없는 리더이지만, 당신 안에는 완벽한 통제를 내려놓아도 되는 공주와 원하는 모든 것을 정복하는 지휘관 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '모든 걸 완벽하게 관리하려 애써온 당신, 오늘만큼은 통제를 잠시 내려놓아도 괜찮습니다. 계획대로 되지 않는 하루도, 당신이라는 사람의 가치를 조금도 깎아내리지 못합니다.',
+        nightFactAttack: '당신의 추진력은 타고난 무기입니다. 이제 그 무기를 남을 관리하는 데만 쓰지 말고, 당신 자신의 목표를 향해 정면으로 겨눠보세요. 망설임 없는 결단이야말로 당신의 본모습입니다.',
+        match: 'INFP (치유의 별)',
+        bad: 'ENFP (설렘의 연인)',
+      },
+      ESFJ: {
+        title: '태양 (Sun)',
+        sub: '모두를 챙기던 다정함을 나에게도 건네는 따뜻함',
+        intro: '낮에는 모두의 분위기를 챙기는 사람이지만, 당신 안에는 눈치 없이 나를 먼저 아껴도 되는 공주와 사람들의 마음을 사로잡는 사교의 여왕 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '사람들 사이에서 늘 분위기를 챙기던 당신, 정작 자신의 기분은 뒷전이지 않았나요. 모두를 웃게 만드는 그 다정함, 오늘은 당신 스스로에게 먼저 건네도 괜찮습니다.',
+        nightFactAttack: '당신의 사교성은 인정받기 위한 노력이 아니라, 사람을 끌어당기는 타고난 재능입니다. 이제 남에게 맞추기 위해서가 아니라, 당신이 원하는 방향으로 그 매력을 써보세요.',
+        match: 'ISTP (고요한 힘)',
+        bad: 'INTP (신비의 여사제)',
+      },
+      ENFJ: {
+        title: '심판 (Judgement)',
+        sub: '남을 이끌던 힘으로 이제는 나를 일으키는 각성',
+        intro: '낮에는 다정하고 든든한 리더이지만, 당신 안에는 이제는 위로받을 차례인 공주와 사람들을 매혹하는 천상의 리더 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '누군가의 성장을 돕느라 정작 자신의 지침은 외면했던 당신. 늘 남을 이끌던 당신도, 가끔은 기대고 위로받을 자격이 있습니다. 오늘은 그 사실을 스스로에게 허락해주세요.',
+        nightFactAttack: '당신의 카리스마는 남을 이끌기 위해서만 존재하는 게 아닙니다. 이제 그 힘의 방향을 당신 자신에게도 돌려보세요. 사람들을 매혹했던 그 에너지로, 이번엔 당신의 삶을 이끌어보세요.',
+        match: 'ISFP (감성의 달)',
+        bad: 'ISTP (고요한 힘)',
+      },
+      ENTJ: {
+        title: '세계 (World)',
+        sub: '목표를 넘어 나 자신을 향한 완성과 정복',
+        intro: '낮에는 강력한 지휘관이지만, 당신 안에는 목표보다 감정이 먼저인 공주와 원하는 모든 걸 이루는 타고난 여제 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '목표를 향해 쉼 없이 달려온 당신, 그 속도만큼 마음을 돌보는 시간은 부족하지 않았나요. 성과가 없어도, 잠시 멈춰도 당신의 가치는 변하지 않습니다.',
+        nightFactAttack: '당신의 지배력은 타고난 것입니다. 목표를 이루는 능력만큼, 그 목표를 스스로를 위해 세우는 것도 중요합니다. 이제 당신의 왕국에서 가장 중요한 신하는 바로 당신 자신입니다.',
+        match: 'INFP (치유의 별)',
+        bad: 'ISFP (감성의 달)',
+      },
+      ESTP: {
+        title: '운명의 수레바퀴 (Wheel of Fortune)',
+        sub: '멈춰도 여전히 빛나는 스릴 넘치는 변화',
+        intro: '낮에는 에너제틱한 행동파이지만, 당신 안에는 즉흥이 아닌 순간에도 나를 지키는 공주와 스릴 넘치는 매력으로 순간을 지배하는 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '늘 활기차고 즉흥적인 모습 뒤에서, 당신도 가끔은 멈춰 쉬고 싶었을 거예요. 매 순간 재밌어야 한다는 부담을 내려놓고, 오늘은 아무것도 하지 않아도 괜찮습니다.',
+        nightFactAttack: '당신의 즉흥성은 무모함이 아니라, 순간을 가장 확실하게 사는 능력입니다. 망설이는 사람들 사이에서, 먼저 움직이는 것이야말로 당신만이 가진 강력한 무기입니다.',
+        match: 'ISFJ (헌신의 절제)',
+        bad: 'INFJ (내면의 은둔자)',
+      },
+      ESFP: {
+        title: '바보 (Fool)',
+        sub: '화려함 뒤 여린 마음도 사랑받을 자유와 열정',
+        intro: '낮에는 에너지 넘치는 분위기 메이커이지만, 당신 안에는 화려함 뒤 여린 마음도 소중한 공주와 무대의 주인공처럼 스스로 빛나는 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '분위기를 밝히던 당신의 미소 뒤에, 사실은 혼자 삭여온 서운함이 있었을지도 모릅니다. 늘 즐거워야 한다는 부담을 내려놓고, 오늘은 솔직한 감정을 스스로에게 허락해주세요.',
+        nightFactAttack: '당신은 원래 시선을 끄는 사람입니다. 그 에너지를 남을 즐겁게 하는 데만 쓰지 말고, 이제는 당신 자신을 위한 무대에 올려보세요. 스스로 주인공이 되는 것을 두려워하지 마세요.',
+        match: 'ISTJ (안정의 황후)',
+        bad: 'INTJ (창조의 마법사)',
+      },
+      ENTP: {
+        title: '매달린 사람 (Hanged Man)',
+        sub: '다르게 보는 시선이 만드는 새로운 관점',
+        intro: '낮에는 재기발랄한 논쟁가이지만, 당신 안에는 변덕도 나의 일부인 공주와 재기발랄한 언변으로 판을 뒤흔드는 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '쉽게 지루해하고 마음이 자주 바뀌는 자신을 탓해본 적 있나요. 그건 결함이 아니라 끊임없이 새로움을 갈망하는 재능입니다. 오늘은 그 변화무쌍함을 그대로 인정해주세요.',
+        nightFactAttack: '당신의 날카로운 말솜씨는 논쟁을 위한 무기가 아니라, 세상을 다르게 보게 만드는 힘입니다. 이제 그 힘을 남을 설득하는 데만 쓰지 말고, 당신 자신을 설득하는 데 먼저 써보세요.',
+        match: 'INFJ (내면의 은둔자)',
+        bad: 'ISFJ (헌신의 절제)',
+      },
+      ENFP: {
+        title: '연인 (Lovers)',
+        sub: '기복 있는 감정까지 온전히 끌어안는 열정과 설렘',
+        intro: '낮에는 반짝이는 아이디어뱅크이지만, 당신 안에는 감정 기복도 온전한 나의 일부인 공주와 넘치는 에너지로 세상을 물들이는 마녀가 함께 살고 있습니다.',
+        hiddenCharm: '하루에도 여러 번 감정이 오르내리는 자신이 유별나다고 느꼈나요. 그 풍부한 감정은 결점이 아니라 세상을 더 뜨겁게 사랑하는 능력입니다. 오늘은 그 기복까지도 당신 그대로 안아주세요.',
+        nightFactAttack: '당신의 열정은 잠깐의 불꽃이 아니라, 사람들을 끌어당기는 강력한 자기장입니다. 이제 그 에너지를 흩뿌리기만 하지 말고, 원하는 한 곳에 정확히 쏟아보세요.',
+        match: 'INTJ (창조의 마법사)',
+        bad: 'ISTJ (안정의 황후)',
+      },
+    };
+
+    // ─────────────────────────────────────────────
     // 질문 데이터베이스 (EI × 3, SN × 3, TF × 3, JP × 3)
     // 각 옵션의 value가 곧 성향 점수 1점으로 누적된다.
     // ─────────────────────────────────────────────
@@ -892,11 +1080,23 @@
           { key: 'B', label: '어라? 갑자기 시간이 비었네? 오히려 좋아! 즉흥적인 대안을 즐긴다.', value: 'P' },
         ],
       },
+      // 성별 문항 — MBTI 점수 집계에는 관여하지 않고, 결과 카드(공주 모드 라이트/마녀 모드 다크,
+      // 낮/밤 카드 콘텐츠)를 남성용/여성용 중 무엇으로 보여줄지 결정하는 마지막 질문.
+      {
+        id: 13,
+        type: 'GENDER',
+        text: `마지막 질문입니다.<br />당신의 성별은 무엇인가요?`,
+        options: [
+          { key: '1', label: '남자', value: 'male' },
+          { key: '2', label: '여자', value: 'female' },
+        ],
+      },
     ];
 
     let currentIndex = 0;
-    const answers = []; // 유저가 선택한 옵션(value 포함)을 순서대로 누적
+    const answers = []; // 유저가 선택한 옵션(value 포함)을 순서대로 누적 (13번째 = 성별 답변)
     let resultMBTI = null; // 최종 산출된 4자리 MBTI 상태값
+    let resultGender = null; // 13번 문항(성별)에서 산출된 'male' | 'female' 상태값
 
     const landingScreen = document.getElementById('landing-screen');
     const quizScreen = document.getElementById('quiz-screen');
@@ -922,6 +1122,8 @@
     const flipBtn = document.getElementById('flip-btn');
     const hiddenCharmText = document.getElementById('hidden-charm-text');
     const nightFactAttackText = document.getElementById('night-fact-attack-text');
+    const resultHiddenCharmLabel = document.getElementById('result-hidden-charm-label');
+    const resultNightFactLabel = document.getElementById('result-night-fact-label');
     const bestMatchValue = document.getElementById('best-match-value');
     const worstMatchValue = document.getElementById('worst-match-value');
     const shareBtn = document.getElementById('share-btn');
@@ -955,6 +1157,7 @@
     const barExitBtn = document.getElementById('bar-exit-btn');
     const barGuideBtn = document.getElementById('bar-guide-btn');
     let currentBarMbti = null; // 미드나잇 바에 입장한 MBTI — 연애비법서 레이어를 열 때 사용
+    let currentBarGender = null; // 미드나잇 바에 입장한 성별('male'|'female') — 남/여 콘텐츠 분기에 사용
 
     // 연애비법서 레이어(모달)
     const guideModal = document.getElementById('guide-modal');
@@ -964,6 +1167,8 @@
     const guideCardTitle = document.getElementById('guide-card-title');
     const guideCardSub = document.getElementById('guide-card-sub');
     const guideIntro = document.getElementById('guide-intro');
+    const guideHiddenCharmLabel = document.getElementById('guide-hidden-charm-label');
+    const guideNightFactLabel = document.getElementById('guide-night-fact-label');
     const guideHiddenCharm = document.getElementById('guide-hidden-charm');
     const guideNightFact = document.getElementById('guide-night-fact');
     const guideMatch = document.getElementById('guide-match');
@@ -1062,30 +1267,48 @@
     }
 
     function finishTest() {
-      const { mbti, counts } = calculateMBTI(answers);
+      // 앞 12문항(EI/SN/TF/JP)만 MBTI 점수 계산에 사용하고, 13번째 성별 문항은 별도로 분리한다
+      const mbtiAnswers = answers.slice(0, 12);
+      const genderAnswer = answers[12];
+
+      const { mbti, counts } = calculateMBTI(mbtiAnswers);
       resultMBTI = mbti; // 상태값으로 산출
+      resultGender = genderAnswer && genderAnswer.value === 'female' ? 'female' : 'male'; // 안전장치: 못 찾으면 male 기본값
 
       console.log('=== 네오-타로 판별 완료 ===');
       console.log('성향 점수:', counts);
-      console.log('최종 MBTI 유형:', resultMBTI);
+      console.log('최종 MBTI 유형:', resultMBTI, '| 성별:', resultGender);
 
       // 질문 → 로딩 화면 전환
       activateScreen(loadingScreen, quizScreen);
 
       // 로딩 화면 3초 유지 후 결과 화면으로 전환
       setTimeout(() => {
-        activateScreen(resultScreen, loadingScreen, () => renderResultScreen(resultMBTI));
+        activateScreen(resultScreen, loadingScreen, () => renderResultScreen(resultMBTI, resultGender));
       }, 3000);
     }
 
-    // resultData를 기반으로 결과 화면 DOM을 채운다
-    function renderResultScreen(mbti) {
-      const data = resultData[mbti] || resultData.INFP; // 안전장치(폴백)
+    // gender('male'|'female')에 맞는 데이터베이스(resultData / femaleResultData)에서
+    // 해당 MBTI 엔트리를 꺼내온다. 못 찾으면 안전하게 각 성별의 INFP로 폴백한다.
+    function getResultData(mbti, gender) {
+      const table = gender === 'female' ? femaleResultData : resultData;
+      return table[mbti] || table.INFP;
+    }
+
+    // resultData/femaleResultData를 기반으로 결과 화면 DOM을 채운다
+    function renderResultScreen(mbti, gender) {
+      const data = getResultData(mbti, gender);
+      const isFemale = gender === 'female';
 
       resultMbtiBadge.textContent = mbti;
       resultCardName.textContent = data.title;
       resultTagline.textContent = data.sub;
       resultIntro.textContent = data.intro;
+
+      // 결과 화면 하단 섹션 라벨: 남성용은 '은밀한 반전 매력/밤의 팩폭',
+      // 여성용은 '공주 모드 위로/마녀 모드 각성'으로 톤앤매너를 완전히 바꾼다
+      resultHiddenCharmLabel.textContent = isFemale ? '👑 공주 모드 · 위로의 속삭임' : '✨ 은밀한 반전 매력';
+      resultNightFactLabel.textContent = isFemale ? '🖤 마녀 모드 · 주도적 각성' : '⚡ 밤의 팩폭';
 
       // 카드 앞/뒷면 라벨: 같은 타로 아치타입(title)을 밤/낮 톤으로만 다르게 보여준다
       cardNightLabel.textContent = data.title;
@@ -1118,7 +1341,7 @@
     // 고정 크기로 만들어두고 그것만 캡처한다.
     // ─────────────────────────────────────────────
     saveStoryBtn.addEventListener('click', async () => {
-      const data = resultData[resultMBTI];
+      const data = getResultData(resultMBTI, resultGender);
       if (!data) return;
 
       storyMbtiBadge.textContent = resultMBTI;
@@ -1158,7 +1381,7 @@
 
     // 카카오톡 공유하기 (SDK 연동은 다음 단계 — 우선 Web Share API로 대체 동작)
     shareBtn.addEventListener('click', () => {
-      const data = resultData[resultMBTI];
+      const data = getResultData(resultMBTI, resultGender);
       if (!data) return;
       const shareText = `나의 밤의 타로 카드는 "${data.title}"! 너의 카드도 확인해봐 🔮`;
 
@@ -1175,6 +1398,7 @@
       currentIndex = 0;
       answers.length = 0;
       resultMBTI = null;
+      resultGender = null;
       cardFlipInner.classList.remove('is-flipped');
 
       activateScreen(landingScreen, resultScreen);
@@ -1196,9 +1420,9 @@
 
     // ─────────────────────────────────────────────
     // 시크릿 코드 검증 시스템
-    // 입력값을 정규화(trim + 대문자화)한 뒤 CODE_TO_MBTI에서 조회한다.
-    // 코드 하나만으로 어떤 MBTI/카드인지 알 수 있으므로, 퀴즈를 안 풀고 코드만 들고
-    // 재방문한 유저도(resultMBTI가 null이어도) 곧바로 미드나잇 바에 입장할 수 있다.
+    // 입력값을 정규화(trim + 대문자화)한 뒤 CODE_TO_RESULT에서 조회한다.
+    // 코드 하나만으로 어떤 성별·MBTI/카드인지 알 수 있으므로, 퀴즈를 안 풀고 코드만 들고
+    // 재방문한 유저도(resultMBTI/resultGender가 null이어도) 곧바로 미드나잇 바에 입장할 수 있다.
     // ─────────────────────────────────────────────
     function normalizeCode(raw) {
       return String(raw || '').trim().toUpperCase();
@@ -1222,25 +1446,29 @@
         return;
       }
 
-      const matchedMbti = CODE_TO_MBTI[code];
-      if (!matchedMbti) {
+      const matched = CODE_TO_RESULT[code];
+      if (!matched) {
         showInlineError(errorEl, '유효하지 않은 입장 코드입니다. 결제 후 전달받은 코드를 다시 확인해주세요.');
         return;
       }
 
       hideInlineError(errorEl);
-      resultMBTI = matchedMbti; // 코드만으로 입장한 경우에도 상태를 갱신해둔다 (공유하기 등에서 재사용)
-      activateScreen(midnightBarScreen, prevScreenEl, () => renderMidnightBar(matchedMbti));
+      // 코드만으로 입장한 경우에도 MBTI/성별 상태를 갱신해둔다 (공유하기 등에서 재사용)
+      resultMBTI = matched.mbti;
+      resultGender = matched.gender;
+      activateScreen(midnightBarScreen, prevScreenEl, () => renderMidnightBar(matched.mbti, matched.gender));
     }
 
-    function renderMidnightBar(mbti) {
-      const data = resultData[mbti] || resultData.INFP;
-      const safeMbti = resultData[mbti] ? mbti : 'INFP';
+    function renderMidnightBar(mbti, gender) {
+      const table = gender === 'female' ? femaleResultData : resultData;
+      const safeMbti = table[mbti] ? mbti : 'INFP';
+      const data = table[safeMbti];
 
       barWelcomeName.textContent = data.title;
       barWelcomeSub.textContent = data.sub;
       barMbtiBadge.textContent = safeMbti;
       currentBarMbti = safeMbti;
+      currentBarGender = gender === 'female' ? 'female' : 'male';
     }
 
     // ─────────────────────────────────────────────
@@ -1250,20 +1478,28 @@
     // <a href="dataURL" download>로 브라우저가 직접 생성한 이미지를 저장하는 방식이라 별개이며,
     // 이 문제와 무관하게 계속 그대로 둔다.)
     // ─────────────────────────────────────────────
-    function openGuideModal(mbti) {
-      const safeMbti = resultData[mbti] ? mbti : 'INFP';
-      const data = resultData[safeMbti];
+    function openGuideModal(mbti, gender) {
+      const table = gender === 'female' ? femaleResultData : resultData;
+      const safeMbti = table[mbti] ? mbti : 'INFP';
+      const data = table[safeMbti];
+      const isFemale = gender === 'female';
 
       guideMbtiBadge.textContent = safeMbti;
       guideCardTitle.textContent = data.title;
       guideCardSub.textContent = data.sub;
       guideIntro.textContent = data.intro;
+
+      // 남성용은 '은밀한 반전 매력/밤의 팩폭', 여성용은 '공주 모드 위로/마녀 모드 각성'으로 라벨 전환
+      guideHiddenCharmLabel.textContent = isFemale ? '👑 공주 모드 · 위로의 속삭임' : '✨ 은밀한 반전 매력';
+      guideNightFactLabel.textContent = isFemale ? '🖤 마녀 모드 · 주도적 각성' : '⚡ 밤의 팩폭';
+
       guideHiddenCharm.textContent = data.hiddenCharm;
       guideNightFact.textContent = data.nightFactAttack;
       guideMatch.textContent = data.match;
       guideBad.textContent = data.bad;
 
-      const codes = MIDNIGHT_BAR_CODES[safeMbti];
+      const codeTable = isFemale ? FEMALE_ENTRY_CODES : MALE_ENTRY_CODES;
+      const codes = codeTable[safeMbti];
       guideSecretCode.textContent = codes && codes.length ? `SECRET CODE · ${codes[0]}` : '';
 
       guideModal.classList.remove('hidden');
@@ -1275,7 +1511,7 @@
       document.body.style.overflow = '';
     }
 
-    barGuideBtn.addEventListener('click', () => openGuideModal(currentBarMbti));
+    barGuideBtn.addEventListener('click', () => openGuideModal(currentBarMbti, currentBarGender));
     guideModalClose.addEventListener('click', closeGuideModal);
     guideModalBackdrop.addEventListener('click', closeGuideModal);
     document.addEventListener('keydown', (e) => {
@@ -1311,7 +1547,9 @@
       currentIndex = 0;
       answers.length = 0;
       resultMBTI = null;
+      resultGender = null;
       currentBarMbti = null;
+      currentBarGender = null;
       cardFlipInner.classList.remove('is-flipped');
       closeGuideModal();
       activateScreen(landingScreen, midnightBarScreen);
