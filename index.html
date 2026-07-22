@@ -6,6 +6,11 @@
 <title>네오-타로: 낮과 밤의 반전 매력</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- 카카오톡 공유하기(Kakao.Share.sendDefault)를 위한 카카오 JavaScript SDK.
+     실제 초기화(Kakao.init)와 키 값은 하단 본문 스크립트의 KAKAO_JS_KEY 상수에서 처리한다 —
+     이 키는 "JavaScript 키"라서 카카오 디벨로퍼스에서 도메인 화이트리스트로 보호되는 공개용
+     키다(REST API 키처럼 서버에 숨겨야 하는 비밀 키가 아니다). -->
+<script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Noto+Sans+KR:wght@300;400;600;800&display=swap" rel="stylesheet">
 <script>
@@ -707,6 +712,24 @@
 
     // 포스타입 유료 포스트 결제 페이지 — [결제하기] 버튼이 새 탭으로 여는 곳
     const POSTYPE_URL = 'https://www.postype.com/@agent-ian';
+
+    // ─────────────────────────────────────────────
+    // 카카오톡 공유하기(Kakao.Share.sendDefault) 설정
+    // KAKAO_JS_KEY만 교체하면 바로 다른 카카오 앱으로 갈아탈 수 있도록 상수로 분리했다.
+    // 카카오 디벨로퍼스(developers.kakao.com) > 내 애플리케이션 > 앱 키 > "JavaScript 키"를
+    // 그대로 붙여넣으면 된다. 이 키는 도메인 화이트리스트로 보호되는 공개용 키라서
+    // 프론트엔드 코드에 그대로 노출해도 안전하다(REST API 키와는 다르다).
+    // ─────────────────────────────────────────────
+    const KAKAO_JS_KEY = '6465451c2f8dac522ad1051e9f3a4df5';
+    const KAKAO_SHARE_TITLE = "[네오타로] 낮에는 감춰왔던 나의 진짜 '밤 본능' 타로";
+    const KAKAO_SHARE_DESCRIPTION = '1분 만에 확인하는 256가지 입체 타로 리딩과 프라이빗 아지트';
+
+    // 이미 초기화된 상태에서 Kakao.init()을 또 호출하면 에러가 나기 때문에 isInitialized()로
+    // 방어한다. window.Kakao 자체가 없을 수도 있다(SDK 로딩 실패, 광고 차단 등) — 그 경우
+    // 아래 shareBtn 클릭 핸들러에서 Web Share API로 자동 폴백한다.
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init(KAKAO_JS_KEY);
+    }
 
     // ─────────────────────────────────────────────
     // 256장 타로 카드 이미지 (cards/*.webp)
@@ -1639,16 +1662,54 @@
       }
     });
 
-    // 카카오톡 공유하기 (SDK 연동은 다음 단계 — 우선 Web Share API로 대체 동작)
+    // 카카오톡 공유하기 — Kakao.Share.sendDefault(feed 타입)로 실제 카카오톡 공유 카드를 띄운다.
+    // 이미지는 화면에 실제로 보이는(낮/밤 플립 상태 그대로) 카드 이미지를 그대로 쓰고,
+    // 링크는 지금 이 페이지가 떠 있는 배포 도메인을 그대로 재사용한다(도메인이 바뀌어도
+    // 코드 수정 없이 항상 정확한 주소가 들어간다).
     shareBtn.addEventListener('click', () => {
       const data = getResultData(resultMBTI, resultGender);
       if (!data) return;
-      const shareText = `나의 밤의 타로 카드는 "${data.title}"! 너의 카드도 확인해봐 🔮`;
 
+      const shareUrl = `${window.location.origin}/`;
+      const isShowingDayCard = cardFlipInner.classList.contains('is-flipped');
+      const currentCardImagePath = isShowingDayCard ? currentResultDayImagePath : currentResultNightImagePath;
+      // 카카오 공유 이미지는 상대 경로가 아니라 절대 URL(https://...)이어야 한다.
+      const absoluteImageUrl = currentCardImagePath
+        ? new URL(currentCardImagePath, window.location.href).href
+        : '';
+
+      if (window.Kakao && window.Kakao.isInitialized()) {
+        window.Kakao.Share.sendDefault({
+          objectType: 'feed',
+          content: {
+            title: KAKAO_SHARE_TITLE,
+            description: KAKAO_SHARE_DESCRIPTION,
+            imageUrl: absoluteImageUrl,
+            link: {
+              mobileWebUrl: shareUrl,
+              webUrl: shareUrl,
+            },
+          },
+          buttons: [
+            {
+              title: '나도 밤 본능 확인하기',
+              link: {
+                mobileWebUrl: shareUrl,
+                webUrl: shareUrl,
+              },
+            },
+          ],
+        });
+        return;
+      }
+
+      // 카카오 SDK를 못 불러온 경우(광고 차단, 네트워크 문제 등)를 대비한 안전한 폴백 —
+      // 버튼을 눌러도 아무 반응이 없는 상황만은 피한다.
+      console.warn('[카카오 공유] Kakao SDK가 초기화되지 않아 시스템 공유로 대체합니다.');
+      const shareText = `나의 밤의 타로 카드는 "${data.title}"! 너의 카드도 확인해봐 🔮`;
       if (navigator.share) {
-        navigator.share({ title: '네오-타로', text: shareText, url: window.location.href }).catch(() => {});
+        navigator.share({ title: '네오-타로', text: shareText, url: shareUrl }).catch(() => {});
       } else {
-        // TODO: 다음 단계에서 카카오 SDK(Kakao.Share.sendDefault) 연동 예정
         console.log('[공유하기]', shareText);
       }
     });
