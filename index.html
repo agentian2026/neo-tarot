@@ -533,18 +533,45 @@
         오늘 밤, 당신만을 위한 깊은 이야기가 이 라운지 안에서 시작됩니다.
       </p>
 
-      <div class="w-full rounded-2xl border border-neonpurple/30 bg-white/[0.02] p-5 flex flex-col gap-3">
-        <p class="text-xs tracking-[0.3em] text-neonpurple font-semibold uppercase text-center mb-1">Tonight Menu</p>
-        <div class="flex items-center gap-3 text-sm text-purple-100">
-          <span class="text-lg">🔓</span><span>입장 완료 — <span id="bar-mbti-badge" class="text-neonpink font-semibold">ESTJ</span> 전용 라운지</span>
+      <!-- TONIGHT MENU 섹션 시작
+           ⚠️ 원본에서 두 가지를 고쳤다:
+           1) "ISTP"가 하드코딩되어 있었는데, 실제로는 JS(renderMidnightBar)가
+              #bar-mbti-badge 요소의 textContent를 유저의 실제 MBTI로 채워준다.
+              하드코딩된 텍스트로 바꾸면 모든 유저에게 ISTP만 보이게 되므로,
+              반드시 id="bar-mbti-badge"를 그대로 유지해야 한다.
+           2) 부모 컨테이너(.screen-inner)가 이미 flex gap-8(32px)로 섹션 간격을 주고 있어서
+              원본의 margin: 20px 0을 그대로 두면 위아래 다른 섹션과의 간격이 이중으로 벌어진다
+              → margin 제거. -->
+      <div style="padding: 22px 18px; background: rgba(25, 15, 40, 0.7); border: 1px solid rgba(232, 121, 249, 0.4); border-radius: 16px; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(121, 40, 202, 0.25); text-align: left;">
+
+        <div style="font-size: 13px; color: #e879f9; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 14px; text-align: center;">
+          ✨ MIDNIGHT VIP MENU
         </div>
-        <div class="flex items-center gap-3 text-sm text-purple-100">
-          <span class="text-lg">🖋️</span><span>창조주의 방 — 당신의 손길이 필요합니다.</span>
-        </div>
-        <div class="flex items-center gap-3 text-sm text-purple-200/70">
-          <span class="text-lg">🌀</span><span>NOC(네오 오컬트 클럽) 접속 — Coming Soon</span>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: #e5e7eb;">
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 16px;">🔓</span>
+            <div><strong style="color: #ffffff;">VIP 전용 라운지</strong> — <span id="bar-mbti-badge" style="color: #ff5ec4; font-weight: 700;">ESTJ</span> 입체 타로 리포트 열람 중</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 16px;">📖</span>
+            <div><strong style="color: #ffffff;">연애 비법서 & 시크릿 리포트</strong> — 매월 새로운 연애 가이드 무료 업데이트</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 16px;">🪄</span>
+            <div><strong style="color: #ffffff;">창조주의 방</strong> — 에이전트 이안의 비하인드 스토리 & 소통 공간</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 16px;">🌀</span>
+            <div><strong style="color: #ffffff;">NOC(네오 오컬트 클럽)</strong> — 정식 런칭 시 최우선 얼리버드 혜택 적용 예정 <span style="font-size: 11px; color: #c084fc; background: rgba(147, 51, 234, 0.3); padding: 2px 6px; border-radius: 4px; margin-left: 4px;">VIP PASS 소장</span></div>
+          </div>
         </div>
       </div>
+      <!-- TONIGHT MENU 섹션 끝 -->
 
       <button
         id="bar-guide-btn" type="button"
