@@ -442,7 +442,9 @@
       </div>
 
       <!-- NEO-TAROT 스레드 아지트 섹션 시작 -->
-      <div style="margin-top: 40px; padding: 25px 20px; background: rgba(25, 15, 40, 0.6); border: 1px solid rgba(147, 51, 234, 0.3); border-radius: 16px; text-align: center; backdrop-filter: blur(10px);">
+      <!-- 부모(screen-inner)가 flex gap-8(32px)을 이미 자식 요소 사이 간격으로 주고 있어서
+           margin-top을 따로 주지 않는다 — 같이 주면 간격이 이중으로 벌어진다. -->
+      <div style="margin-top: 0; padding: 25px 20px; background: rgba(25, 15, 40, 0.6); border: 1px solid rgba(147, 51, 234, 0.3); border-radius: 16px; text-align: center; backdrop-filter: blur(10px);">
 
           <p style="font-size: 13px; color: #c084fc; letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase;">🌙 NEO-TAROT COMMUNITY</p>
 
