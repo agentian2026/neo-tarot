@@ -1320,6 +1320,14 @@
     let resultMBTI = null; // 최종 산출된 4자리 MBTI 상태값
     let resultGender = null; // 13번 문항(성별)에서 산출된 'male' | 'female' 상태값
 
+    // ⚠️ getCardImagePath()는 호출될 때마다 4장 중 하나를 새로 랜덤 선택한다.
+    // 결과 화면을 렌더링할 때 뽑힌 실제 낮/밤 카드 경로를 여기에 저장해두고,
+    // 인스타 스토리 저장 시에는 이 값을 그대로 재사용해야 한다 — 저장 버튼을 누를 때마다
+    // getCardImagePath()를 다시 호출하면 매번 다른 변형이 뽑혀서, 화면에 보이는 카드와
+    // 실제로 저장되는 이미지가 서로 달라지는 문제가 생긴다(모바일 앱 환경에서 실제로 보고됨).
+    let currentResultNightImagePath = null;
+    let currentResultDayImagePath = null;
+
     const landingScreen = document.getElementById('landing-screen');
     const quizScreen = document.getElementById('quiz-screen');
     const loadingScreen = document.getElementById('loading-screen');
@@ -1545,8 +1553,12 @@
 
       // cards/의 실제 카드 아트(성별+MBTI+낮/밤, 4장 중 랜덤 매핑)를 불러온다.
       // 로드 실패 시 setCardFace 내부에서 위 아이콘/라벨 폴백으로 자동 전환된다.
-      setCardFace(cardNightImage, cardNightFallback, getCardImagePath(gender, mbti, 'night'), `${data.title} · 밤의 카드`);
-      setCardFace(cardDayImage, cardDayFallback, getCardImagePath(gender, mbti, 'day'), `${data.title} · 낮의 카드`);
+      // 여기서 뽑힌 경로를 상태 변수에 저장해두고, 인스타 스토리 저장 시 재사용한다
+      // (저장 시 getCardImagePath()를 다시 부르면 다른 변형이 뽑혀서 화면과 어긋난다).
+      currentResultNightImagePath = getCardImagePath(gender, mbti, 'night');
+      currentResultDayImagePath = getCardImagePath(gender, mbti, 'day');
+      setCardFace(cardNightImage, cardNightFallback, currentResultNightImagePath, `${data.title} · 밤의 카드`);
+      setCardFace(cardDayImage, cardDayFallback, currentResultDayImagePath, `${data.title} · 낮의 카드`);
 
       hiddenCharmText.textContent = data.hiddenCharm;
       nightFactAttackText.textContent = data.nightFactAttack;
@@ -1585,9 +1597,12 @@
 
       // 화면에서 유저가 실제로 보고 있는 면(낮/밤)과 동일한 카드 이미지를 저장하도록 맞춘다.
       // is-flipped 클래스가 있으면 낮 카드가 보이는 상태, 없으면 밤 카드가 보이는 상태다.
+      // ⚠️ 여기서 getCardImagePath()를 다시 호출하면 안 된다 — 호출할 때마다 4장 중
+      // 랜덤으로 새로 하나를 뽑기 때문에, 화면에 실제로 보이는 카드와 저장되는 이미지가
+      // 서로 다른 변형으로 어긋나버린다(모바일 앱에서 매번 다른 사진이 저장되던 원인).
+      // 대신 renderResultScreen()에서 이미 뽑아 저장해 둔 경로를 그대로 재사용한다.
       const isShowingDayCard = cardFlipInner.classList.contains('is-flipped');
-      const storyTimeOfDay = isShowingDayCard ? 'day' : 'night';
-      const storyImagePath = getCardImagePath(resultGender, resultMBTI, storyTimeOfDay);
+      const storyImagePath = isShowingDayCard ? currentResultDayImagePath : currentResultNightImagePath;
 
       const originalLabel = saveStoryBtn.textContent;
       saveStoryBtn.disabled = true;
@@ -1644,6 +1659,8 @@
       answers.length = 0;
       resultMBTI = null;
       resultGender = null;
+      currentResultNightImagePath = null;
+      currentResultDayImagePath = null;
       cardFlipInner.classList.remove('is-flipped');
 
       activateScreen(landingScreen, resultScreen);
