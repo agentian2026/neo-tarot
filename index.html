@@ -536,6 +536,39 @@
         </div>
       </div>
 
+      <!-- 미드나잇 바 VIP PASS 업셀 섹션 시작
+           ⚠️ 원본 코드에서 두 가지를 수정했다:
+           1) <a href="결제링크_주소_입력">는 미입력 placeholder라 그대로 두면 빈 링크로 이동한다.
+              → 이미 result-screen의 [pay-btn]이 쓰는 것과 동일한 POSTYPE_URL 상수로 새 탭 오픈하도록
+                <button>+JS 이벤트로 교체(다른 결제 버튼들과 방식 통일, target=_blank 누락으로 인한
+                현재 탭 이탈 위험도 함께 제거).
+           2) "이미 코드가 있으신가요?" 입력 줄은 실제 <input>/검증 로직이 없는 빈 stub이었다.
+              이 화면(Midnight Bar)은 이미 입장 코드를 통과해 들어온 상태라 별도 코드 입력이 필요 없으므로
+              그대로 제거하고, 결제 즉시 이용 가능하다는 짧은 안내 문구로 대체했다.
+           3) 부모 컨테이너(.screen-inner)가 이미 flex gap-8(32px)로 섹션 간 간격을 주고 있어서
+              원본의 margin: 20px 0을 그대로 두면 간격이 이중으로 벌어진다 → margin 제거. -->
+      <div style="padding: 22px 18px; background: rgba(25, 15, 40, 0.7); border: 1px solid rgba(232, 121, 249, 0.4); border-radius: 16px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(121, 40, 202, 0.25);">
+
+          <div style="font-size: 13px; color: #e879f9; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px;">
+              🌙 MIDNIGHT BAR VIP PASS
+          </div>
+
+          <h3 style="font-size: 16px; color: #ffffff; margin-bottom: 10px; font-weight: 600; line-height: 1.4;">
+              단 777원으로 여는 프라이빗 아지트!
+          </h3>
+
+          <p style="font-size: 13px; color: #d1d5db; line-height: 1.5; margin-bottom: 18px;">
+              연애 비법서 다운로드 + 네오 오컬트 클럽(NOC) 얼리버드 권한 + 매월 업데이트되는 시크릿 리포트까지 평생 소장하세요.
+          </p>
+
+          <button id="bar-vip-pass-btn" type="button" style="display: block; width: 100%; padding: 14px 0; background: linear-gradient(135deg, #7928ca, #4f46e5); color: #ffffff; font-size: 15px; font-weight: 600; border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(121, 40, 202, 0.4); margin-bottom: 12px; cursor: pointer;">
+              💳 결제하고 입장 코드 받기 (777원)
+          </button>
+
+          <p style="font-size: 11px; color: #9ca3af; margin: 0;">이미 입장하신 상태라 별도 코드 입력 없이 결제 즉시 적용됩니다.</p>
+      </div>
+      <!-- 미드나잇 바 VIP PASS 업셀 섹션 끝 -->
+
       <button
         id="bar-guide-btn" type="button"
         class="w-full text-center px-8 py-4 rounded-full font-bold text-sm sm:text-base tracking-wide bg-gradient-to-r from-neonpurple2 via-neonpurple to-neonpink text-white shadow-neon transition-transform duration-300 active:scale-95 hover:scale-[1.02]"
@@ -1264,6 +1297,7 @@
     const barExitBtn = document.getElementById('bar-exit-btn');
     const barGuideBtn = document.getElementById('bar-guide-btn');
     const barBookBtn = document.getElementById('bar-book-btn');
+    const barVipPassBtn = document.getElementById('bar-vip-pass-btn');
     let currentBarMbti = null; // 미드나잇 바에 입장한 MBTI — 연애비법서 레이어를 열 때 사용
     let currentBarGender = null; // 미드나잇 바에 입장한 성별('male'|'female') — 남/여 콘텐츠 분기에 사용
 
@@ -1528,6 +1562,11 @@
     // 입장 코드를 들고 돌아와 아래 코드 검증 로직으로 입장한다.
     // ─────────────────────────────────────────────
     payBtn.addEventListener('click', () => {
+      window.open(POSTYPE_URL, '_blank', 'noopener');
+    });
+
+    // 미드나잇 바 VIP PASS 업셀 버튼 — 동일한 결제 페이지(POSTYPE_URL)를 새 탭으로 연다.
+    barVipPassBtn.addEventListener('click', () => {
       window.open(POSTYPE_URL, '_blank', 'noopener');
     });
 
