@@ -517,13 +517,43 @@
       <!-- 중앙 아이콘: 칵테일 잔 → 연애비법서(마법책). 클릭 시 해당 MBTI/성별 연애비법서를
            Blob 기반 HTML 파일로 안전하게 다운로드한다 (실제 PDF 바이너리 다운로드 방식은
            과거 크롬이 "사이트에서 사용할 수 없는 파일"로 차단한 이력이 있어, 브라우저가
-           의심하지 않는 text/html Blob + Object URL 방식으로 대체했다). -->
+           의심하지 않는 text/html Blob + Object URL 방식으로 대체했다).
+           ⚠️ 유저가 참고 이미지(어두운 가죽 표지 + 보라 네온 오라의 "LOVE SECRET BOOK" 마법책 사진)를
+           보내줬지만, 그 파일 자체를 저장/재생성할 도구가 없어 이모지(📕✨) 대신 같은 분위기의
+           SVG 마법책 아이콘을 직접 그려 넣었다 — 외부 이미지 파일이 필요 없어 배포 시 경로 문제도 없다. -->
       <button
         id="bar-book-btn" type="button"
         class="group flex flex-col items-center gap-3 focus:outline-none"
       >
-        <div class="w-32 h-32 rounded-full border border-neonpurple/50 flex items-center justify-center animate-floaty transition-transform duration-300 group-hover:scale-105 group-active:scale-95" style="background: radial-gradient(circle, rgba(178,107,255,0.18), transparent 70%);">
-          <span class="text-5xl">📕✨</span>
+        <div class="w-32 h-32 rounded-full border border-neonpurple/50 flex items-center justify-center animate-floaty transition-transform duration-300 group-hover:scale-105 group-active:scale-95 relative" style="background: radial-gradient(circle, rgba(178,107,255,0.18), transparent 70%);">
+          <svg width="72" height="92" viewBox="0 0 84 108" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 10px rgba(178,107,255,0.65)) drop-shadow(0 0 20px rgba(255,94,196,0.25));">
+            <defs>
+              <linearGradient id="bookCoverGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#2a1a4a"/>
+                <stop offset="55%" stop-color="#1a1030"/>
+                <stop offset="100%" stop-color="#0d0818"/>
+              </linearGradient>
+              <linearGradient id="bookSpineGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#000000" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect x="4" y="2" width="76" height="104" rx="4" fill="url(#bookCoverGrad)" stroke="#d4af37" stroke-width="1.5"/>
+            <rect x="4" y="2" width="14" height="104" rx="4" fill="url(#bookSpineGrad)"/>
+            <rect x="9" y="7" width="66" height="94" rx="2" fill="none" stroke="#b26bff" stroke-width="1" stroke-opacity="0.6"/>
+            <g stroke="#d4af37" stroke-width="1" fill="none" opacity="0.85">
+              <path d="M13 11 l6 0 M13 11 l0 6"/>
+              <path d="M71 11 l-6 0 M71 11 l0 6"/>
+              <path d="M13 97 l6 0 M13 97 l0 -6"/>
+              <path d="M71 97 l-6 0 M71 97 l0 -6"/>
+            </g>
+            <circle cx="42" cy="38" r="11" fill="none" stroke="#e879f9" stroke-width="1.2"/>
+            <path d="M42 27 L42 49 M31 38 L53 38" stroke="#e879f9" stroke-width="1"/>
+            <text x="42" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="11" font-weight="700" fill="#f5e8c8" letter-spacing="1">연애</text>
+            <text x="42" y="86" text-anchor="middle" font-family="Georgia, serif" font-size="11" font-weight="700" fill="#f5e8c8" letter-spacing="1">비법서</text>
+          </svg>
+          <span class="absolute -top-1 -right-1 text-lg animate-twinkle" style="animation-delay:0.3s;">✨</span>
+          <span class="absolute bottom-3 -left-2 text-sm animate-twinkle" style="animation-delay:1.2s;">✧</span>
         </div>
         <span class="text-sm sm:text-base font-semibold text-neonpink tracking-wide group-hover:text-white transition-colors duration-300">비법서 전달</span>
       </button>
