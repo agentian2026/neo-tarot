@@ -663,15 +663,20 @@
   <!-- 인스타 스토리 캡처용 히든 카드 — 화면에는 절대 보이지 않고(왼쪽으로 완전히 밀어냄) html2canvas가
        찍을 때만 실제 1080x1920px 크기로 DOM에 존재한다. 버튼 클릭 시 resultData로 내용을 채운 뒤
        이 요소를 캡처해서 PNG로 다운로드시킨다.
-       ⚠️ 두 가지를 고쳤다:
+       ⚠️ 세 가지를 고쳤다:
        1) 기존에는 이 카드 박스 안에 🌙 이모지만 있고 실제 타로 카드 일러스트(<img>)가 아예
           없었다 — 그래서 화면에는 이미지가 잘 보여도 인스타 스토리로 저장하면 카드 그림이
-          통째로 빠진 채 저장됐다. #story-card-image를 추가하고, 저장 버튼 클릭 시
-          getCardImagePath()로 실제 이미지를 채운 뒤 로드가 끝날 때까지 기다렸다가(await)
-          html2canvas로 캡처하도록 고쳤다(로드 전에 캡처하면 빈 칸으로 찍히는 타이밍 문제 방지).
-       2) 바이럴 임팩트를 위해 카드 박스를 340×500 → 660×970으로 대폭 확대했고, 그만큼
-          늘어난 높이를 맞추기 위해 위아래 여백/폰트 크기를 조금씩 줄여 1080×1920 캔버스
-          안에 여전히 다 들어오도록 재조정했다. -->
+          통째로 빠진 채 저장됐다. 저장 버튼 클릭 시 getCardImagePath()로 실제 이미지를 채운 뒤
+          로드가 끝날 때까지 기다렸다가(await) html2canvas로 캡처하도록 고쳤다.
+       2) 바이럴 임팩트를 위해 카드 박스를 340×500 → 660×960으로 대폭 확대했다. 660:960은
+          화면에 실제 보이는 카드(#card-flip-inner, 기본 w-44 h-64 = 176:256 = 11:16)와
+          정확히 동일한 11:16 비율이다 — 비율이 조금이라도 어긋나면 저장된 이미지 속 인물이
+          가로로 눌리거나 늘어나 "뚱뚱해" 보이는 문제가 생긴다.
+       3) 사진이 채워지는 부분을 <img object-fit:cover>에서 배경(background-size:cover)을 쓰는
+          일반 <div>로 바꿨다 — html2canvas는 <img>의 object-fit 속성을 제대로 반영하지 못하고
+          이미지를 박스 크기에 맞춰 그냥 강제로 늘려버리는(찌그러뜨리는) 알려진 버그가 있어서,
+          실제로 저장된 이미지 속 인물이 옆으로 퍼져 보이는 원인이 됐다. background-size:cover는
+          html2canvas가 정확히 지원하므로 비율 왜곡 없이 크롭만 되도록 고쳤다. -->
   <div
     id="story-capture"
     class="fixed pointer-events-none flex flex-col items-center"
@@ -680,8 +685,8 @@
     <span style="letter-spacing:0.35em; font-size:26px; color:#b26bff; font-weight:600; text-transform:uppercase;">Occult Night Bar</span>
     <div style="margin-top:20px; font-family:'Cinzel Decorative', serif; font-size:54px; color:#ffffff; text-shadow:0 0 24px rgba(178,107,255,0.8), 0 0 60px rgba(178,107,255,0.4); letter-spacing:0.06em;">네오-타로</div>
 
-    <div style="margin-top:50px; width:660px; height:970px; border-radius:32px; border:3px solid rgba(178,107,255,0.6); position:relative; overflow:hidden; background: repeating-linear-gradient(45deg, rgba(178,107,255,0.10) 0px, rgba(178,107,255,0.10) 3px, transparent 3px, transparent 22px), linear-gradient(160deg, #211a38 0%, #171029 55%, #0f0a1c 100%); box-shadow:0 0 70px rgba(178,107,255,0.55), inset 0 0 50px rgba(178,107,255,0.15); display:flex; align-items:center; justify-content:center;">
-      <img id="story-card-image" crossorigin="anonymous" alt="" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" />
+    <div style="margin-top:50px; width:660px; height:960px; border-radius:32px; border:3px solid rgba(178,107,255,0.6); position:relative; overflow:hidden; background: repeating-linear-gradient(45deg, rgba(178,107,255,0.10) 0px, rgba(178,107,255,0.10) 3px, transparent 3px, transparent 22px), linear-gradient(160deg, #211a38 0%, #171029 55%, #0f0a1c 100%); box-shadow:0 0 70px rgba(178,107,255,0.55), inset 0 0 50px rgba(178,107,255,0.15); display:flex; align-items:center; justify-content:center;">
+      <div id="story-card-image" style="display:none; position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat;"></div>
       <span id="story-card-fallback" style="font-size:200px; text-shadow:0 0 30px rgba(178,107,255,0.9);">🌙</span>
     </div>
 
@@ -768,6 +773,11 @@
     // 저장 버튼 클릭 시 반드시 이 함수가 끝난(resolve된) 뒤에만 html2canvas를 호출한다.
     // 네트워크 문제 등으로 이미지가 응답이 없을 경우를 대비해 4초 타임아웃 후에는 폴백(🌙)
     // 상태로 그대로 진행시켜, 저장 자체가 무한정 멈추는 일은 없도록 한다.
+    // ⚠️ imgEl은 실제로는 <img>가 아니라 background-size:cover를 쓰는 <div>다.
+    // html2canvas가 <img>의 object-fit을 제대로 반영하지 못하고 이미지를 박스에 맞춰
+    // 강제로 늘려버리는(가로로 퍼지는) 버그가 있어서, 로드 확인만 오프스크린 Image()
+    // 객체로 하고 실제 화면에 보여줄 때는 CSS background-image + background-size:cover로
+    // 그린다 — 이 방식은 html2canvas가 정확히 지원해서 비율이 절대 찌그러지지 않는다.
     function loadStoryCardImage(imgEl, fallbackEl, src) {
       return new Promise((resolve) => {
         let settled = false;
@@ -776,21 +786,21 @@
           settled = true;
           resolve(loaded);
         };
-        imgEl.onload = () => {
+        const preloader = new Image();
+        preloader.crossOrigin = 'anonymous';
+        preloader.onload = () => {
+          imgEl.style.backgroundImage = `url("${src}")`;
           imgEl.style.display = 'block';
           fallbackEl.style.display = 'none';
           finish(true);
         };
-        imgEl.onerror = () => {
+        preloader.onerror = () => {
           console.warn('[인스타 스토리 카드 이미지 로드 실패]', src);
           imgEl.style.display = 'none';
           fallbackEl.style.display = 'flex';
           finish(false);
         };
-        imgEl.src = '';
-        requestAnimationFrame(() => {
-          imgEl.src = src;
-        });
+        preloader.src = src;
         setTimeout(() => finish(false), 4000);
       });
     }
