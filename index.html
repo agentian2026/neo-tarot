@@ -1597,6 +1597,7 @@
 
       // 카드는 항상 '밤의 모드'로 초기화된 상태로 시작
       cardFlipInner.classList.remove('is-flipped');
+      updateFlipBtnLabel();
 
       // 결과 화면에 진입할 때마다 입장 코드 입력창은 항상 깨끗한 상태로 초기화
       resultCodeInput.value = '';
@@ -1604,8 +1605,18 @@
     }
 
     // 낮/밤 카드 반전 인터랙션
+    // 버튼 문구는 "지금 보고 있지 않은 면으로 넘어가자"는 뜻이어야 한다 — 밤 카드가 보이는
+    // 중엔 "낮의 본능 확인하기"(낮으로 넘어가자), 낮 카드로 넘어간 뒤에는 반대로
+    // "밤의 본능 확인하기"(다시 밤으로 돌아가자)로 바뀌어야 한다. 예전엔 이 문구가
+    // 고정 텍스트라서 낮 카드로 넘어간 뒤에도 계속 "낮의 본능 확인하기"로 남아있었다.
+    function updateFlipBtnLabel() {
+      const isShowingDayCard = cardFlipInner.classList.contains('is-flipped');
+      flipBtn.textContent = isShowingDayCard ? '밤의 본능 확인하기 🔄' : '낮의 본능 확인하기 🔄';
+    }
+
     flipBtn.addEventListener('click', () => {
       cardFlipInner.classList.toggle('is-flipped');
+      updateFlipBtnLabel();
     });
 
     // ─────────────────────────────────────────────
@@ -1729,6 +1740,7 @@
       currentResultNightImagePath = null;
       currentResultDayImagePath = null;
       cardFlipInner.classList.remove('is-flipped');
+      updateFlipBtnLabel();
 
       activateScreen(landingScreen, resultScreen);
     });
@@ -1991,6 +2003,7 @@
       currentBarMbti = null;
       currentBarGender = null;
       cardFlipInner.classList.remove('is-flipped');
+      updateFlipBtnLabel();
       closeGuideModal();
       activateScreen(landingScreen, midnightBarScreen);
     });
