@@ -651,19 +651,43 @@
           <p id="guide-night-fact-label" class="text-xs tracking-[0.25em] text-neonpink font-semibold mb-2 uppercase">⚡ 밤의 팩폭</p>
           <p id="guide-night-fact" class="text-sm text-purple-100 leading-relaxed"></p>
         </div>
+
+        <!-- ① 실전 공략 치트키: 카톡 스타일 / 데이트 선호 / 심쿵 포인트 3줄을 순서대로 렌더링 -->
+        <div class="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-400/10 via-white/[0.02] to-transparent p-5">
+          <p class="text-xs tracking-[0.25em] text-amber-300 font-semibold mb-3 uppercase">🔥 실전 공략 치트키</p>
+          <ul id="guide-cheat-keys" class="flex flex-col gap-2.5 text-sm text-purple-100 leading-relaxed list-none"></ul>
+        </div>
+
+        <!-- ② 관계를 망치는 무의식적 실수: 습관(habit) + 방지 솔루션(solution) -->
+        <div class="rounded-2xl border border-rose-400/40 bg-gradient-to-br from-rose-500/10 via-white/[0.02] to-transparent p-5">
+          <p class="text-xs tracking-[0.25em] text-rose-300 font-semibold mb-2 uppercase">⚠️ 관계를 망치는 무의식적 실수</p>
+          <p id="guide-mistake-habit" class="text-sm text-purple-100 leading-relaxed mb-3"></p>
+          <div class="rounded-xl bg-white/5 border border-white/10 px-3.5 py-3">
+            <p class="text-[11px] tracking-widest text-emerald-300 font-semibold uppercase mb-1">✅ 방지 솔루션</p>
+            <p id="guide-mistake-solution" class="text-sm text-white/90 leading-relaxed"></p>
+          </div>
+        </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="grid grid-cols-2 gap-4 mb-4">
         <div class="rounded-2xl border border-neonpurple/40 bg-neonpurple/5 p-4 flex flex-col items-center text-center gap-1.5">
           <span class="text-xl">🔮</span>
           <span class="text-[11px] text-purple-200 tracking-widest uppercase">찰떡 궁합</span>
           <span id="guide-match" class="font-display text-sm text-white glow-text leading-snug"></span>
+          <span id="guide-match-tip" class="text-[11px] text-purple-200/80 leading-relaxed mt-1"></span>
         </div>
         <div class="rounded-2xl border border-neonpink/40 bg-neonpink/5 p-4 flex flex-col items-center text-center gap-1.5">
           <span class="text-xl">⚡</span>
           <span class="text-[11px] text-purple-200 tracking-widest uppercase">파국 궁합</span>
           <span id="guide-bad" class="font-display text-sm text-white glow-text leading-snug"></span>
+          <span id="guide-bad-tip" class="text-[11px] text-purple-200/80 leading-relaxed mt-1"></span>
         </div>
+      </div>
+
+      <!-- ④ 오늘 밤 미드나잇 미션: 바로 실천할 수 있는 행동 과제 1가지 -->
+      <div class="rounded-2xl border border-neonpink/50 bg-gradient-to-br from-neonpink/15 via-neonpurple/10 to-transparent p-5 mb-6 text-center shadow-neon">
+        <p class="text-xs tracking-[0.25em] text-neonpink font-semibold mb-2 uppercase">🍸 오늘 밤 미드나잇 미션</p>
+        <p id="guide-midnight-mission" class="text-sm text-white leading-relaxed"></p>
       </div>
 
       <p id="guide-secret-code" class="text-center text-[11px] tracking-[0.15em] text-amber-400 font-semibold"></p>
@@ -930,6 +954,11 @@
         nightFactAttack: '낮에는 예의 바른 신사였을지 몰라도, 단둘이 있는 침실이나 은밀한 공간에서는 상대방의 몸짓과 감정까지 완벽하게 컨트롤하려는 은밀한 지배자(Dominant)적 본능이 깨어납니다. 성실하기만 한 재미없는 남자가 아니라, 상대를 완전히 안달 나게 만들고 완벽하게 리드하는 능숙하고 강렬한 어른의 밤을 보냅니다. 한 번 당신의 궤도에 들어온 상대는 그 압도적인 텐션에서 헤어나오지 못합니다.',
         match: 'INFP (매혹의 달)',
         bad: 'ENFP (혼돈의 광대)',
+        cheatKeys: ["카톡 스타일: 용건 위주로 빠르게 답장하되, 상대 이름을 부르며 확신에 찬 말투로 리드하세요.", "데이트 선호: 즉흥보다 완벽하게 짜인 코스 — 예약과 동선까지 미리 챙겨두면 리더십 매력이 배가됩니다.", "심쿵 포인트: '내가 다 알아서 할게' 한마디가 백 마디 다정함보다 강하게 꽂힙니다."],
+        mistake: { habit: "상대의 의견을 듣기도 전에 결론부터 내리고 지시하듯 말해버리는 습관이 있습니다.", solution: "결정을 내리기 전 딱 한 번, '네 생각은 어때?'라고 먼저 물어보세요. 그 한 마디가 통제욕을 리더십으로 바꿉니다." },
+        matchTip: "INFP는 강요당한다 느끼는 순간 마음을 닫습니다 — 명령이 아니라 제안으로 이끄세요.",
+        badTip: "ENFP와 부딪히면 서로 옳음을 증명하려 들지 말고, 먼저 한 발 물러나 상대 페이스를 잠깐 따라가 보세요.",
+        midnightMission: "오늘 밤, 평소라면 바로 정해버렸을 약속 하나를 '네가 골라볼래?'라고 상대에게 넘겨보세요.",
       },
       INFP: {
         title: '은둔자 (Hermit)',
@@ -939,6 +968,11 @@
         nightFactAttack: '낮에는 말수 적고 조심스러운 사람일지 몰라도, 침실이나 단둘만의 공간에서는 오랫동안 눌러왔던 감정과 상상이 한꺼번에 터져 나오는 은밀한 몰입형 본능이 깨어납니다. 서투르고 순진하기만 한 것이 아니라, 상대의 숨소리 하나까지 놓치지 않고 온몸으로 반응하는 뜨겁고 진심 어린 밤을 만들어냅니다. 한 번 당신에게 스며든 상대는 그 진심의 온도에서 쉽게 빠져나오지 못합니다.',
         match: 'ESTJ (철혈의 황제)',
         bad: 'ISTJ (얼음의 검사)',
+        cheatKeys: ["카톡 스타일: 답장이 늦어도 괜찮습니다. 대신 한 번 보낼 때 상대만을 향한 진심 담긴 문장으로 승부하세요.", "데이트 선호: 시끄러운 핫플보다 둘만 얘기할 수 있는 조용한 공간에서 매력이 배로 드러납니다.", "심쿵 포인트: '너랑 있으면 편해' 같은 담백한 진심 고백이 화려한 멘트보다 훨씬 깊게 남습니다."],
+        mistake: { habit: "혼자 생각하다 서운함을 쌓아두고, 정작 상대에게는 아무 말도 안 하는 습관이 있습니다.", solution: "서운한 순간, 그 감정이 사라지기 전에 짧게라도 표현해보세요. 침묵은 상대에게 무관심으로 오해받기 쉽습니다." },
+        matchTip: "ESTJ에게는 당신의 섬세함을 말이 아니라 행동으로 먼저 보여주면 신뢰가 빠르게 쌓입니다.",
+        badTip: "ISTJ와 부딪히면 감정을 설명하려 하지 말고, 원하는 것을 구체적인 말로 정리해서 전달하세요.",
+        midnightMission: "오늘 밤, 마음속에만 담아뒀던 진심 한 문장을 실제로 상대에게 보내보세요.",
       },
 
       // ↓↓↓ 나머지 14종 — 동일한 톤·수위·분량으로 완성 ↓↓↓
@@ -950,6 +984,11 @@
         nightFactAttack: '낮에는 감정 표현에 인색한 원칙주의자일지 몰라도, 은밀한 공간에서는 그동안 억눌러온 감정과 욕망을 정확하고 집요하게 풀어내는 진지한 본능이 깨어납니다. 즉흥적이기보다 한 사람에게 완전히 집중하며, 정해둔 것은 끝까지 지키는 우직한 밤을 보냅니다. 가볍게 흔들리지 않는 만큼, 한번 마음을 준 상대에게는 뼛속까지 진심입니다.',
         match: 'ENFP (자유로운 광대)',
         bad: 'ESFP (눈부신 태양)',
+        cheatKeys: ["카톡 스타일: 짧고 명확하게, 그러나 매일 같은 시간에 꾸준히 — 그 규칙성 자체가 신뢰를 만듭니다.", "데이트 선호: 정해진 계획 안에서 작은 깜짝 이벤트 하나 — 그 반전이 예상보다 크게 통합니다.", "심쿵 포인트: 상대가 지나가듯 흘린 말을 몇 주 뒤에 기억해서 챙겨주는 순간, 마음이 완전히 넘어갑니다."],
+        mistake: { habit: "감정 표현을 아껴서, 좋아하는 티를 안 내려다 오히려 무관심해 보이는 실수를 합니다.", solution: "하루에 한 번, 사소해도 좋으니 감정을 말로 꺼내보세요. '좋다'는 말 한마디가 생각보다 큰 확신을 줍니다." },
+        matchTip: "ENFP의 즉흥성을 통제하려 하지 말고, 그 자유로움을 존중해주면 관계가 훨씬 편안해집니다.",
+        badTip: "ESFP와 부딪히면 규칙을 고집하기보다, 딱 한 번은 즉흥적인 제안을 먼저 던져보세요.",
+        midnightMission: "오늘 밤, 평소엔 절대 안 할 즉흥적인 연락 한 통을 먼저 보내보세요.",
       },
       ISFJ: {
         title: '여황제 (Empress)',
@@ -959,6 +998,11 @@
         nightFactAttack: '낮에는 수줍고 조심스러운 사람일지 몰라도, 은밀한 공간에서는 상대를 편안하게 만들면서도 자신도 모르게 깊이 빠져드는 다정한 몰입형 본능이 깨어납니다. 상대의 긴장을 풀어주는 데는 누구보다 능숙하지만, 정작 자신이 그 온기에 먼저 무너지는 쪽입니다. 그 헌신적인 다정함에 한 번 익숙해진 상대는 다른 온도를 견디지 못합니다.',
         match: 'ESTP (거침없는 힘)',
         bad: 'ENTP (도발적인 전차)',
+        cheatKeys: ["카톡 스타일: 상대의 하루를 세세히 물어보는 다정한 질문이 최고의 무기입니다.", "데이트 선호: 상대가 편하게 쉴 수 있는 아늑한 공간 — 당신의 배려가 자연스럽게 드러납니다.", "심쿵 포인트: 상대가 말하지 않은 필요를 먼저 챙겨줄 때, 그 섬세함에 완전히 반합니다."],
+        mistake: { habit: "상대를 챙기느라 정작 자신이 원하는 건 말하지 못하고 참아버리는 습관이 있습니다.", solution: "가끔은 받는 연습도 해보세요. '나도 이거 해줘'라고 솔직히 요청하는 것도 매력입니다." },
+        matchTip: "ESTP에게는 잔소리 대신 믿고 지켜봐 주는 여유를 보이면 훨씬 편하게 다가옵니다.",
+        badTip: "ENTP와 부딪히면 논쟁으로 맞서지 말고, 감정을 먼저 담담히 얘기하며 대화를 리드하세요.",
+        midnightMission: "오늘 밤, 남을 위한 배려 대신 온전히 나를 위한 작은 부탁 하나를 상대에게 해보세요.",
       },
       INFJ: {
         title: '고위 여사제 (High Priestess)',
@@ -968,6 +1012,11 @@
         nightFactAttack: '낮에는 신중하고 조심스러운 사람일지 몰라도, 침실이나 단둘만의 공간에서는 상대의 감정과 몸짓을 정확히 읽어내 완벽하게 리드하는 은밀한 본능이 깨어납니다. 가볍게 스치는 관계가 아니라, 영혼까지 얽어매는 듯한 진하고 몰입도 높은 밤을 만들어냅니다. 한 번 그 시선에 사로잡힌 상대는 쉽게 헤어나오지 못합니다.',
         match: 'ENTP (도발적인 전차)',
         bad: 'ISTP (위험한 악마)',
+        cheatKeys: ["카톡 스타일: 짧은 대화 속에서도 상대의 숨은 감정을 짚어주는 한마디로 깊은 인상을 남기세요.", "데이트 선호: 사람 많은 곳보다 대화에 집중할 수 있는 분위기 있는 공간이 훨씬 유리합니다.", "심쿵 포인트: '너 오늘 뭔가 힘들었지'처럼 말하지 않은 걸 알아채는 순간, 상대는 완전히 무장해제됩니다."],
+        mistake: { habit: "상대를 너무 깊이 분석하다가 정작 자기 마음은 숨기고 거리를 두는 실수를 합니다.", solution: "가끔은 분석을 멈추고, 지금 느끼는 감정을 있는 그대로 먼저 꺼내 보여주세요." },
+        matchTip: "ENTP와는 논리 싸움을 피하고, 그의 아이디어에 진심으로 궁금해하며 질문을 던지면 급속도로 가까워집니다.",
+        badTip: "ISTP와 부딪히면 침묵으로 밀어붙이지 말고, 원하는 것을 직접적인 말로 요청하세요.",
+        midnightMission: "오늘 밤, 평소라면 속으로만 삼켰을 통찰 한 가지를 상대에게 솔직히 말해보세요.",
       },
       INTJ: {
         title: '마법사 (Magician)',
@@ -977,6 +1026,11 @@
         nightFactAttack: '낮에는 감정을 잘 드러내지 않는 사람일지 몰라도, 은밀한 공간에서는 상대의 반응 하나까지 미리 읽어내고 정확하게 리드하는 치밀한 지배자적 본능이 깨어납니다. 즉흥이 아니라 확신으로 움직이며, 상대를 완전히 자신의 페이스로 끌어들이는 능숙한 밤을 만들어냅니다. 한 번 그 궤도에 들어온 상대는 벗어날 타이밍조차 스스로 놓쳐버립니다.',
         match: 'ENFP (자유로운 광대)',
         bad: 'ISFJ (은밀한 여황제)',
+        cheatKeys: ["카톡 스타일: 답장 텀이 길어도 괜찮습니다. 대신 한 번 올 때 핵심을 정확히 짚는 문장으로 신뢰를 쌓으세요.", "데이트 선호: 미리 완벽하게 짜인 코스보다, 상대가 원하는 걸 미리 조사해서 깜짝 반영한 코스가 더 먹힙니다.", "심쿵 포인트: 상대도 몰랐던 상대의 취향을 정확히 맞혀버리는 순간, 신뢰가 폭발적으로 쌓입니다."],
+        mistake: { habit: "모든 걸 미리 계산하려다, 상대에게 곁을 내주지 않는 차가운 사람처럼 비치는 실수를 합니다.", solution: "가끔은 계획 없이 즉흥적으로 움직여보세요. 완벽하지 않아도 된다는 걸 스스로 허락하는 게 매력입니다." },
+        matchTip: "ENFP의 즉흥성을 답답해하지 말고, 그 자유로움에 맞춰 계획을 살짝 느슨하게 풀어보세요.",
+        badTip: "ISFJ와 부딪히면 논리로 설득하려 하지 말고, 먼저 감정을 다정하게 물어봐주세요.",
+        midnightMission: "오늘 밤, 계획에 없던 즉흥적인 만남이나 연락을 딱 한 번 시도해보세요.",
       },
       ISTP: {
         title: '악마 (Devil)',
@@ -986,6 +1040,11 @@
         nightFactAttack: '낮에는 감정 표현에 인색한 사람일지 몰라도, 은밀한 공간에서는 설명 없이 손끝의 확신만으로 상대를 옭아매는 위험할 정도로 능숙한 본능이 깨어납니다. 서두르지 않지만 그만큼 여유롭고 집요하게, 상대가 먼저 안달 나게 만드는 밤을 즐깁니다. 한 번 그 페이스에 말려든 상대는 주도권을 되찾기 어렵습니다.',
         match: 'ESFJ (균형의 절제)',
         bad: 'ENFJ (매혹의 별)',
+        cheatKeys: ["카톡 스타일: 말을 아끼되, 답장 타이밍만큼은 놓치지 마세요 — 여백이 매력이 되는 유일한 유형입니다.", "데이트 선호: 액티비티가 있는 활동적인 데이트 — 몸으로 부딪히는 순간 텐션이 확 올라갑니다.", "심쿵 포인트: 말없이 슬쩍 챙겨주는 스몰 액션 하나가 어떤 멋진 말보다 강하게 남습니다."],
+        mistake: { habit: "감정을 표현하지 않고 넘어가다, 상대가 관심 없다고 오해하게 만드는 실수를 자주 합니다.", solution: "가끔은 짧게라도 감정을 말로 확인시켜주세요. '이건 진심이야' 한마디면 충분합니다." },
+        matchTip: "ESFJ에게는 먼저 다가오는 다정함을 밀어내지 말고, 그대로 받아주는 여유를 보여주세요.",
+        badTip: "ENFJ와 부딪히면 침묵으로 피하지 말고, 짧게라도 지금 감정을 인정하고 대화를 시도하세요.",
+        midnightMission: "오늘 밤, 평소라면 그냥 넘어갔을 순간에 짧은 진심 한마디를 툭 던져보세요.",
       },
       ISFP: {
         title: '연인 (Lovers)',
@@ -995,6 +1054,11 @@
         nightFactAttack: '낮에는 조용하고 자기 세계에 머무는 사람일지 몰라도, 침실이나 단둘만의 공간에서는 온몸의 감각을 총동원해 분위기를 완전히 지배하는 은밀한 본능이 깨어납니다. 서두르지 않고 천천히, 그러나 확실하게 상대를 무장해제시키는 능숙한 밤을 만들어냅니다. 그 감각적인 여운에 한 번 취한 상대는 쉽게 벗어나지 못합니다.',
         match: 'ENFJ (매혹의 별)',
         bad: 'ESTJ (철혈의 황제)',
+        cheatKeys: ["카톡 스타일: 감성적인 사진이나 플레이리스트 공유로 대화를 시작하면 자연스럽게 분위기가 만들어집니다.", "데이트 선호: 감각을 자극하는 공간(전시, 조명 좋은 카페) — 분위기가 곧 무기입니다.", "심쿵 포인트: 눈을 오래 마주치며 조용히 웃어주는 것만으로도 상대의 심장을 흔듭니다."],
+        mistake: { habit: "기분에 따라 온도가 달라져서, 상대가 갑자기 멀어진 느낌을 받게 만드는 실수를 합니다.", solution: "기분이 가라앉는 날엔 이유를 짧게라도 알려주세요. 설명 없는 거리는 오해를 부릅니다." },
+        matchTip: "ENFJ에게는 감정을 말로 정리해서 표현하면, 그 진심이 훨씬 확실하게 전달됩니다.",
+        badTip: "ESTJ와 부딪히면 회피하지 말고, 원하는 속도와 방식을 분명하게 얘기해주세요.",
+        midnightMission: "오늘 밤, 지금 느끼는 감정을 사진이나 짧은 메시지로 상대에게 그대로 전달해보세요.",
       },
       INTP: {
         title: '달 (Moon)',
@@ -1004,6 +1068,11 @@
         nightFactAttack: '낮에는 세상과 거리를 둔 사색가일지 몰라도, 은밀한 공간에서는 논리적인 언어와 낮은 목소리만으로 상대를 완전히 홀리는 위험한 본능이 깨어납니다. 서두르지 않지만 묘하게 집요하며, 상대가 스스로 다가오게 만드는 은근한 밤을 즐깁니다. 그 신비로운 텐션에 한 번 걸려든 상대는 쉽게 정신을 차리지 못합니다.',
         match: 'ENTJ (정복의 탑)',
         bad: 'ESFJ (균형의 절제)',
+        cheatKeys: ["카톡 스타일: 뻔한 안부 대신 흥미로운 질문 하나를 던져서 대화를 지적인 밀당으로 이끄세요.", "데이트 선호: 새로운 걸 배우거나 탐구하는 데이트(전시, 방탈출 등) — 함께 몰입할 거리가 있어야 합니다.", "심쿵 포인트: 아무도 예상 못한 통찰로 상대를 놀라게 하는 순간, 신비로움이 매력으로 바뀝니다."],
+        mistake: { habit: "생각에 빠져 답장이나 연락을 놓치고, 상대를 방치한다는 느낌을 주는 실수를 합니다.", solution: "바쁜 생각 중에도 짧은 한마디는 잊지 마세요. '지금 생각 중이야, 이따 답할게' 한 줄이면 충분합니다." },
+        matchTip: "ENTJ에게는 논리적인 근거로 대화를 이끌면 급속도로 신뢰를 얻을 수 있습니다.",
+        badTip: "ESFJ와 부딪히면 논리로만 설득하려 하지 말고, 먼저 감정적으로 공감하는 말을 건네보세요.",
+        midnightMission: "오늘 밤, 평소라면 혼자 생각만 했을 질문 하나를 상대에게 직접 던져보세요.",
       },
       ESTP: {
         title: '힘 (Strength)',
@@ -1013,6 +1082,11 @@
         nightFactAttack: '낮에는 몸이 먼저 움직이는 행동파일지 몰라도, 침실이나 단둘만의 공간에서는 계산 없이 순간에 몰입하며 짜릿함을 좇는 거침없는 본능이 완전히 깨어납니다. 망설이거나 재는 법 없이, 원하는 것을 원하는 순간 확실하게 표현하는 화끈한 밤을 만들어냅니다. 그 직진하는 에너지에 한 번 휩쓸린 상대는 페이스를 따라가기 바빠집니다.',
         match: 'ISFJ (은밀한 여황제)',
         bad: 'INFJ (꿰뚫는 여사제)',
+        cheatKeys: ["카톡 스타일: 짧고 위트있게, 답장은 빠르게 — 텐션을 끊지 않는 게 핵심입니다.", "데이트 선호: 즉흥적이고 스릴 있는 액티비티 — 계획 없이 떠나는 하루가 최고의 데이트입니다.", "심쿵 포인트: 망설임 없이 먼저 손을 잡거나 다가가는 순간, 그 자신감에 완전히 반합니다."],
+        mistake: { habit: "재미를 좇다가 상대의 진지한 감정 표현을 가볍게 넘겨버리는 실수를 합니다.", solution: "상대가 진지해질 땐 잠깐 멈추고 눈을 맞춰주세요. 그 순간만큼은 온전히 집중해주는 게 중요합니다." },
+        matchTip: "ISFJ에게는 다정한 배려를 가볍게 여기지 말고, 진심으로 고마움을 표현해주세요.",
+        badTip: "INFJ와 부딪히면 즉흥적으로 밀어붙이지 말고, 먼저 상대의 속도를 물어봐주세요.",
+        midnightMission: "오늘 밤, 평소라면 그냥 넘겼을 즉흥적인 만남 제안을 실제로 보내보세요.",
       },
       ESFP: {
         title: '태양 (Sun)',
@@ -1022,6 +1096,11 @@
         nightFactAttack: '낮에는 누구에게나 다정한 분위기 메이커일지 몰라도, 은밀한 공간에서는 상대를 무대의 주인공으로 만들며 자신도 그 열기에 거침없이 몰입하는 뜨거운 본능이 깨어납니다. 부끄러워하지 않고 감정을 표현하며, 서로를 완전히 몰입시키는 화려하고 화끈한 밤을 만들어냅니다. 그 눈부신 에너지에 한 번 물든 상대는 평범한 밤에는 만족하지 못합니다.',
         match: 'ISTJ (얼음의 정의)',
         bad: 'INTJ (어둠의 마법사)',
+        cheatKeys: ["카톡 스타일: 이모티콘과 텐션 가득한 리액션으로 대화를 항상 즐겁게 만드세요.", "데이트 선호: 사람 많고 활기찬 곳에서 시작해, 마지막엔 단둘만의 조용한 순간으로 마무리하세요.", "심쿵 포인트: 많은 사람 사이에서도 오직 상대에게만 시선을 고정하는 순간, 특별함이 확 느껴집니다."],
+        mistake: { habit: "모두에게 다정하다 보니, 상대가 '나만 특별한 게 맞나' 불안해하게 만드는 실수를 합니다.", solution: "단둘이 있을 때만큼은 확실하게 티를 내주세요. '너는 특별해'라는 확신을 자주 줘야 합니다." },
+        matchTip: "ISTJ에게는 즉흥성을 강요하지 말고, 그의 계획을 존중하며 리듬을 맞춰주세요.",
+        badTip: "INTJ와 부딪히면 감정으로 몰아붙이지 말고, 잠깐의 시간과 공간을 먼저 줘보세요.",
+        midnightMission: "오늘 밤, 단둘이 있는 것처럼 오직 그 사람만을 위한 메시지 한 통을 보내보세요.",
       },
       ENFP: {
         title: '광대 (Fool)',
@@ -1031,6 +1110,11 @@
         nightFactAttack: '낮에는 밝고 가벼워 보이는 사람일지 몰라도, 침실이나 단둘만의 공간에서는 마음이 가는 대로 거침없이 돌진하는 대담한 본능이 완전히 깨어납니다. 계획하지 않아도 그 순간의 감정에 온전히 충실하며, 예상치 못한 순간에 상대를 놀라게 하는 짜릿한 밤을 만들어냅니다. 그 자유분방한 텐션에 한 번 물든 상대는 다음이 궁금해질 수밖에 없습니다.',
         match: 'INTJ (어둠의 마법사)',
         bad: 'ISTJ (얼음의 정의)',
+        cheatKeys: ["카톡 스타일: 예측 못 할 타이밍에 엉뚱하고 창의적인 드립으로 대화를 즐겁게 흔드세요.", "데이트 선호: 계획 없이 발길 닿는 대로 — 즉흥성이 만드는 의외의 순간이 최고의 무기입니다.", "심쿵 포인트: 상대만 아는 인사이드 조크를 만들어서 둘만의 세계를 쌓아가는 게 핵심입니다."],
+        mistake: { habit: "새로운 자극에 쉽게 빠져서, 지금 만나는 상대에게 소홀해지는 것처럼 보이는 실수를 합니다.", solution: "다른 데 마음이 갈 때일수록, 지금 상대에게 더 확실한 관심 표현을 해주세요." },
+        matchTip: "INTJ에게는 즉흥적인 제안도 미리 살짝 귀띔해주면, 훨씬 편하게 받아들입니다.",
+        badTip: "ISTJ와 부딪히면 즉흥으로 밀어붙이지 말고, 계획을 존중하는 모습을 먼저 보여주세요.",
+        midnightMission: "오늘 밤, 아무 이유 없이 그냥 생각났다며 상대에게 안부 메시지를 보내보세요.",
       },
       ENTP: {
         title: '전차 (Chariot)',
@@ -1040,6 +1124,11 @@
         nightFactAttack: '낮에는 논쟁을 즐기는 이야기꾼일지 몰라도, 은밀한 공간에서는 밀고 당기는 긴장감을 정교하게 설계하며 상대를 안달 나게 만드는 도발적인 본능이 깨어납니다. 뻔한 전개를 싫어하는 만큼, 예측할 수 없는 방식으로 상대를 몰아붙이는 짜릿한 밤을 만들어냅니다. 그 밀당에 한 번 걸려든 상대는 페이스를 완전히 내주게 됩니다.',
         match: 'INFJ (꿰뚫는 여사제)',
         bad: 'ISFJ (은밀한 여황제)',
+        cheatKeys: ["카톡 스타일: 살짝 도발적인 드립으로 밀당을 걸되, 선을 넘지 않는 유머 감각이 핵심입니다.", "데이트 선호: 토론하듯 대화가 끊이지 않는 곳 — 지적인 텐션이 곧 스킨십보다 강한 무기입니다.", "심쿵 포인트: 상대의 예상을 뒤집는 반전 있는 답변 하나로 완전히 사로잡습니다."],
+        mistake: { habit: "이기고 싶은 마음에 사소한 논쟁에서도 끝까지 몰아붙이다 상대를 지치게 만드는 실수를 합니다.", solution: "가끔은 이기려 하지 말고 져주세요. 승패보다 상대의 마음을 얻는 게 더 큰 승리입니다." },
+        matchTip: "INFJ에게는 논쟁 대신, 진심으로 궁금해하는 질문으로 다가가면 마음을 쉽게 엽니다.",
+        badTip: "ISFJ와 부딪히면 논리로 이기려 들지 말고, 먼저 감정을 다독여주는 말부터 건네세요.",
+        midnightMission: "오늘 밤, 평소라면 끝까지 우겼을 사소한 논쟁 하나를 먼저 져주세요.",
       },
       ESFJ: {
         title: '절제 (Temperance)',
@@ -1049,6 +1138,11 @@
         nightFactAttack: '낮에는 모두에게 다정한 사교가일지 몰라도, 침실이나 단둘만의 공간에서는 다정함 속에 숨겨둔 절묘한 밀당으로 상대를 완전히 애태우는 은밀한 본능이 깨어납니다. 다가왔다가도 살짝 물러서는 완급 조절로, 상대가 스스로 안달 나게 만드는 능숙한 밤을 즐깁니다. 그 균형 잡힌 밀당에 한 번 익숙해진 상대는 쉽게 헤어나오지 못합니다.',
         match: 'ISTP (위험한 악마)',
         bad: 'INTP (신비로운 달)',
+        cheatKeys: ["카톡 스타일: 다정하게 챙기되, 가끔은 답장을 살짝 늦춰 은근한 긴장감을 만들어보세요.", "데이트 선호: 다 같이 즐기는 모임 후, 자연스럽게 단둘이 남는 흐름을 만드는 게 효과적입니다.", "심쿵 포인트: 모두에게 다정한 당신이 유독 그 사람에게만 다른 태도를 보일 때 특별함이 느껴집니다."],
+        mistake: { habit: "너무 잘 챙겨주다 보니, 상대가 편한 사람으로만 여기고 설렘을 못 느끼게 만드는 실수를 합니다.", solution: "가끔은 다정함을 줄이고 살짝 튕겨보세요. 완급 조절이 관계에 긴장감을 살립니다." },
+        matchTip: "ISTP에게는 무심함을 억지로 풀려 하지 말고, 편안하게 곁에 있어 주는 것만으로 충분합니다.",
+        badTip: "INTP와 부딪히면 감정을 강요하지 말고, 논리적으로 대화를 정리해서 풀어가세요.",
+        midnightMission: "오늘 밤, 평소보다 답장을 딱 10분만 늦춰서 보내보세요.",
       },
       ENFJ: {
         title: '별 (Star)',
@@ -1058,6 +1152,11 @@
         nightFactAttack: '낮에는 모두를 다정하게 챙기는 리더일지 몰라도, 은밀한 공간에서는 상대의 마음을 읽고 그 안으로 깊이 들어가는 매혹적인 지배자적 본능이 깨어납니다. 다정함을 잃지 않으면서도 확실하게 리드하며, 상대가 온전히 안심하고 몰입하게 만드는 뜨거운 밤을 만들어냅니다. 그 카리스마에 한 번 사로잡힌 상대는 다른 사람에게 곁을 내주기 어려워집니다.',
         match: 'ISFP (감각의 연인)',
         bad: 'ISTP (위험한 악마)',
+        cheatKeys: ["카톡 스타일: 상대의 하루를 진심으로 궁금해하는 질문으로 대화의 온도를 계속 올리세요.", "데이트 선호: 상대를 위한 서프라이즈가 담긴 코스 — 세심하게 준비한 티가 나야 효과적입니다.", "심쿵 포인트: 상대가 스스로도 몰랐던 장점을 진심으로 짚어주는 순간, 완전히 마음을 엽니다."],
+        mistake: { habit: "상대를 챙기고 이끄는 데 집중하다, 정작 자신의 감정은 표현하지 않는 실수를 합니다.", solution: "가끔은 이끄는 대신 기대보세요. '나도 위로받고 싶어'라는 솔직함이 오히려 매력이 됩니다." },
+        matchTip: "ISFP에게는 강하게 이끌기보다, 감각적인 디테일로 조용히 취향을 맞춰주세요.",
+        badTip: "ISTP와 부딪히면 다가가려 애쓰기보다, 잠깐 거리를 두고 상대가 다가올 시간을 주세요.",
+        midnightMission: "오늘 밤, 남을 위로하는 대신 오늘 하루 힘들었던 걸 상대에게 먼저 털어놔보세요.",
       },
       ENTJ: {
         title: '탑 (Tower)',
@@ -1067,6 +1166,11 @@
         nightFactAttack: '낮에는 목표만을 향해 달리는 지휘관일지 몰라도, 침실이나 단둘만의 공간에서는 판을 뒤엎고 완전히 주도권을 쥐려는 확신에 찬 지배자적 본능이 깨어납니다. 망설임 없이 원하는 것을 표현하며, 상대를 자신의 페이스로 완전히 끌어들이는 강렬한 밤을 만들어냅니다. 한 번 그 궤도에 들어온 상대는 스스로 벗어날 타이밍을 놓쳐버립니다.',
         match: 'INFP (순수한 은둔자)',
         bad: 'ISFP (감각의 연인)',
+        cheatKeys: ["카톡 스타일: 군더더기 없이 확신에 찬 문장으로 — 망설이는 티를 내지 않는 게 매력입니다.", "데이트 선호: 완벽하게 계획되었지만 스케일이 큰 코스 — 압도적인 준비성으로 승부하세요.", "심쿵 포인트: '이미 다 알아봤어, 그냥 따라오면 돼'라는 확신에 상대는 안심하고 빠져듭니다."],
+        mistake: { habit: "모든 걸 주도하려다, 상대의 의견을 들을 틈을 안 주는 실수를 합니다.", solution: "가끔은 결정권을 넘겨보세요. '이번엔 네가 골라'라는 한마디가 관계의 균형을 맞춥니다." },
+        matchTip: "INFP에게는 강하게 밀어붙이지 말고, 그 속도에 맞춰 천천히 다가가 주세요.",
+        badTip: "ISFP와 부딪히면 논리로 설득하려 하지 말고, 먼저 감정을 다정하게 물어봐 주세요.",
+        midnightMission: "오늘 밤, 평소라면 직접 정했을 일 하나를 상대에게 결정권을 넘겨보세요.",
       },
     };
 
@@ -1087,6 +1191,11 @@
         nightFactAttack: '당신이 지켜온 원칙은 약점이 아니라 무기입니다. 이제 그 원칙을 지키기만 하는 사람이 아니라, 원칙을 직접 설계하는 사람이 되어보세요. 당신의 세계에서 규칙을 정하는 건 언제나 당신이어야 합니다.',
         match: 'ENFP (설렘의 연인)',
         bad: 'ESFP (열정의 바보)',
+        cheatKeys: ["카톡 스타일: 완벽한 답장을 고민하느라 늦추지 말고, 솔직한 그 순간의 마음을 바로 보내보세요.", "데이트 선호: 미리 계획된 곳도 좋지만, 가끔은 예약 없이 발길 닿는 곳으로 가보는 것도 매력입니다.", "심쿵 포인트: 완벽하지 않은 모습을 살짝 보여줄 때, 상대는 오히려 더 편안함과 매력을 느낍니다."],
+        mistake: { habit: "실수할까 봐 마음을 다 보여주지 않고, 안전한 만큼만 곁을 내주는 습관이 있습니다.", solution: "오늘은 계획에 없던 솔직한 말 한마디를 먼저 건네보세요. 완벽하지 않아도 사랑받을 수 있습니다." },
+        matchTip: "ENFP에게는 자유로움을 통제하려 하지 말고, 그 즉흥성을 있는 그대로 즐겨보세요.",
+        badTip: "ESFP와 부딪히면 원칙을 고집하기보다, 딱 한 번은 즉흥적인 흐름에 몸을 맡겨보세요.",
+        midnightMission: "오늘 밤, 평소라면 절대 안 보냈을 솔직하고 즉흥적인 메시지 하나를 보내보세요.",
       },
       ISFJ: {
         title: '절제 (Temperance)',
@@ -1096,6 +1205,11 @@
         nightFactAttack: '당신의 배려는 약함이 아니라 정교한 관찰력에서 나옵니다. 그 관찰력으로 이제는 남을 맞추는 대신, 원하는 것을 정확히 얻어내 보세요. 조용한 카리스마만큼 강력한 무기는 없습니다.',
         match: 'ESTP (변화의 수레바퀴)',
         bad: 'ENTP (통찰의 매달린 사람)',
+        cheatKeys: ["카톡 스타일: 상대만 챙기지 말고, 오늘 있었던 당신의 이야기도 함께 나눠보세요.", "데이트 선호: 늘 상대가 좋아하는 곳만 고르지 말고, 이번엔 당신이 원하는 장소를 먼저 제안해보세요.", "심쿵 포인트: 다정함 속에 살짝 보이는 솔직한 욕구 하나가 상대를 더 깊이 끌어당깁니다."],
+        mistake: { habit: "상대의 기분만 살피다, 정작 내가 원하는 건 말하지 못하고 넘어가는 습관이 있습니다.", solution: "가끔은 '나는 이게 좋아'라고 먼저 말해보세요. 그 솔직함이 관계를 더 편안하게 만듭니다." },
+        matchTip: "ESTP에게는 다정함을 티 내기보다, 여유롭게 지켜봐 주는 모습을 보여주세요.",
+        badTip: "ENTP와 부딪히면 참기만 하지 말고, 감정을 담백하게 먼저 표현해보세요.",
+        midnightMission: "오늘 밤, 남을 위한 배려 대신 온전히 나를 위한 부탁 하나를 상대에게 해보세요.",
       },
       INFJ: {
         title: '은둔자 (Hermit)',
@@ -1105,6 +1219,11 @@
         nightFactAttack: '당신의 직관은 이미 답을 알고 있습니다. 이제 그 직관을 의심하지 말고, 확신을 담아 말해보세요. 조용한 통찰력으로 사람들을 이끄는 것이야말로 당신만이 가진 마녀의 능력입니다.',
         match: 'ENTP (통찰의 매달린 사람)',
         bad: 'ISTP (고요한 힘)',
+        cheatKeys: ["카톡 스타일: 깊은 대화를 원한다면, 가벼운 질문보다 진심이 담긴 질문 하나를 먼저 던져보세요.", "데이트 선호: 조용히 대화에 집중할 수 있는 공간에서 당신의 매력이 가장 잘 드러납니다.", "심쿵 포인트: 상대가 미처 말하지 않은 마음을 알아채고 다정히 짚어줄 때, 마음이 완전히 열립니다."],
+        mistake: { habit: "너무 깊이 생각하다 혼자 결론을 내리고, 정작 마음을 표현하지 못하는 습관이 있습니다.", solution: "그 생각을 혼자 삼키지 말고, 짧게라도 상대에게 나눠보세요. 표현은 관계를 더 가깝게 만듭니다." },
+        matchTip: "ENTP에게는 논리로 맞서기보다, 진심 어린 호기심으로 다가가면 마음이 빠르게 열립니다.",
+        badTip: "ISTP와 부딪히면 혼자 삭이지 말고, 원하는 걸 직접적인 말로 전달해보세요.",
+        midnightMission: "오늘 밤, 혼자만 담아뒀던 솔직한 마음 한 가지를 상대에게 표현해보세요.",
       },
       INTJ: {
         title: '마법사 (Magician)',
@@ -1114,6 +1233,11 @@
         nightFactAttack: '당신의 치밀함은 타인을 압박하는 도구가 아니라, 원하는 삶을 정확히 설계하는 능력입니다. 이제 그 설계도의 주인공을 다른 누구도 아닌 당신 자신으로 그려보세요.',
         match: 'ENFP (설렘의 연인)',
         bad: 'ISFJ (헌신의 절제)',
+        cheatKeys: ["카톡 스타일: 완벽한 문장을 고민하다 늦추지 말고, 떠오른 생각을 그대로 전해보세요.", "데이트 선호: 계획한 코스 안에서도 즉흥적인 여유 하나를 남겨두면 관계가 더 편안해집니다.", "심쿵 포인트: 철저한 당신이 가끔 보여주는 허당미 하나가 상대에게 큰 반전 매력이 됩니다."],
+        mistake: { habit: "모든 걸 미리 계산하려다, 정작 마음을 여는 데는 시간이 오래 걸리는 습관이 있습니다.", solution: "계획 없이 마음이 가는 대로 한 번 움직여보세요. 완벽하지 않아도 충분히 매력적입니다." },
+        matchTip: "ENFP에게는 계획을 강요하지 말고, 그 자유로움에 맞춰 살짝 느슨해져 보세요.",
+        badTip: "ISFJ와 부딪히면 논리로 설명하려 하지 말고, 먼저 감정을 다정하게 물어봐주세요.",
+        midnightMission: "오늘 밤, 계획 없이 즉흥적으로 떠오른 연락 하나를 그대로 실행해보세요.",
       },
       ISTP: {
         title: '힘 (Strength)',
@@ -1123,6 +1247,11 @@
         nightFactAttack: '당신은 원래 정해진 틀 안에 갇힐 사람이 아닙니다. 남들이 만든 기준에 맞추려 애쓰는 대신, 당신만의 방식으로 판을 새로 짜보세요. 자유로움이야말로 당신의 가장 강력한 무기입니다.',
         match: 'ESFJ (따뜻한 태양)',
         bad: 'ENFJ (각성의 심판)',
+        cheatKeys: ["카톡 스타일: 말을 아끼는 건 괜찮지만, 상대가 불안하지 않게 가끔은 확실한 한마디를 남겨주세요.", "데이트 선호: 몸을 움직이는 활동적인 데이트에서 당신의 매력이 자연스럽게 드러납니다.", "심쿵 포인트: 무심한 듯 툭 던지는 진심 한마디가 어떤 다정한 말보다 강하게 남습니다."],
+        mistake: { habit: "괜찮은 척하며 힘든 걸 숨기다, 상대가 다가올 틈을 스스로 막아버리는 습관이 있습니다.", solution: "가끔은 힘들다고 솔직히 말해보세요. 약한 모습을 보여주는 것도 신뢰를 쌓는 방법입니다." },
+        matchTip: "ESFJ에게는 먼저 다가오는 다정함을 밀어내지 말고, 그대로 받아들여 보세요.",
+        badTip: "ENFJ와 부딪히면 침묵으로 피하지 말고, 짧게라도 지금 감정을 표현해보세요.",
+        midnightMission: "오늘 밤, 평소라면 그냥 넘겼을 감정을 짧은 메시지로 솔직하게 표현해보세요.",
       },
       ISFP: {
         title: '달 (Moon)',
@@ -1132,6 +1261,11 @@
         nightFactAttack: '당신의 섬세함은 상대의 마음을 가장 깊은 곳까지 읽어내는 능력이기도 합니다. 이제 그 감각을 스스로를 위해 써보세요. 은은하게, 그러나 확실하게 시선을 사로잡는 법을 당신은 이미 알고 있습니다.',
         match: 'ENFJ (각성의 심판)',
         bad: 'ESTJ (추진의 전차)',
+        cheatKeys: ["카톡 스타일: 감성적인 사진이나 음악 공유로 자연스럽게 마음을 표현해보세요.", "데이트 선호: 조명이 예쁜 카페나 전시처럼 감각을 자극하는 공간이 잘 맞습니다.", "심쿵 포인트: 눈을 오래 맞추고 조용히 웃어주는 것만으로도 깊은 인상을 남깁니다."],
+        mistake: { habit: "기분에 따라 온도가 바뀌어서, 상대가 갑자기 멀어졌다고 오해하게 만드는 습관이 있습니다.", solution: "기분이 가라앉는 날엔 짧게라도 이유를 알려주세요. 설명 없는 거리는 불안을 만듭니다." },
+        matchTip: "ENFJ에게는 감정을 말로 정리해서 전달하면, 진심이 훨씬 명확하게 가닿습니다.",
+        badTip: "ESTJ와 부딪히면 피하지 말고, 원하는 속도와 방식을 분명하게 얘기해보세요.",
+        midnightMission: "오늘 밤, 지금 드는 감정을 사진이나 짧은 글로 상대에게 그대로 전달해보세요.",
       },
       INFP: {
         title: '별 (Star)',
@@ -1141,6 +1275,11 @@
         nightFactAttack: '당신 안의 이상은 몽상이 아니라 아직 실현되지 않은 계획일 뿐입니다. 이제 그 이상을 조용히 품기만 하지 말고, 세상 밖으로 꺼내 보여주세요. 당신의 진심은 생각보다 훨씬 강력합니다.',
         match: 'ESTJ (추진의 전차)',
         bad: 'ISTJ (안정의 황후)',
+        cheatKeys: ["카톡 스타일: 답장이 늦어도 괜찮지만, 한 번 보낼 땐 진심이 담긴 문장으로 승부하세요.", "데이트 선호: 둘만 조용히 이야기 나눌 수 있는 공간에서 당신의 진심이 가장 잘 전해집니다.", "심쿵 포인트: 담백하지만 진심 어린 한마디가 화려한 멘트보다 훨씬 깊게 남습니다."],
+        mistake: { habit: "서운한 마음을 혼자 삭이다, 정작 상대는 아무것도 모르게 만드는 습관이 있습니다.", solution: "그 감정이 사라지기 전에 짧게라도 표현해보세요. 침묵은 오해를 부르기 쉽습니다." },
+        matchTip: "ESTJ에게는 말보다 행동으로 진심을 먼저 보여주면 신뢰가 빠르게 쌓입니다.",
+        badTip: "ISTJ와 부딪히면 감정을 설명하려 하지 말고, 원하는 것을 구체적으로 정리해서 전달하세요.",
+        midnightMission: "오늘 밤, 마음속에만 담아뒀던 진심 한 문장을 실제로 전해보세요.",
       },
       INTP: {
         title: '여사제 (High Priestess)',
@@ -1150,6 +1289,11 @@
         nightFactAttack: '당신의 냉철한 사고는 남을 이기기 위한 것이 아니라, 스스로 세상을 다시 정의하는 힘입니다. 이제 관찰만 하지 말고, 당신이 발견한 통찰로 판 자체를 새로 짜보세요.',
         match: 'ENTJ (정복의 세계)',
         bad: 'ESFJ (따뜻한 태양)',
+        cheatKeys: ["카톡 스타일: 안부 대신 흥미로운 질문 하나로 대화를 지적인 밀당으로 이끌어보세요.", "데이트 선호: 새로운 걸 함께 배우거나 탐구하는 데이트가 당신에게 잘 맞습니다.", "심쿵 포인트: 예상 못한 통찰 하나로 상대를 놀라게 할 때, 신비로움이 매력으로 바뀝니다."],
+        mistake: { habit: "생각에 빠져 연락을 놓치고, 상대를 방치한다는 느낌을 주는 습관이 있습니다.", solution: "바쁜 생각 중에도 짧은 한마디는 잊지 마세요. '생각 중이야, 이따 답할게' 한 줄이면 충분합니다." },
+        matchTip: "ENTJ에게는 논리적인 근거로 대화를 이끌면 급속도로 신뢰를 얻을 수 있습니다.",
+        badTip: "ESFJ와 부딪히면 논리로만 설득하려 하지 말고, 먼저 감정에 공감하는 말을 건네보세요.",
+        midnightMission: "오늘 밤, 혼자 생각만 했던 질문 하나를 상대에게 직접 던져보세요.",
       },
       ESTJ: {
         title: '전차 (Chariot)',
@@ -1159,6 +1303,11 @@
         nightFactAttack: '당신의 추진력은 타고난 무기입니다. 이제 그 무기를 남을 관리하는 데만 쓰지 말고, 당신 자신의 목표를 향해 정면으로 겨눠보세요. 망설임 없는 결단이야말로 당신의 본모습입니다.',
         match: 'INFP (치유의 별)',
         bad: 'ENFP (설렘의 연인)',
+        cheatKeys: ["카톡 스타일: 용건 위주로 빠르게, 그러나 가끔은 다정한 한마디를 더해보세요.", "데이트 선호: 완벽하게 계획된 코스 안에 즉흥적인 여유 하나를 남겨보세요.", "심쿵 포인트: '내가 다 준비해뒀어'라는 확신에 찬 리드가 상대를 안심시킵니다."],
+        mistake: { habit: "모든 걸 통제하려다, 상대의 의견을 들을 틈을 놓치는 습관이 있습니다.", solution: "결정을 내리기 전 한 번, '네 생각은 어때?'라고 물어보세요. 리더십이 배려로 바뀝니다." },
+        matchTip: "INFP에게는 강요가 아니라 제안으로 다가가면 마음을 훨씬 쉽게 엽니다.",
+        badTip: "ENFP와 부딪히면 옳음을 증명하려 들지 말고, 먼저 한 발 물러서 보세요.",
+        midnightMission: "오늘 밤, 평소라면 바로 정해버렸을 일 하나를 상대에게 맡겨보세요.",
       },
       ESFJ: {
         title: '태양 (Sun)',
@@ -1168,6 +1317,11 @@
         nightFactAttack: '당신의 사교성은 인정받기 위한 노력이 아니라, 사람을 끌어당기는 타고난 재능입니다. 이제 남에게 맞추기 위해서가 아니라, 당신이 원하는 방향으로 그 매력을 써보세요.',
         match: 'ISTP (고요한 힘)',
         bad: 'INTP (신비의 여사제)',
+        cheatKeys: ["카톡 스타일: 다정하게 챙기되, 가끔은 답장을 살짝 늦춰 은근한 긴장감을 만들어보세요.", "데이트 선호: 다 같이 즐기는 모임 후 자연스럽게 단둘이 남는 흐름을 만들어보세요.", "심쿵 포인트: 모두에게 다정한 당신이 유독 그 사람에게만 다른 태도를 보일 때 특별함이 느껴집니다."],
+        mistake: { habit: "너무 잘 챙겨주다, 상대가 편한 사람으로만 여기게 만드는 습관이 있습니다.", solution: "가끔은 다정함을 줄이고 살짝 튕겨보세요. 완급 조절이 관계에 긴장감을 살립니다." },
+        matchTip: "ISTP에게는 무심함을 억지로 풀려 하지 말고, 편안하게 곁에 있어 주세요.",
+        badTip: "INTP와 부딪히면 감정을 강요하지 말고, 논리적으로 대화를 정리해서 풀어가세요.",
+        midnightMission: "오늘 밤, 평소보다 답장을 딱 10분만 늦춰서 보내보세요.",
       },
       ENFJ: {
         title: '심판 (Judgement)',
@@ -1177,6 +1331,11 @@
         nightFactAttack: '당신의 카리스마는 남을 이끌기 위해서만 존재하는 게 아닙니다. 이제 그 힘의 방향을 당신 자신에게도 돌려보세요. 사람들을 매혹했던 그 에너지로, 이번엔 당신의 삶을 이끌어보세요.',
         match: 'ISFP (감성의 달)',
         bad: 'ISTP (고요한 힘)',
+        cheatKeys: ["카톡 스타일: 상대의 하루를 진심으로 궁금해하는 질문으로 대화의 온도를 올려보세요.", "데이트 선호: 세심하게 준비한 티가 나는 서프라이즈 코스가 효과적입니다.", "심쿵 포인트: 상대도 몰랐던 장점을 진심으로 짚어줄 때, 완전히 마음을 엽니다."],
+        mistake: { habit: "상대를 이끌고 챙기는 데 집중하다, 정작 자신의 감정은 숨기는 습관이 있습니다.", solution: "가끔은 이끄는 대신 기대보세요. '나도 위로받고 싶어'라는 솔직함이 오히려 매력이 됩니다." },
+        matchTip: "ISFP에게는 강하게 이끌기보다, 감각적인 디테일로 조용히 취향을 맞춰주세요.",
+        badTip: "ISTP와 부딪히면 다가가려 애쓰기보다, 잠깐 거리를 두고 상대가 다가올 시간을 주세요.",
+        midnightMission: "오늘 밤, 남을 위로하는 대신 오늘 하루 힘들었던 걸 상대에게 먼저 털어놔보세요.",
       },
       ENTJ: {
         title: '세계 (World)',
@@ -1186,6 +1345,11 @@
         nightFactAttack: '당신의 지배력은 타고난 것입니다. 목표를 이루는 능력만큼, 그 목표를 스스로를 위해 세우는 것도 중요합니다. 이제 당신의 왕국에서 가장 중요한 신하는 바로 당신 자신입니다.',
         match: 'INFP (치유의 별)',
         bad: 'ISFP (감성의 달)',
+        cheatKeys: ["카톡 스타일: 확신에 찬 문장으로, 망설이는 티를 내지 않는 게 매력입니다.", "데이트 선호: 스케일이 크고 완벽하게 준비된 코스로 압도적인 준비성을 보여주세요.", "심쿵 포인트: '이미 다 알아봤어'라는 확신에 상대는 안심하고 빠져듭니다."],
+        mistake: { habit: "모든 걸 주도하려다, 상대의 의견을 들을 틈을 안 주는 습관이 있습니다.", solution: "가끔은 결정권을 넘겨보세요. '이번엔 네가 골라'라는 한마디가 관계의 균형을 맞춥니다." },
+        matchTip: "INFP에게는 강하게 밀어붙이지 말고, 그 속도에 맞춰 천천히 다가가 주세요.",
+        badTip: "ISFP와 부딪히면 논리로 설득하려 하지 말고, 먼저 감정을 다정하게 물어봐 주세요.",
+        midnightMission: "오늘 밤, 평소라면 직접 정했을 일 하나를 상대에게 결정권을 넘겨보세요.",
       },
       ESTP: {
         title: '운명의 수레바퀴 (Wheel of Fortune)',
@@ -1195,6 +1359,11 @@
         nightFactAttack: '당신의 즉흥성은 무모함이 아니라, 순간을 가장 확실하게 사는 능력입니다. 망설이는 사람들 사이에서, 먼저 움직이는 것이야말로 당신만이 가진 강력한 무기입니다.',
         match: 'ISFJ (헌신의 절제)',
         bad: 'INFJ (내면의 은둔자)',
+        cheatKeys: ["카톡 스타일: 짧고 위트있게, 답장은 빠르게 — 텐션을 끊지 않는 게 핵심입니다.", "데이트 선호: 즉흥적이고 스릴 있는 액티비티가 당신에게 잘 맞습니다.", "심쿵 포인트: 망설임 없이 먼저 다가가는 순간, 그 자신감에 상대가 완전히 반합니다."],
+        mistake: { habit: "재미를 좇다가 상대의 진지한 감정 표현을 가볍게 넘겨버리는 습관이 있습니다.", solution: "상대가 진지해질 땐 잠깐 멈추고 눈을 맞춰주세요. 그 순간만큼은 온전히 집중해주세요." },
+        matchTip: "ISFJ에게는 다정한 배려를 가볍게 여기지 말고, 진심으로 고마움을 표현해주세요.",
+        badTip: "INFJ와 부딪히면 즉흥적으로 밀어붙이지 말고, 먼저 상대의 속도를 물어봐주세요.",
+        midnightMission: "오늘 밤, 평소라면 그냥 넘겼을 즉흥적인 만남 제안을 실제로 보내보세요.",
       },
       ESFP: {
         title: '바보 (Fool)',
@@ -1204,6 +1373,11 @@
         nightFactAttack: '당신은 원래 시선을 끄는 사람입니다. 그 에너지를 남을 즐겁게 하는 데만 쓰지 말고, 이제는 당신 자신을 위한 무대에 올려보세요. 스스로 주인공이 되는 것을 두려워하지 마세요.',
         match: 'ISTJ (안정의 황후)',
         bad: 'INTJ (창조의 마법사)',
+        cheatKeys: ["카톡 스타일: 이모티콘과 텐션 가득한 리액션으로 대화를 항상 즐겁게 만들어보세요.", "데이트 선호: 활기찬 곳에서 시작해, 마지막엔 단둘만의 조용한 순간으로 마무리해보세요.", "심쿵 포인트: 많은 사람 사이에서도 오직 상대에게만 시선을 고정하는 순간, 특별함이 확 느껴집니다."],
+        mistake: { habit: "모두에게 다정하다 보니, 상대가 '나만 특별한 게 맞나' 불안해하게 만드는 습관이 있습니다.", solution: "단둘이 있을 때만큼은 확실하게 티를 내주세요. '너는 특별해'라는 확신을 자주 줘야 합니다." },
+        matchTip: "ISTJ에게는 즉흥성을 강요하지 말고, 그의 계획을 존중하며 리듬을 맞춰주세요.",
+        badTip: "INTJ와 부딪히면 감정으로 몰아붙이지 말고, 잠깐의 시간과 공간을 먼저 줘보세요.",
+        midnightMission: "오늘 밤, 단둘이 있는 것처럼 오직 그 사람만을 위한 메시지 한 통을 보내보세요.",
       },
       ENTP: {
         title: '매달린 사람 (Hanged Man)',
@@ -1213,6 +1387,11 @@
         nightFactAttack: '당신의 날카로운 말솜씨는 논쟁을 위한 무기가 아니라, 세상을 다르게 보게 만드는 힘입니다. 이제 그 힘을 남을 설득하는 데만 쓰지 말고, 당신 자신을 설득하는 데 먼저 써보세요.',
         match: 'INFJ (내면의 은둔자)',
         bad: 'ISFJ (헌신의 절제)',
+        cheatKeys: ["카톡 스타일: 살짝 엉뚱한 드립으로 밀당을 걸되, 선을 넘지 않는 유머 감각이 핵심입니다.", "데이트 선호: 대화가 끊이지 않는 곳 — 지적인 텐션이 곧 매력의 무기입니다.", "심쿵 포인트: 예상을 뒤집는 반전 있는 답변 하나로 완전히 사로잡습니다."],
+        mistake: { habit: "이기고 싶은 마음에 사소한 논쟁도 끝까지 몰아붙이다 상대를 지치게 만드는 습관이 있습니다.", solution: "가끔은 이기려 하지 말고 져주세요. 승패보다 상대의 마음을 얻는 게 더 큰 승리입니다." },
+        matchTip: "INFJ에게는 논쟁 대신, 진심으로 궁금해하는 질문으로 다가가면 마음을 쉽게 엽니다.",
+        badTip: "ISFJ와 부딪히면 논리로 이기려 들지 말고, 먼저 감정을 다독여주는 말부터 건네세요.",
+        midnightMission: "오늘 밤, 평소라면 끝까지 우겼을 사소한 논쟁 하나를 먼저 져주세요.",
       },
       ENFP: {
         title: '연인 (Lovers)',
@@ -1222,6 +1401,11 @@
         nightFactAttack: '당신의 열정은 잠깐의 불꽃이 아니라, 사람들을 끌어당기는 강력한 자기장입니다. 이제 그 에너지를 흩뿌리기만 하지 말고, 원하는 한 곳에 정확히 쏟아보세요.',
         match: 'INTJ (창조의 마법사)',
         bad: 'ISTJ (안정의 황후)',
+        cheatKeys: ["카톡 스타일: 예측 못 할 타이밍에 엉뚱하고 창의적인 드립으로 대화를 즐겁게 흔들어보세요.", "데이트 선호: 계획 없이 발길 닿는 대로 — 즉흥성이 만드는 의외의 순간이 최고의 무기입니다.", "심쿵 포인트: 상대만 아는 인사이드 조크를 만들어서 둘만의 세계를 쌓아가 보세요."],
+        mistake: { habit: "감정 기복이 클 때, 그 이유를 설명하지 않아 상대를 혼란스럽게 만드는 습관이 있습니다.", solution: "감정이 오르내릴 때 짧게라도 이유를 알려주세요. 그 솔직함이 오히려 더 큰 신뢰를 만듭니다." },
+        matchTip: "INTJ에게는 즉흥적인 제안도 미리 살짝 귀띔해주면, 훨씬 편하게 받아들입니다.",
+        badTip: "ISTJ와 부딪히면 즉흥으로 밀어붙이지 말고, 계획을 존중하는 모습을 먼저 보여주세요.",
+        midnightMission: "오늘 밤, 아무 이유 없이 그냥 생각났다며 상대에게 안부 메시지를 보내보세요.",
       },
     };
 
@@ -1451,6 +1635,12 @@
     const guideNightFact = document.getElementById('guide-night-fact');
     const guideMatch = document.getElementById('guide-match');
     const guideBad = document.getElementById('guide-bad');
+    const guideCheatKeysList = document.getElementById('guide-cheat-keys');
+    const guideMistakeHabit = document.getElementById('guide-mistake-habit');
+    const guideMistakeSolution = document.getElementById('guide-mistake-solution');
+    const guideMatchTip = document.getElementById('guide-match-tip');
+    const guideBadTip = document.getElementById('guide-bad-tip');
+    const guideMidnightMission = document.getElementById('guide-midnight-mission');
     const guideSecretCode = document.getElementById('guide-secret-code');
 
     // ─────────────────────────────────────────────
@@ -1866,6 +2056,32 @@
       guideMatch.textContent = data.match;
       guideBad.textContent = data.bad;
 
+      // ① 실전 공략 치트키 3줄 — 매번 리스트를 비우고 다시 채운다(li#텍스트 노드, innerHTML 미사용)
+      guideCheatKeysList.innerHTML = '';
+      (data.cheatKeys || []).forEach((line) => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2';
+        const dot = document.createElement('span');
+        dot.textContent = '▸';
+        dot.className = 'text-amber-300 mt-0.5 flex-shrink-0';
+        const span = document.createElement('span');
+        span.textContent = line;
+        li.appendChild(dot);
+        li.appendChild(span);
+        guideCheatKeysList.appendChild(li);
+      });
+
+      // ② 무의식적 실수(habit) + 방지 솔루션(solution)
+      guideMistakeHabit.textContent = data.mistake ? data.mistake.habit : '';
+      guideMistakeSolution.textContent = data.mistake ? data.mistake.solution : '';
+
+      // ③ 궁합 세부 플레이북 — 찰떡/파국 궁합 각 1줄 팁
+      guideMatchTip.textContent = data.matchTip || '';
+      guideBadTip.textContent = data.badTip || '';
+
+      // ④ 오늘 밤 미드나잇 미션
+      guideMidnightMission.textContent = data.midnightMission || '';
+
       const codeTable = isFemale ? FEMALE_ENTRY_CODES : MALE_ENTRY_CODES;
       const codes = codeTable[safeMbti];
       guideSecretCode.textContent = codes && codes.length ? `SECRET CODE · ${codes[0]}` : '';
@@ -1930,6 +2146,17 @@
   .match-grid div { flex:1; text-align:center; border-radius:16px; padding:16px; border:1px solid rgba(178,107,255,0.3); }
   .match-grid .label { font-size:11px; color:#d9c9ff; letter-spacing:0.15em; text-transform:uppercase; }
   .match-grid .value { margin-top:6px; font-weight:700; }
+  .match-grid .tip { margin-top:6px; font-size:11px; color:rgba(217,201,255,0.75); line-height:1.5; }
+  .cheat { background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.35); }
+  .cheat h2 { color:#fbbf24; }
+  .cheat ul { margin:0; padding-left:18px; }
+  .cheat li { margin-bottom:8px; line-height:1.7; }
+  .mistake { background:rgba(244,63,94,0.08); border:1px solid rgba(244,63,94,0.35); }
+  .mistake h2 { color:#fb7185; }
+  .mistake .solution-box { margin-top:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:12px 14px; }
+  .mistake .solution-label { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:#34d399; font-weight:700; margin:0 0 4px; }
+  .mission { background:linear-gradient(135deg, rgba(255,94,196,0.15), rgba(178,107,255,0.12)); border:1px solid rgba(255,94,196,0.5); text-align:center; }
+  .mission h2 { color:#ff5ec4; }
   .code { text-align:center; font-size:11px; letter-spacing:0.15em; color:#fbbf24; font-weight:600; margin-top:8px; }
   .footer { text-align:center; margin-top:32px; font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:0.1em; }
 </style>
@@ -1950,9 +2177,33 @@
       <h2>${escapeHtml(factLabel)}</h2>
       <p>${escapeHtml(data.nightFactAttack)}</p>
     </div>
+    <div class="section cheat">
+      <h2>🔥 실전 공략 치트키</h2>
+      <ul>${(data.cheatKeys || []).map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>
+    </div>
+    <div class="section mistake">
+      <h2>⚠️ 관계를 망치는 무의식적 실수</h2>
+      <p>${escapeHtml(data.mistake ? data.mistake.habit : '')}</p>
+      <div class="solution-box">
+        <p class="solution-label">✅ 방지 솔루션</p>
+        <p>${escapeHtml(data.mistake ? data.mistake.solution : '')}</p>
+      </div>
+    </div>
     <div class="match-grid">
-      <div><div class="label">찰떡 궁합</div><div class="value">${escapeHtml(data.match)}</div></div>
-      <div><div class="label">파국 궁합</div><div class="value">${escapeHtml(data.bad)}</div></div>
+      <div>
+        <div class="label">찰떡 궁합</div>
+        <div class="value">${escapeHtml(data.match)}</div>
+        ${data.matchTip ? `<div class="tip">${escapeHtml(data.matchTip)}</div>` : ''}
+      </div>
+      <div>
+        <div class="label">파국 궁합</div>
+        <div class="value">${escapeHtml(data.bad)}</div>
+        ${data.badTip ? `<div class="tip">${escapeHtml(data.badTip)}</div>` : ''}
+      </div>
+    </div>
+    <div class="section mission">
+      <h2>🍸 오늘 밤 미드나잇 미션</h2>
+      <p>${escapeHtml(data.midnightMission)}</p>
     </div>
     ${codeLine ? `<p class="code">${escapeHtml(codeLine)}</p>` : ''}
     <p class="footer">NEO-TAROT · neo-tarot-seven.vercel.app</p>
