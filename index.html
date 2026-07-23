@@ -431,7 +431,7 @@
           <label for="result-code-input" class="text-[11px] tracking-widest text-purple-200/70 uppercase text-center">이미 입장 코드가 있으신가요?</label>
           <div class="flex gap-2">
             <input
-              id="result-code-input" type="text" placeholder="예: FOOL-777X" autocomplete="off"
+              id="result-code-input" type="text" placeholder="결제 후 받은 보안 코드를 입력하세요" autocomplete="off"
               class="code-input flex-1 rounded-full px-4 py-3 text-sm text-white placeholder-white/25 tracking-widest text-center uppercase"
             />
             <button id="result-code-submit" type="button" class="px-5 py-3 rounded-full text-sm font-semibold bg-white/10 border border-neonpurple/40 text-purple-100 hover:bg-neonpurple/20 hover:border-neonpurple transition-all duration-300 active:scale-95">
@@ -492,7 +492,7 @@
 
       <div class="w-full flex flex-col gap-3">
         <input
-          id="entry-code-input" type="text" placeholder="예: FOOL-777X" autocomplete="off"
+          id="entry-code-input" type="text" placeholder="결제 후 받은 보안 코드를 입력하세요" autocomplete="off"
           class="code-input w-full rounded-full px-5 py-4 text-sm text-white placeholder-white/25 tracking-widest text-center uppercase"
         />
         <button id="entry-code-submit" type="button" class="w-full px-8 py-4 rounded-full font-bold text-base tracking-wide bg-gradient-to-r from-neonpurple2 via-neonpurple to-neonpink text-white shadow-neon transition-transform duration-300 active:scale-95 hover:scale-[1.02]">
@@ -901,6 +901,18 @@
         CODE_TO_RESULT[code] = { mbti, gender: 'female' };
       });
     });
+
+    // ─────────────────────────────────────────────
+    // 포스타입(Postype) 결제 완료 페이지에서 모든 구매자에게 동일하게 안내되는
+    // 공식 VIP 입장 코드. 위 MBTI별 코드들과 달리 이 코드는 특정 유형을 가리키지
+    // 않는 "결제 확인용 공용 열쇠"다 — tryEnterMidnightBar()가 이미 본인의 실제
+    // 퀴즈 결과(resultMBTI/resultGender)를 우선 사용하도록 고쳐져 있어서, 이 코드로
+    // 입장해도 각자 자기 실제 MBTI/성별 리포트를 그대로 보게 된다. 아래 값은 본인
+    // 결과가 아예 없는 예외 상황(랜딩에서 퀴즈 없이 코드만 입력한 경우)에서만 쓰이는
+    // 기본값이다. normalizeCode()가 대소문자를 구분하지 않고 대문자로 통일하기 때문에
+    // 'neo777', 'Neo777' 등 어떻게 입력해도 'NEO777'로 자동 인식된다.
+    // ─────────────────────────────────────────────
+    CODE_TO_RESULT['NEO777'] = { mbti: 'INFP', gender: 'male' };
 
     // ─────────────────────────────────────────────
     // 결과 데이터베이스 (16유형)
