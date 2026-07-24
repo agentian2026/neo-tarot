@@ -205,6 +205,56 @@
     border-color: #b26bff;
     box-shadow: 0 0 0 3px rgba(178,107,255,0.18), 0 0 18px rgba(178,107,255,0.3);
   }
+
+  /* 찰떡궁합 이성 유혹 비법서(loveSecretData) 본문 렌더링용 클래스.
+     각 항목의 content는 이미 완성된 HTML 문자열이라 innerHTML로 그대로 삽입되므로,
+     내부에서 쓰는 lsd-* 클래스들의 스타일을 여기서 한 번만 정의해두면 된다. */
+  .lsd-hero-quote {
+    display: block;
+    font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #f0d9ff;
+    text-align: center;
+    padding: 14px 6px 18px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .lsd-section {
+    border-radius: 16px;
+    padding: 16px 18px;
+    border: 1px solid rgba(178,107,255,0.25);
+    background: rgba(178,107,255,0.06);
+  }
+  .lsd-section-story { border-color: rgba(255,94,196,0.3); background: rgba(255,94,196,0.06); }
+  .lsd-section-pov { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); }
+  .lsd-section-tips { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
+  .lsd-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #d9c9ff;
+    margin-bottom: 8px;
+  }
+  .lsd-section-story .lsd-label { color: #ff9ed6; }
+  .lsd-section-tips .lsd-label { color: #fbbf24; }
+  .lsd-p { margin: 0 0 10px; line-height: 1.75; }
+  .lsd-p:last-child { margin-bottom: 0; }
+  .lsd-quote {
+    margin: 0 0 10px;
+    padding: 10px 14px;
+    border-left: 3px solid rgba(178,107,255,0.5);
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    font-style: italic;
+    color: #f5eaff;
+    line-height: 1.7;
+  }
+  .lsd-tip-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .lsd-tip-item { line-height: 1.75; }
+  .lsd-tip-item strong { color: #fde68a; }
 </style>
 </head>
 <body class="font-body text-white min-h-screen overflow-x-hidden relative">
@@ -627,6 +677,16 @@
         📖 나의 연애비법서 읽기
       </button>
 
+      <!-- 일일 드립피드(매일 하나씩 공개) 이성 유혹 비법서 진입 버튼.
+           클릭 시 love-secret-modal이 열리고, 유저의 성별에 따라 반대 성별 타깃 16종 중
+           오늘까지 열린 항목만 카드로 보여준다. -->
+      <button
+        id="bar-love-secret-btn" type="button"
+        class="w-full text-center px-8 py-4 rounded-full font-bold text-sm sm:text-base tracking-wide border-2 border-amber-400/50 bg-amber-400/10 text-amber-300 shadow-neon transition-transform duration-300 active:scale-95 hover:scale-[1.02] hover:bg-amber-400/20"
+      >
+        🍷 오늘의 찰떡궁합 유혹 비법서
+      </button>
+
       <button id="bar-exit-btn" type="button" class="text-xs text-purple-200/50 hover:text-white underline underline-offset-4 tracking-wide transition-colors duration-300">
         메인으로 돌아가기
       </button>
@@ -732,6 +792,49 @@
           allow="camera; microphone; geolocation"
           loading="lazy"
         ></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- 찰떡궁합 이성 유혹 비법서 — 일일 드립피드(Drip-feed) 모달.
+       #lsd-list-view(목록/진도표)와 #lsd-detail-view(본문 읽기)를 한 모달 안에서
+       토글하는 2-뷰 구조. guide-modal과 같은 열기/닫기 애니메이션 패턴(hidden 토글)을 쓴다. -->
+  <div id="love-secret-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
+    <div id="love-secret-modal-backdrop" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-amber-400/40 bg-midnight shadow-neonStrong p-6 sm:p-8">
+      <button id="love-secret-modal-close" type="button" aria-label="닫기" class="absolute top-4 right-4 text-white/50 hover:text-white text-2xl leading-none">✕</button>
+
+      <!-- ── 목록/진도표 뷰 ── -->
+      <div id="lsd-list-view">
+        <div class="text-center mb-5">
+          <p class="text-[11px] tracking-[0.35em] text-amber-300 font-semibold uppercase mb-2">Daily Drip · VIP Only</p>
+          <h2 class="font-display text-xl sm:text-2xl text-white glow-text leading-snug">🍷 찰떡궁합 이성 유혹 비법서</h2>
+          <p id="lsd-track-label" class="mt-2 text-sm text-purple-200">매일 밤 10시, 새로운 유형이 하나씩 공개됩니다</p>
+        </div>
+
+        <!-- 진도표(Progress Bar): 16칸 세그먼트 + "X / 16 공개됨" 텍스트 -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] tracking-widest text-purple-200/70 uppercase">진행률</span>
+            <span id="lsd-progress-text" class="text-[11px] font-semibold text-amber-300">0 / 16 공개됨</span>
+          </div>
+          <div id="lsd-progress-bar" class="flex gap-1"></div>
+        </div>
+
+        <div id="lsd-card-list" class="flex flex-col gap-3"></div>
+      </div>
+
+      <!-- ── 상세(본문 읽기) 뷰 — 기본 숨김, 카드를 클릭하면 이 뷰로 전환된다 ── -->
+      <div id="lsd-detail-view" class="hidden">
+        <button id="lsd-detail-back" type="button" class="mb-4 text-xs text-purple-200/70 hover:text-white flex items-center gap-1 transition-colors duration-300">
+          ← 목록으로
+        </button>
+        <div class="text-center mb-5">
+          <span id="lsd-detail-badge" class="inline-block px-4 py-1 rounded-full border border-amber-400/50 text-xs tracking-[0.3em] text-amber-300 font-semibold">ESTJ</span>
+          <h3 id="lsd-detail-title" class="mt-3 font-display text-xl text-white glow-text leading-snug"></h3>
+          <p id="lsd-detail-day" class="mt-1 text-[11px] tracking-widest text-purple-200/60 uppercase"></p>
+        </div>
+        <div id="lsd-detail-content" class="lsd-content flex flex-col gap-4 text-sm text-purple-100 leading-relaxed"></div>
       </div>
     </div>
   </div>
@@ -979,6 +1082,307 @@
     // 'neo777', 'Neo777' 등 어떻게 입력해도 'NEO777'로 자동 인식된다.
     // ─────────────────────────────────────────────
     CODE_TO_RESULT['NEO777'] = { mbti: 'INFP', gender: 'male' };
+
+    // ─────────────────────────────────────────────
+    // 찰떡궁합 이성 유혹 비법서 — 일일 드립피드(Drip-feed) 데이터 (32종)
+    // m_love_secret_data.md(targetGender: male, 여성 독자용) +
+    // f_love_secret_data.md(targetGender: female, 남성 독자용) 원본을 파싱해서 만들었다.
+    // 원문의 스토리/성향 재해석/상대방 시점 섹션은 그대로 살리되, '미드나잇 지배 팁' 섹션만
+    // 사용자와 상의 후 새로 썼다 — 원문은 '상대가 거리를 두거나 말하려 할 때 손목을 잡아
+    // 벽에 고정하라'는 신체 제압 지침이 32종에 거의 동일하게 반복돼서, 실제 유료 서비스로
+    // 배포하기엔 동의 없는 신체 제압을 조장할 위험이 있었다. 대신 '상대의 적극적인 호응을
+    // 읽고, 서로 주도권을 주고받으며, 말로도 분명히 확인하고 즐기는' 방향으로 다시 썼다.
+    // ─────────────────────────────────────────────
+    const loveSecretData = [
+      {
+        id: "M_01",
+        targetGender: "male",
+        mbti: "ESTJ",
+        title: "정복된 지배자 (The Bound Tyrant)",
+        unlockDayIndex: 1,
+        summary: "낮의 그가 세상을 통제한다면, 밤의 그는 오직 한 사람의 반응을 통제한다.",
+        content: "<blockquote class=\"lsd-hero-quote\">낮의 그가 세상을 통제한다면, 밤의 그는 오직 한 사람의 반응을 통제한다.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [절대적 통제와 완벽한 소유]</p><p class=\"lsd-p\">낮 동안 조직과 질서를 지휘하던 그의 완벽주의는, 밤이 되면 <strong>‘단 한 사람을 완전히 소유하려는 농밀한 집착’</strong>으로 변모합니다. 그에게 연애는 어설픈 감정 놀이가 아닌, <strong>상대의 마음에 자신이라는 절대적인 법을 각인시키는 과정</strong>입니다. 당신의 일상, 당신의 시선, 심지어 당신이 숨을 쉬는 박자까지 자신의 통제 아래 두어야만 비로소 깊은 만족감을 느낍니다. 하지만 그 강력한 지배욕의 이면에는, <strong>'오직 당신에게만 나의 완벽한 통제권을 침범당하고 싶다'</strong>는 지독하게 역설적인 본능이 숨어 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"너는 항상 내게 계획을 묻지. 하지만 지금 내 계획은, 네가 오늘 밤 단 한 순간도 나에게서 눈을 떼지 못하게 만드는 거야.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 손목을 잡는 각도, 귓가에 닿는 목소리의 높낮이까지 철저히 계산해 당신의 숨을 턱 막히게 만듭니다. 차갑고 단호한 지시처럼 던져지는 말들 속에 숨겨진 뜨거운 열기는 당신을 거부할 수 없게 끌어당기죠. 그가 당신의 모든 행동을 통제하려 들 때, 그 단단한 턱을 손으로 잡고 그가 예측하지 못한 깊은 입맞춤을 선사하세요. 세상 모든 것을 지배하던 그 단단한 눈빛이 순식간에 흩어지며, 통제권을 빼앗긴 자의 거친 숨소리가 밤의 정적을 깨뜨릴 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"마치 정밀하게 세공된 칼날 같다. 내 일거수일투족을 꿰뚫어 보는 그 눈빛에 소름이 돋지만, 이상하게 그 칼날 끝에 온전히 갇히고 싶어진다. 나를 완벽하게 지배하려 들면서도, 정작 내 작은 돌발 행동 하나에 짓는 그 찰나의 당황한 표정… 그 반전이 나를 미치게 만든다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>주도권 주고받기:</strong> 그가 확신에 차서 리드할 때, 시선을 피하지 않고 그의 옷깃이나 손을 당신이 먼저 슬쩍 당겨보세요. 그가 전혀 예상 못한 적극적인 반응에 늘 여유롭던 표정이 순간 무너집니다.</li><li class=\"lsd-tip-item\"><strong>확실한 초대:</strong> \"오늘 밤은 네가 원하는 대로 해봐\" 라고 직접 말해주세요. 통제하고 싶어하는 그에게는, 상대가 분명한 말로 허락하고 즐기고 있다는 확신이 그 어떤 밀당보다 강력한 스위치가 됩니다.</li></ul></div>",
+      },
+      {
+        id: "M_02",
+        targetGender: "male",
+        mbti: "ISTJ",
+        title: "금욕의 집행자 (The Cloistered Warden)",
+        unlockDayIndex: 2,
+        summary: "가장 굳게 닫힌 문 뒤에, 가장 위험하고 뜨거운 밤이 숨어 있다.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 굳게 닫힌 문 뒤에, 가장 위험하고 뜨거운 밤이 숨어 있다.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [봉인된 금욕과 은밀한 침포]</p><p class=\"lsd-p\">낮 동안 빈틈없는 규칙과 절제로 스스로를 묶어두는 그의 금욕적인 태도는, 밤이 되면 <strong>‘단 한 사람만을 향한 완벽하고 치밀한 집착’</strong>으로 돌변합니다. 그에게 마음을 연다는 것은 평생 쌓아 올린 완벽한 성벽의 열쇠를 건네는 것과 같습니다. 남들에게는 얼음처럼 차갑고 무심하지만, 당신이 그 결계 안으로 들어서는 순간, 오랫동안 억눌려 있던 본능이 서서히 고개를 듭니다. 그는 결코 서두르지 않습니다. 마치 정교한 의식을 치르듯, 밤의 정적 속에서 당신의 피부 한 점, 숨소리 하나까지 깊게 탐닉하며 자신만의 영역으로 지독하게 침식해 들어옵니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"내가 정한 선을 넘어온 건 너야. 이제 와서 돌아서겠다고 해도, 그 문은 이미 잠겼어.\"</blockquote>\n<p class=\"lsd-p\">낮에는 시선조차 제대로 맞추지 않던 그가, 단둘이 남겨진 밤에는 소름 돋을 정도로 집요하게 당신을 쫓습니다. 무표정한 얼굴 뒤에 숨겨진 거친 숨결로 당신의 목덜미를 거머쥐고, 거부할 수 없는 단호함으로 당신을 고정시킵니다. 그의 시계는 오직 당신의 반응에 맞춰 느리게 흐릅니다. 평소의 흐트러짐 없는 단정한 옷차림을 당신의 손으로 직접 하나씩 어지럽혀 보세요. 평정심을 유지하려 애쓰며 다물었던 그의 입술 사이로 나직한 탄식이 새어 나오는 순간, 그가 오랫동안 가둬두었던 가장 위험한 본능이 풀려나게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"평소에는 서늘할 정도로 감정이 없는 사람 같다. 하지만 어둠 속에서 나를 내리눌러 오는 그 묵직한 무게감과 나직한 목소리를 들으면 오싹한 전율이 흐른다. 절대 무너지지 않을 것 같은 그 단단한 금욕의 껍질을 깨부수고, 그 안에 갇힌 거친 본능을 나 혼자서만 전부 꺼내보고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>천천히 여는 신뢰:</strong> 그가 평소처럼 신중하게 거리를 재고 있을 때, 그의 손을 가만히 잡고 눈을 맞추며 \"괜찮아, 천천히 해도 돼\" 라고 말해보세요. 안전하다는 확신이 그의 단단한 경계를 스스로 풀게 만듭니다.</li><li class=\"lsd-tip-item\"><strong>직접 말하는 원함:</strong> 밀당보다 담백한 고백이 더 잘 통하는 유형입니다. \"나 지금 너랑 있는 게 좋아\" 처럼 솔직한 한마디를 건네면, 평소 절제하던 그가 오히려 먼저 다가오게 됩니다.</li></ul></div>",
+      },
+      {
+        id: "M_03",
+        targetGender: "male",
+        mbti: "ESTP",
+        title: "금지된 자극의 사냥꾼 (The Reckless Hunter)",
+        unlockDayIndex: 3,
+        summary: "위험할수록 달콤하고, 빠져나갈수록 안달 난다.",
+        content: "<blockquote class=\"lsd-hero-quote\">위험할수록 달콤하고, 빠져나갈수록 안달 난다.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [본능적 오감과 아드레날린의 노예]</p><p class=\"lsd-p\">낮 동안 화려한 언변과 넘치는 에너지로 판을 흔들던 그의 본능은, 밤이 되면 <strong>‘찰나의 자극에 모든 것을 내던지는 거침없는 사냥꾼’</strong>으로 변모합니다. 그에게 연애는 머리로 계산하는 게임이 아니라, <strong>온몸의 감각이 폭발하는 가장 뜨거운 현장</strong>입니다. 밀당이나 복잡한 눈치 보기는 생략하고, 오직 지금 이 순간 느껴지는 오감과 아드레날린에 집중하죠. 그는 위험한 경계선 위에서 당신의 도발을 즐기며, 거침없는 직진으로 당신의 방어선을 순식간에 무너뜨립니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"생각은 나중에 해. 지금 네 눈앞에 있는 건 나잖아.\"</blockquote>\n<p class=\"lsd-p\">그는 주저하는 당신의 허리를 낚아채듯 끌어당기며 망설일 틈을 주지 않습니다. 거친 숨소리와 망설임 없는 스킨십으로 당신의 모든 이성을 마비시키고, 직관적인 본능의 세계로 당신을 끌고 들어가죠. 하지만 그를 완벽히 길들이고 싶다면, 순순히 응해주기보다 순간적으로 그의 손을 쳐내며 피해보세요. 항상 쉽게 손에 쥐었던 그가 처음으로 <strong>‘가지지 못한 표적’</strong>을 만났을 때, 그의 눈빛은 사냥감을 향한 미친듯한 집착으로 번뜩이게 됩니다. 당신을 완전히 굴복시키기 전까지 그는 결코 이 밤을 끝내지 않을 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"마치 본능만 남은 야수 같다. 눈이 마주치는 순간부터 숨이 턱 막힐 정도로 강렬하게 밀고 들어오는데, 그 거침없는 패기에 끌려다니면서도 오싹한 쾌감이 든다. 한순간이라도 내가 방심하면 나를 완전히 삼켜버릴 것 같아서, 매 순간이 손에 땀을 쥐게 만드는 아슬아슬한 스릴의 연속이다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>즉흥적인 눈빛 신호:</strong> 그가 다가올 때 피하지 말고 장난스럽게 눈을 맞추며 웃어보세요. 그는 상대의 적극적인 텐션을 본능적으로 알아채고, 그 즉흥적인 합을 가장 짜릿하게 즐기는 타입입니다.</li><li class=\"lsd-tip-item\"><strong>가볍게 던지는 도발:</strong> \"따라올 수 있으면 따라와 봐\" 하고 장난스럽게 먼저 리드해보세요. 그는 쫓아오는 걸 좋아하는 만큼, 함께 뛰어드는 상대를 만났을 때 가장 크게 반응합니다.</li></ul></div>",
+      },
+      {
+        id: "M_04",
+        targetGender: "male",
+        mbti: "ISTP",
+        title: "서늘한 관조자 & 미로의 지배자 (The Cold Executioner)",
+        unlockDayIndex: 4,
+        summary: "가장 조용한 얼굴로 당신의 결계를 풀어헤치는 서늘한 탐닉.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 조용한 얼굴로 당신의 결계를 풀어헤치는 서늘한 탐닉.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [치밀한 해부와 정교한 정복]</p><p class=\"lsd-p\">낮 동안 세상만사에 무심한 듯 건조한 표정으로 거리를 두던 그의 감각은, 어둠이 내리면 <strong>‘단 한 사람의 반응을 정교하게 해부하는 탐식가’</strong>의 본능으로 전환됩니다. 그에게 밤의 관계는 소란스러운 감정의 과시가 아니라, <strong>상대의 모든 경계와 방어 기제를 하나씩 무력화하는 정밀한 작업</strong>입니다. 말수가 적은 대신 타인의 미세한 떨림, 가빠지는 숨소리, 피부의 반응을 귀신같이 읽어내죠. 평소에는 과묵하던 그가 거리를 좁혀올 때 느껴지는 서늘한 압박감은, 당신의 이성을 가장 빠른 속도로 마비시킵니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"어디까지 참을 수 있는지 보고 싶어서. 긴장 풀어, 이제 시작이니까.\"</blockquote>\n<p class=\"lsd-p\">그는 절대 서두르지 않습니다. 무심한 눈빛으로 당신을 바라보면서도, 손끝은 당신이 가장 약한 지점을 정확히 짚어내며 조용히 침식해 들어오죠. 차가운 촉감 뒤에 숨겨진 은근한 열기는 당신을 도망칠 수 없게 가둡니다. 만약 그를 안달 나게 만들고 싶다면, 그가 치밀하게 계산한 접촉의 순간에 그의 시선을 똑바로 맞추며 피하지 말아보세요. 무심함을 유지하려던 그의 눈동자가 찰나의 순간 흔들리고, 반응을 관찰하던 ‘관조자’에서 모든 이성을 내던진 ‘야수’로 돌변해 당신을 거세게 몰아붙일 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"무표정한 얼굴로 나를 내려다보는데, 그 눈빛이 너무 차가워서 오히려 온몸이 타오르는 것 같다. 내 숨소리 하나까지 다 계산하고 있다는 게 느껴져서 소름이 돋지만, 그 서늘한 손길이 닿는 순간 완전히 무력화되어 버린다. 도무지 속을 알 수 없는 이 남자의 결계 속으로 내가 제 발로 걸어 들어간 기분이다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>조용한 확신 표현:</strong> 말이 적은 그에게는 눈빛과 미소로 편안함을 먼저 보여주세요. 그가 다가올 때 살짝 웃으며 시선을 피하지 않으면, 그 조용한 허락이 그의 관찰력을 자극하는 최고의 신호가 됩니다.</li><li class=\"lsd-tip-item\"><strong>짧고 분명한 말:</strong> 그는 긴 설명보다 짧고 진심 어린 한마디를 더 신뢰합니다. \"너랑 있으면 편해\" 정도의 담백한 말 한마디가, 그의 서늘한 거리를 스스로 좁히게 만듭니다.</li></ul></div>",
+      },
+      {
+        id: "M_05",
+        targetGender: "male",
+        mbti: "INFJ",
+        title: "은밀한 구원자 & 집착의 환영 (The Devout Cultist)",
+        unlockDayIndex: 5,
+        summary: "가장 맑은 영혼 뒤에 가꿔둔, 오직 당신만을 위한 다정한 지옥.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 맑은 영혼 뒤에 가꿔둔, 오직 당신만을 위한 다정한 지옥.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [치밀한 정신적 지배와 맹목적 탐닉]</p><p class=\"lsd-p\">낮 동안 온화한 미소와 차분한 배려로 세상을 대하던 그의 이상주의는, 단둘이 남겨진 밤이 되면 <strong>‘상대의 영혼까지 깊숙이 잠식하려는 맹목적 집착’</strong>으로 변모합니다. 그에게 밤의 관계는 단순한 육체적 찰나를 넘어선 <strong>‘정신과 감각의 완전한 융합’</strong>입니다. 타인의 감정을 기가 막히게 꿰뚫어 보는 그의 직관은, 당신이 어떤 자극에 자지러지고 어디서 방어선이 무너지는지 이미 정확히 파악하고 있죠. 겉으로는 다정하고 부드럽게 당신을 어루만지고 있지만, 그 속에는 당신의 모든 마음을 소유하고 조종하려는 은밀한 구원자적 야욕이 숨어 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"너의 가장 약한 모습까지 전부 내게 보여줘. 괜찮아, 내가 전부 안아줄 테니까.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 깊은 한숨, 찰나의 눈빛 흔들림 하나 놓치지 않고 다정하게 귓가에 속삭입니다. 하지만 그 따뜻한 속삭임과 달리, 당신을 고정하는 그의 손길에는 단 한 치의 빠져나갈 구멍도 존재하지 않죠. 그의 다정한 덫에서 벗어나고 싶다면, 그가 당신의 마음을 완벽히 파악했다고 자만할 때 <strong>\"사실 나, 아직 너한테 다 안 보여줬는데?\"</strong> 하고 나직하게 던져보세요. 당신이라는 미지의 깊이에 매료된 그의 눈빛이 순간 미친 듯이 번뜩이며, 그동안 억누르던 거친 본능을 드러내 당신을 완전히 탐닉하기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"지독할 정도로 다정한데, 그 다정함이 오히려 구속처럼 느껴져 오싹하다. 나를 완전히 이해한다는 듯 바라보는 그 깊은 눈동자에 갇히면 내 모든 이성이 녹아내린다. 나를 부드럽게 다루면서도 결코 놓아주지 않는 그 집요함에, 기꺼이 내 모든 걸 바치고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>마음을 먼저 여는 대화:</strong> 그는 상대의 진심을 깊이 읽어내는 만큼, 당신도 마음을 솔직하게 나눠보세요. \"너한테는 다 보여줘도 될 것 같아\" 라는 말이 그의 깊은 몰입을 이끌어냅니다.</li><li class=\"lsd-tip-item\"><strong>함께 만드는 은밀함:</strong> 그가 조심스럽게 다가올 때, \"괜찮아, 나도 같은 마음이야\" 라고 분명히 답해주세요. 서로의 진심이 확인되는 순간 그가 가장 크게 마음을 엽니다.</li></ul></div>",
+      },
+      {
+        id: "M_06",
+        targetGender: "male",
+        mbti: "ENFJ",
+        title: "성스러운 유혹자 & 낙원의 지배자 (The Sacred Tempter)",
+        unlockDayIndex: 6,
+        summary: "당신을 구원하는 척, 가장 완벽한 굴복을 완성시키는 밤의 교주.",
+        content: "<blockquote class=\"lsd-hero-quote\">당신을 구원하는 척, 가장 완벽한 굴복을 완성시키는 밤의 교주.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [치명적인 다정함과 숨겨진 독점욕]</p><p class=\"lsd-p\">낮 동안 스포트라이트 중심에서 모두의 호감을 사며 배려 넘치는 리더로 살아가던 그의 온기는, 밤이 되면 <strong>‘단 한 사람을 영원히 자신의 세계에 가두려는 치명적인 집착’</strong>으로 변모합니다. 그에게 연애는 단순한 친밀감이 아니라, <strong>상대방의 삶과 감정 전체를 자신이 주도하는 하나의 거대한 성전(聖殿)</strong>입니다. 타인의 욕망을 본능적으로 읽어내는 탁월한 감각으로, 당신이 무엇에 갈증을 느끼는지 귀신같이 알아차리고 이를 미끼로 완벽히 끌어당기죠. 겉으로는 오직 당신만을 위해 헌신하는 성자처럼 행동하지만, 그 밑바닥에는 당신의 세계에서 자신 말고는 그 누구도 존재할 수 없게 만들려는 거대한 독점욕이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"나 말고 다른 사람 생각은 1초도 하지 마. 지금 이 순간, 네 세상에는 나만 있어야 해.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 얼굴을 두 손으로 감싸 쥐고, 빠져나갈 여지조차 주지 않는 깊은 눈빛으로 당신을 삼킬 듯 바라봅니다. 귓가에 감겨드는 매혹적인 목소리와 다정한 손길은 당신의 경계심을 순식간에 녹여버리죠. 하지만 그 다정함에 취해 방심하는 순간, 그는 거친 숨소리와 함께 당신을 고정하며 자신의 숨결 아래 굴복시킵니다. 그를 완벽하게 안달 나게 만들고 싶다면, 그가 당신을 완전히 소유했다고 확신하며 미소 지을 때 살짝 시선을 피하며 <strong>\"글쎄, 네 뜻대로 될까?\"</strong> 하고 아슬아슬하게 밀당을 시도해 보세요. 언제나 완벽하게 상대를 컨트롤하던 그의 태도가 순식간에 무너지며, 거칠고 집요한 본능으로 당신을 완전히 정복하려 들 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"지독하게 눈부신 다정함인데, 이상하게 그 다정함이 날 점점 옥죄어 오는 기분이다. 나를 세상에서 가장 특별한 존재로 만들어주면서도, 동시에 자신의 손아귀에서 한 걸음도 나가지 못하게 만드는 그 압도적인 존재감. 그가 만든 완벽한 낙원 속에서 기꺼이 길을 잃고 영원히 갇히고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>그의 다정함에 응답하기:</strong> 그가 헌신적으로 다가올 때, 당연하게 받지만 말고 \"네가 나한테 이렇게 신경 써주는 거 좋아\" 라고 직접 말해주세요. 상대의 명확한 호응이 그의 다정함을 더 깊게 만듭니다.</li><li class=\"lsd-tip-item\"><strong>가끔은 리드해보기:</strong> 늘 이끄는 그에게 가끔 \"오늘은 내가 리드해볼게\" 라고 웃으며 제안해보세요. 서로 주도권을 주고받는 그 신선함이, 그를 가장 설레게 하는 반전이 됩니다.</li></ul></div>",
+      },
+      {
+        id: "M_07",
+        targetGender: "male",
+        mbti: "ENFP",
+        title: "쾌락의 환상가 & 열병의 잔혹극 (The Feverish Jester)",
+        unlockDayIndex: 7,
+        summary: "가장 유쾌한 웃음 뒤에 숨겨둔, 당신을 미치게 만들 은밀하고 뜨거운 열병.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 유쾌한 웃음 뒤에 숨겨둔, 당신을 미치게 만들 은밀하고 뜨거운 열병.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [순수한 본능과 폭주하는 집착]</p><p class=\"lsd-p\">낮 동안 모두에게 다정하고 엉뚱한 매력으로 좌중을 사로잡던 그의 산만함은, 단둘이 남겨진 밤이 되면 <strong>‘단 한 사람에게 모든 감각을 쏟아붓는 기어가는 폭주’</strong>로 변모합니다. 그에게 밤의 관계는 단순한 스킨십이 아니라, <strong>상대와 함께 감정의 최극단까지 치달아 오르는 은밀한 유희</strong>입니다. 아이 같은 순수함과 동물적인 본능이 기묘하게 섞여 있어, 당신이 어디서 호흡을 놓치고 어느 지점에서 자극을 느끼는지 본능적으로 파악하고 아슬아슬하게 선을 넘나들죠. 평소의 가벼운 모습은 온데간데없이, 오직 당신만을 향해 일직선으로 불타오르는 그의 광기 어린 눈빛은 당신의 이성을 가장 빠른 속도로 무너뜨립니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"나한테서 도망칠 수 있을 거라 생각했어? 오늘 밤은 네가 아는 난 없어.\"</blockquote>\n<p class=\"lsd-p\">그는 장난기 어린 미소를 지으며 다가오지만, 당신의 손목을 잡아누르는 손길에는 단 한 치의 유격도 존재하지 않습니다. 귓가에 번지는 뜨거운 숨결과 예고 없이 깊게 들어오는 터치는 당신의 숨을 턱 막히게 만들죠. 그러나 이 열정적인 사냥꾼을 완벽하게 길들이고 싶다면, 그가 끌고 가는 강렬한 템포에 순순히 휩쓸려 주다가도 결정적인 순간에 그를 가볍게 밀쳐내며 <strong>\"겨우 이 정도였어?\"</strong> 하고 은밀하게 자극해 보세요. 순간 그의 눈빛에서 장난기가 싹 거두어지고, 항상 예측 불가했던 그가 오직 당신이라는 표적 하나에 사로잡혀 거칠고 집요하게 밤을 지배하기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"평소에는 대책 없이 밝기만 한 줄 알았는데, 어둠 속에서 나를 바라보는 그 눈빛은 위험할 정도로 뜨겁다. 나를 애태우며 가지고 놀다가도 순간 순식간에 집어삼킬 듯 밀어붙이는데, 그 예측 불가능한 도파민에 중독되어 헤어 나올 수가 없다. 이 위험한 열병에서 절대 깨어나고 싶지 않다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>예측불허 함께 즐기기:</strong> 그의 엉뚱한 텐션에 맞장구치며 같이 웃어보세요. 그는 자신의 즉흥성을 진심으로 즐겨주는 상대에게 가장 강하게 끌립니다.</li><li class=\"lsd-tip-item\"><strong>둘만의 농담 만들기:</strong> \"우리만 아는 얘기 하나 더 만들자\" 라며 장난스러운 제안을 던져보세요. 그에게는 둘만의 특별한 순간을 함께 쌓아가는 것 자체가 최고의 유혹입니다.</li></ul></div>",
+      },
+      {
+        id: "M_08",
+        targetGender: "male",
+        mbti: "INTP",
+        title: "관조하는 관능 & 이성의 파괴자 (The Cold Analyst)",
+        unlockDayIndex: 8,
+        summary: "가장 차가운 지성 뒤에 숨겨둔, 정교하고 서늘한 탐닉의 시간.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 차가운 지성 뒤에 숨겨둔, 정교하고 서늘한 탐닉의 시간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [치밀한 관찰과 방어기제의 무력화]</p><p class=\"lsd-p\">낮 동안 세상의 온갖 현상을 분석하고 타인과 거리를 두던 그의 무심함은, 어둠이 내리면 <strong>‘상대의 감각과 반응을 정밀하게 탐구하는 서늘한 집착’</strong>으로 변모합니다. 그에게 밤의 관계는 단순히 욕망을 부딪치는 일이 아닙니다. <strong>상대가 가진 모든 방어기제를 하나씩 풀어헤치고, 완벽한 이성의 영역을 혼돈으로 물들이는 정교한 실험</strong>에 가깝죠. 말없이 당신을 가만히 내려다보는 그 눈빛 속에는, 당신이 어느 순간에 숨을 죽이고 어디서 방어선을 놓아버리는지 꿰뚫어 보는 날카로움이 서려 있습니다. 평소의 멍하거나 서투른 모습은 완전히 사라지고, 서늘할 정도로 무표정한 얼굴로 당신의 감각을 지배해 나갑니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"늘 이성적일 수 있을 거라 생각했어? 아니, 지금 네가 무너지는 건 완벽히 계산된 결과야.\"</blockquote>\n<p class=\"lsd-p\">그는 절대 급하게 서두르지 않습니다. 마치 정밀한 기계를 다루듯, 당신의 반응을 하나하나 살피며 지독하게 느린 템포로 감각을 조여오죠. 귓가에 닿는 차가운 숨결과 예상치 못한 지점을 깊게 짚어내는 손길은 당신의 이성을 가장 빠른 속도로 마비시킵니다. 하지만 이 서늘한 관조자를 완벽하게 무너뜨리고 싶다면, 그가 당신을 관찰하며 만족스러운 미소를 지을 때 그의 목덜미를 끌어당겨 가늘게 떨리는 입술을 맞춰보세요. 모든 것을 분석하려 들던 그의 두뇌가 멈추고, 완벽했던 그의 논리 회로가 찰나의 순간 불타오르며 차가운 관조자에서 이성을 잃은 야수로 돌변하게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"도무지 무슨 생각을 하는지 알 수 없는 무표정한 얼굴로 나를 내려다보는데, 그 고요함이 오히려 소름이 돋을 정도로 관능적이다. 내 모든 반응을 다 읽고 있다는 게 느껴져서 부끄러우면서도, 나를 정교하게 해부하듯 다루는 그 차가운 손길에 내 온몸의 감각이 완벽히 굴복당하는 기분이 든다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>호기심 자극하는 질문:</strong> \"너 지금 무슨 생각해?\" 라고 진심으로 궁금해하며 물어보세요. 그는 자신의 세계에 진짜 관심을 보이는 상대에게 서서히 마음의 문을 엽니다.</li><li class=\"lsd-tip-item\"><strong>감각으로 초대하기:</strong> 그의 손을 가만히 잡으며 \"딴생각 말고 지금 이 순간에 집중해볼래?\" 라고 부드럽게 이끌어보세요. 강요가 아닌 다정한 초대가 그의 이성을 편안하게 풀어줍니다.</li></ul></div>",
+      },
+      {
+        id: "M_09",
+        targetGender: "male",
+        mbti: "INFP",
+        title: "몽상의 사형집행인 & 탐닉의 시인 (The Melancholy Devotee)",
+        unlockDayIndex: 9,
+        summary: "가장 헌신적인 사랑의 시 뒤에 숨겨진, 당신을 녹여버릴 지독한 집착.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 헌신적인 사랑의 시 뒤에 숨겨진, 당신을 녹여버릴 지독한 집착.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [탐닉적 헌신과 정신적 침포]</p><p class=\"lsd-p\">낮 동안 조용히 자신만의 세계에 머물며 조심스럽게 타인을 대하던 그의 순수함은, 어둠이 내리면 <strong>‘단 한 사람을 자신의 깊은 유토피아로 침식시키는 몽환적 집착’</strong>으로 변모합니다. 그에게 밤의 관계는 단순한 육체적 스킨십을 넘어, <strong>상대의 존재 자체를 자신의 영혼 깊숙이 이식하는 정교한 의식</strong>입니다. 그의 섬세한 감수성은 당신의 작은 피부 떨림, 흐트러지는 호흡 하나까지 귀신같이 포착해 내죠. 겉으로는 순종적이고 다정하게 당신을 추앙하는 듯하지만, 그 깊은 눈동자 밑바닥에는 당신의 신음과 온기를 온전히 혼자서만 독점하고 가두려는 집요한 본능이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"나를 망가뜨려도 좋아. 하지만 내 밤에서 벗어날 생각은 하지 마.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 손가락 마디마디에 조심스레 입을 맞추며 다가오지만, 당신의 허리를 감싸 안는 팔에는 결코 풀어지지 않는 강렬한 집착이 실려 있습니다. 귓가에 번지는 애절하고 뜨거운 숨결은 당신의 이성을 천천히, 그러나 거부할 수 없게 물들입니다. 하지만 이 탐닉적인 시인을 완벽하게 사로잡고 싶다면, 그가 당신을 깊은 눈빛으로 갈구할 때 가만히 그의 뺨을 감싸 쥐고 <strong>\"네가 원하는 대로 나를 가져봐\"</strong> 하고 은밀하게 주도권을 넘겨보세요. 자신의 억눌린 몽상이 현실이 되는 순간, 늘 망설이던 그의 눈빛이 치명적인 열기로 타오르며 헌신적인 연인에서 당신을 온전히 삼켜버릴 야수로 돌변하게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"나를 부서질 듯 아끼면서도, 그 깊은 눈빛 속에 나를 온전히 가두고 싶어 하는 집착이 느껴져 오싹하다. 나를 향한 그 순수한 열망과 애절함이 오히려 거부할 수 없는 중독처럼 다가온다. 그의 몽환적인 밤의 결계 속에 갇혀, 내 모든 감각을 그에게 내어주고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>진심을 담은 고백:</strong> 그가 망설이는 순간, 그의 손을 잡고 \"네가 원하는 대로 나를 대해도 좋아\" 라고 다정하게 말해주세요. 확신을 주는 그 한마디가 그의 억눌린 마음을 편안하게 풀어줍니다.</li><li class=\"lsd-tip-item\"><strong>함께하는 은밀한 속삭임:</strong> \"오늘 밤 내 세상엔 너밖에 없어\" 처럼 진심이 담긴 말을 건네보세요. 그는 로맨틱한 확신을 받을 때 가장 깊이, 그리고 가장 다정하게 반응합니다.</li></ul></div>",
+      },
+      {
+        id: "M_10",
+        targetGender: "male",
+        mbti: "ESFJ",
+        title: "다정한 집행자 & 밤의 신전 (The Devoted Inquisitor)",
+        unlockDayIndex: 10,
+        summary: "모두를 향하던 온기가 오직 당신 한 사람만을 가두는 지독한 열기 폭풍으로.",
+        content: "<blockquote class=\"lsd-hero-quote\">모두를 향하던 온기가 오직 당신 한 사람만을 가두는 지독한 열기 폭풍으로.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [과잉된 헌신과 숨 막히는 소유욕]</p><p class=\"lsd-p\">낮 동안 주변 사람들을 챙기고 세심한 배려로 인기를 한몸에 받던 그의 다정함은, 어둠이 내리면 <strong>‘상대의 반응 하나하나에 지독하게 목매는 완벽한 소유욕’</strong>으로 변모합니다. 그에게 밤의 관계는 단순히 감정을 나누는 시간을 넘어, <strong>상대가 자신에게 완전히 매료되었음을 끊임없이 확인받고 지배하는 은밀한 과정</strong>입니다. 타인의 기분과 변화를 기가 막히게 감지하는 그의 오감은 당신의 가빠지는 호흡, 아주 미세한 떨림까지 모두 포착해 내죠. 겉으로는 당신의 기분을 끊임없이 살피며 상다리가 부러지듯 헌신하지만, 그 손길 밑바닥에는 당신의 오감을 자신의 온기로 완전히 메워버리려는 묵직한 집착이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"나 말고 다른 곳에 신경 쓸 여유가 있어? 오늘 밤은 오직 나로만 채워줄게.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 뺨을 부드럽게 감싸 쥐며 달콤한 말을 건네지만, 당신을 누르는 묵직한 체중과 단단한 악력에는 결코 빠져나갈 틈을 주지 않습니다. 당신의 숨소리가 흐트러질 때마다 만족스러운 미소를 지으며, 더욱 깊숙하고 거세게 당신의 경계선을 침범해 들어오죠. 하지만 이 다정한 집행자를 완전히 안달 나게 만들고 싶다면, 그가 당신을 온전히 만족시켰다고 자만하며 깊은 눈빛을 보낼 때 <strong>\"음, 글쎄... 아직 조금 부족한 것 같은데?\"</strong> 하고 아슬아슬하게 도발해 보세요. 언제나 완벽한 연인이고 싶었던 그의 자존심과 본능이 동시에 불타오르며, 숨길 수 없는 거친 숨소리와 함께 당신이 비명을 지를 때까지 집요하고 완벽하게 밤을 지배하려 들 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"지독할 정도로 나에게 몰입해 있다. 나를 소중하게 다루면서도, 내가 자기 손아귀에서 조금이라도 벗어나려 하면 단호하게 잡아채는 그 악력에 순간 소름이 돋는다. 나를 온전히 만족시키겠다는 그 집요함과 과잉된 열기에 휩쓸려, 밤새 그의 손길 아래 완전히 무너져 내리고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>돌봄에 응답하기:</strong> 그가 당신을 세심하게 챙길 때, \"네가 이렇게 챙겨주는 거 진짜 좋다\" 라고 표현해주세요. 자신의 다정함이 제대로 전해졌다는 확신이 그를 더 깊이 몰입하게 만듭니다.</li><li class=\"lsd-tip-item\"><strong>솔직한 반응 보여주기:</strong> 그는 상대의 반응에 예민하게 반응하는 타입입니다. 참지 말고 웃음이든 설렘이든 솔직하게 표현해주는 것이, 그에게는 가장 강력한 초대가 됩니다.</li></ul></div>",
+      },
+      {
+        id: "M_11",
+        targetGender: "male",
+        mbti: "ISFP",
+        title: "은밀한 쾌락주의자 & 본능의 조각가 (The Silent Hedonist)",
+        unlockDayIndex: 11,
+        summary: "가장 조용한 숨결로 당신의 결계를 하나씩 해체하는 밤의 예술가.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 조용한 숨결로 당신의 결계를 하나씩 해체하는 밤의 예술가.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [순수한 오감 탐닉과 은근한 정복]</p><p class=\"lsd-p\">낮 동안 거절도 잘 못하고 순둥한 미소로 평화를 사랑하던 그의 조용함은, 어둠이 내리면 <strong>‘상대의 피부와 미세한 반응 하나까지 온몸으로 탐닉하는 관능적 본능’</strong>으로 변모합니다. 그에게 밤의 관계는 말이 필요 없는 <strong>‘가장 완벽한 오감의 미학’</strong>입니다. 타인의 기류와 분위기를 본능적으로 감지하는 그의 스킨십은 서두르지 않지만, 당신이 어디에 약하고 어느 자극에 숨을 들이키는지 정확하게 짚어내며 조용히 침식해 들어오죠. 겉으로는 여전히 부드럽고 다정해 보이지만, 당신의 호흡이 흐트러지는 순간을 놓치지 않고 묘한 지배감을 느끼며 밤의 정적을 쾌락으로 채워나갑니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"아무 말도 하지 마. 그냥 지금 이 느낌에만 집중해.\"</blockquote>\n<p class=\"lsd-p\">그는 기다란 손가락으로 당신의 목덜미와 허리선에 가만히 온기를 내리쬐며, 조용하지만 거부할 수 없는 농밀함으로 다가옵니다. 귓가에 조용히 닿는 나직한 숨소리와 망설임 없이 깊어지는 터치는 당신의 이성을 천천히 무력화하죠. 그러나 이 은밀한 쾌락주의자를 미치도록 안달 나게 만들고 싶다면, 그가 당신의 반응을 느끼며 나른하게 미소 지을 때, 그의 손을 낚아채 당신의 몸 위로 꾹 눌러버리며 <strong>\"보기보다 되게 과감하네?\"</strong> 하고 나직하게 눈을 맞춰보세요. 순순히 따라오던 당신의 도발적인 반격에 그의 눈빛이 순식간에 짙어지고, 얌전했던 껍질을 완전히 벗어던진 채 당신의 밤을 거침없이 집어삼키기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"평소에는 수줍음도 많고 조용한 편이라 생각했는데, 단둘이 있을 때 나를 내려다보는 눈빛이 위험할 정도로 야성적이다. 말을 많이 하지 않는데도 손길 하나, 숨결 하나가 온몸의 신경을 자극한다. 그 나른하고 은밀한 열기에 홀려 어느새 내 모든 걸 내맡기고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>분위기로 먼저 다가가기:</strong> 화려한 말보다 조명, 향기, 편안한 침묵 같은 분위기를 함께 만들어보세요. 감각이 예민한 그는 그 분위기 안에서 자연스럽게 마음을 엽니다.</li><li class=\"lsd-tip-item\"><strong>먼저 다가가는 용기:</strong> 그가 나른하게 당신을 바라볼 때, 먼저 그의 손을 잡고 웃어보세요. 조용하던 그를 가장 빠르게 이끄는 건 다정하지만 분명한 당신의 적극성입니다.</li></ul></div>",
+      },
+      {
+        id: "M_12",
+        targetGender: "male",
+        mbti: "ISFJ",
+        title: "은밀한 순교자 & 칠흑의 사육자 (The Silent Obsessor)",
+        unlockDayIndex: 12,
+        summary: "헌신이라는 이름의 사슬로 당신의 밤을 단단히 묶어버리는 정교한 소유.",
+        content: "<blockquote class=\"lsd-hero-quote\">헌신이라는 이름의 사슬로 당신의 밤을 단단히 묶어버리는 정교한 소유.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [지독한 묵인과 폭주하는 독점욕]</p><p class=\"lsd-p\">낮 동안 세상에서 가장 다정하고 조용하게 당신의 뒤를 지키던 그의 헌신은, 어둠이 내리면 <strong>‘단 한 사람을 영원히 자신의 품 안에서 벗어나지 못하게 가두는 묵직한 집착’</strong>으로 변모합니다. 그에게 밤의 관계는 단순한 애정 표현이 아니라, <strong>자신의 모든 것을 바쳐 상대의 세계를 온전히 손아귀에 쥐는 정교한 의식</strong>입니다. 섬세하게 상대를 살피는 그의 감각은 당신의 미세한 피부 떨림, 가빠지는 숨소리, 나직한 탄성까지 놓치지 않고 모조리 포착해 내죠. 겉으로는 여전히 부드러운 손길로 당신을 안아주는 것 같지만, 그 속에는 당신의 모든 감각을 자신의 온기 외에는 아무것도 느끼지 못하도록 마비시키려는 소름 돋는 독점욕이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"도망치지 마. 내가 준 사랑 안에서 그냥 온전히 내게 갇히는 거야.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 허벅지를 단단히 감싸 안고, 빠져나갈 여지조차 주지 않는 깊고 묵직한 체중으로 당신을 눌러옵니다. 귓가에 조용히 닿는 축축하고 뜨거운 숨결과 당신의 목덜미를 거머쥐는 단호한 악력은 당신의 이성을 순간 마비시키죠. 하지만 이 은밀한 사육자를 미치도록 안달 나게 만들고 싶다면, 그가 당신을 소중하게 다루며 천천히 침식해 올 때, 그의 벨트나 옷깃을 억세게 잡아끌어 당신의 허리께로 밀착시키며 <strong>\"말만 다정하게 하지 말고, 제대로 보여줘 봐.\"</strong> 하고 도발적으로 속삭여보세요. 언제나 절제하고 가다듬던 그의 다정한 눈빛이 단숨에 칠흑 같은 본능으로 뒤덮이고, 억눌러왔던 거친 숨소리와 함께 당신을 온전히 정복할 때까지 거세게 몰아붙이기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"지독할 정도로 나만을 바라보는 그 순한 눈동자 뒤에, 소름 돋을 만큼 깊은 독점욕이 숨어 있다. 나를 부서질 듯 소중히 다루면서도 결코 놓아주지 않는 그 묵직한 손길과 체온. 나를 헌신이라는 이름의 사슬로 꽁꽁 묶어두는 그에게 온전히 길들여져, 밤새 그의 품에서 벗어나고 싶지 않아진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>숨겨진 마음 짚어주기:</strong> \"너 나 되게 아껴주는구나\" 하고 그가 알아채길 바라는 다정함을 먼저 짚어주세요. 그는 자신의 헌신을 알아봐 주는 순간 마음을 활짝 엽니다.</li><li class=\"lsd-tip-item\"><strong>솔직한 요청 건네기:</strong> \"오늘은 너를 좀 더 가까이서 느끼고 싶어\" 라고 부드럽게 말해보세요. 조심스러운 그에게는 상대의 분명하고 다정한 요청이 가장 큰 확신을 줍니다.</li></ul></div>",
+      },
+      {
+        id: "M_13",
+        targetGender: "male",
+        mbti: "ENTJ",
+        title: "절대적 지배자 & 밤의 제왕 (The Absolute Monarch)",
+        unlockDayIndex: 13,
+        summary: "세상을 복종시키는 그의 손길이, 오직 당신의 밤을 완전하게 굴복시킨다.",
+        content: "<blockquote class=\"lsd-hero-quote\">세상을 복종시키는 그의 손길이, 오직 당신의 밤을 완전하게 굴복시킨다.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [압도적 정복욕과 완벽한 지배]</p><p class=\"lsd-p\">낮 동안 거대한 전략을 세우고 사람들을 지휘하던 그의 카리스마는, 어둠이 내리면 <strong>‘단 한 사람의 몸과 마음을 완전히 정복하려는 오만하고 뜨거운 독점욕’</strong>으로 변모합니다. 그에게 밤의 관계는 어설픈 밀당이 아닌, <strong>상대방의 모든 저항을 무력화하고 완벽한 항복을 받아내는 거친 전장</strong>입니다. 상대를 통제하고 끌어당기는 본능적인 감각으로, 당신의 방어선이 어디서 무너지는지 정확히 파악해 빈틈없이 밀어붙이죠. 겉으로는 차가운 자신감과 오만함을 풍기지만, 그 속에는 당신의 입에서 오직 자신의 이름만이 튀어나오게 만들려는 지독한 지배욕이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"딴생각할 겨를 따위는 안 줄 거야. 오늘 밤 넌 완벽하게 내 것이 되는 거니까.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 두 손목을 한 손으로 거머쥐고 머리 위로 단단히 고정하며, 빠져나갈 여지조차 주지 않는 압도적인 체중으로 당신을 눌러옵니다. 귓가를 매섭게 파고드는 거친 숨소리와 망설임 없이 당신의 피부를 쓸어내리는 뜨거운 악력은 순간 당신의 이성을 마비시키죠. 하지만 이 오만한 제왕을 단숨에 안달 나게 만들어 바닥까지 무너뜨리고 싶다면, 그가 만족스러운 미소를 지으며 완벽한 지배감을 즐길 때, 고개를 들어 그의 턱선과 목덜미를 강하게 깨물며 <strong>\"나를 온전히 가지려면, 이것보단 더 거칠어야 할걸?\"</strong> 하고 도발적으로 쏘아붙여보세요. 자신의 완벽한 통제에 완강하게 반기를 든 당신의 정복할 수 없는 매력에 그의 눈빛이 미친 듯이 번뜩이고, 거친 숨소리와 함께 당신이 비명을 지르며 애원할 때까지 미친 듯이 밤을 탐닉하기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"마치 모든 걸 집어삼킬 듯한 태양 같다. 나를 압도하며 내려다보는 그 서늘하고 뜨거운 눈빛 하나에 온몸의 피가 역류하는 것 같다. 나를 완벽하게 정복하려는 그 거친 악력과 직진성에 완벽히 굴복당하면서도, 그 압도적인 존재감에 내 밤을 전부 내어주고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>당당하게 맞서기:</strong> 그가 자신만만하게 리드하려 할 때, 눈을 피하지 않고 \"좋아, 어디 한번 보여줘\" 라고 웃으며 받아쳐 보세요. 자신을 대등하게 상대해주는 사람에게 그는 가장 강하게 끌립니다.</li><li class=\"lsd-tip-item\"><strong>확실한 항복 선언:</strong> 정말 즐기고 있다면 \"완전히 너한테 반했어\" 라고 솔직하게 말해주세요. 승부욕 강한 그에게는 상대의 분명한 인정과 애정 표현이 최고의 보상이 됩니다.</li></ul></div>",
+      },
+      {
+        id: "M_14",
+        targetGender: "male",
+        mbti: "ENTP",
+        title: "오만한 도발자 & 은밀한 유희 (The Reckless Provocateur)",
+        unlockDayIndex: 14,
+        summary: "당신의 이성을 경계선 끝까지 몰아붙여 완전한 굴복의 절정을 끌어내는 밤의 침략자.",
+        content: "<blockquote class=\"lsd-hero-quote\">당신의 이성을 경계선 끝까지 몰아붙여 완전한 굴복의 절정을 끌어내는 밤의 침략자.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [아슬아슬한 금기 파괴와 폭주하는 정복욕]</p><p class=\"lsd-p\">낮 동안 비상한 두뇌와 화려한 언변으로 상대를 흔들던 그의 지적 호기심은, 어둠이 내리면 <strong>‘상대의 이성이 마비되고 본능에 무너지는 순간을 과감하게 끌어내는 미친 정복욕’</strong>으로 변모합니다. 그에게 밤의 관계는 평범한 애정 확인이 아니라, <strong>상대의 한계점을 어디까지 밀어붙일 수 있는지 시험하고 완벽한 승리를 획득하는 아슬아슬한 유희</strong>입니다. 타인의 약점과 욕망의 지점을 기가 막히게 꿰뚫어 보는 능력으로, 당신이 어디서 호흡을 놓고 어느 순간에 자지러지는지 번개처럼 파악해 빠져나갈 수 없게 뒤흔들죠. 겉으로는 느긋하고 자신만만한 미소를 지어 보이지만, 그 밑바닥에는 당신의 차분한 이성을 산산조각 내고 오직 자신만을 향한 갈증으로 비명을 지르게 만들려는 거친 승리욕이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"어디까지 참을 수 있는지 볼까? 오늘 밤은 네가 만든 그 어떤 방어선도 소용없어.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 허리를 단단히 끌어당겨 밀착시키고, 빠져나갈 여지조차 주지 않는 농밀한 터치와 나직한 도발로 당신의 경계심을 순식간에 해체합니다. 귓가를 간지럽히는 뜨거운 숨결과 예고 없이 선을 넘어오는 묵직한 스킨십은 당신의 이성을 가장 빠른 속도로 무력화하죠. 하지만 이 오만한 도발자를 단숨에 안달 나게 만들어 절정의 혼돈 속으로 밀어 넣고 싶다면, 그가 만족스러운 미소를 지으며 완벽히 판을 통제하고 있다고 확신할 때, 그의 상의나 허리띠를 강하게 낚아채 끌어당기며 입술이 닿을 듯한 거리에서 <strong>\"말로만 세게 굴지 말고, 나를 진짜 무너뜨려 봐.\"</strong> 하고 오만하게 도발해 보세요. 언제나 상황을 놀잇감처럼 다루던 그의 눈빛이 순간 미친 듯이 번뜩이고, 짓궂은 미소를 싹 거둔 채 억눌려 있던 야성적 본능을 폭발시키며 당신이 백기(白旗)를 들 때까지 거세게 밀어붙이기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"마치 불꽃 속으로 나를 끌고 들어가는 위험한 악마 같다. 나를 애태우고 도발하면서 내 이성이 무너지는 과정을 눈 하나 깜빡 않고 즐기는데, 그 치밀한 손길에 온몸의 신경이 도파민으로 폭발하는 기분이 든다. 나를 완전히 정복하려는 그의 거친 승리욕에 휘말려, 밤새 그의 통제 속에서 기꺼이 굴복하고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>받아치는 재치:</strong> 그의 장난스러운 도발에 똑같이 재치있게 받아쳐 보세요. 그는 자신과 대등하게 말을 주고받을 수 있는 상대에게 가장 큰 흥미를 느낍니다.</li><li class=\"lsd-tip-item\"><strong>지적인 밀당:</strong> \"내가 무슨 생각 하는지 맞혀봐\" 라며 그를 살짝 애태워보세요. 정답을 찾기 위해 그가 밤새 당신에게 몰입하게 되는, 서로 즐거운 게임이 됩니다.</li></ul></div>",
+      },
+      {
+        id: "M_15",
+        targetGender: "male",
+        mbti: "ESFP",
+        title: "본능의 무용수 & 찰나의 폭군 (The Sensual Wildcard)",
+        unlockDayIndex: 15,
+        summary: "가장 유쾌한 조명 아래서 끌어올린, 오직 당신의 감각을 마비시킬 뜨거운 소유욕.",
+        content: "<blockquote class=\"lsd-hero-quote\">가장 유쾌한 조명 아래서 끌어올린, 오직 당신의 감각을 마비시킬 뜨거운 소유욕.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [폭발적인 감각 탐닉과 집요한 정복]</p><p class=\"lsd-p\">낮 동안 화려한 매력과 넘치는 흥으로 시선을 싹쓸이하던 그의 에너지는, 단둘이 남겨진 밤이 되면 <strong>‘상대의 모든 감각을 한순간에 흩뜨려버리는 지독하고 거침없는 본능’</strong>으로 변모합니다. 그에게 밤의 관계는 단순한 차분함이 아니라, <strong>온몸의 오감이 오직 한 사람에게만 집중되어 폭발하는 가장 뜨거운 현장</strong>입니다. 분위기와 피부로 느껴지는 자극을 순식간에 감지해 내는 그의 감각은, 당신이 어디서 호흡을 놓치고 어느 터치에 자지러지는지 즉각적으로 파악해 내죠. 겉으로는 순진하게 미소 짓는 것 같지만, 그 속에는 순간의 쾌락을 끝까지 밀어붙이고 당신의 비명과 숨소리를 독점하려는 거친 정복욕이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"나한테서 눈 떼지 마. 오늘 밤 네가 느낄 수 있는 모든 건 다 내가 줄 테니까.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 허리를 거세게 낚아채 끌어당기며, 망설일 틈조차 주지 않는 과감하고 뜨거운 스킨십으로 당신의 경계선을 순식간에 무너뜨립니다. 귓가를 간지럽히는 가쁜 숨소리와 당신의 허벅지를 단단히 고정하는 묵직한 악력은 당신의 이성을 순간 마비시키죠. 하지만 이 거침없는 야수를 단숨에 안달 나게 만들어 절정의 열기 속에 가두고 싶다면, 그가 당신을 완전히 사로잡았다고 생각할 때, 그의 머리채나 목덜미를 강하게 잡아끌어 입술을 맞추며 <strong>\"생각보다 거칠어서 마음에 드는데, 여기서 멈추면 안 되지?\"</strong> 하고 오만하게 자극해 보세요. 언제나 즉흥적인 자극에 민감하던 그의 눈빛이 순간 미친 듯이 번뜩이고, 억눌러왔던 야성적인 본능을 폭발시키며 당신이 백기를 들 때까지 폭풍처럼 밤을 지배하기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"마치 온몸을 태워버릴 듯한 불꽃 같다. 나를 압도하며 다가오는 그 거침없는 패기와 감각적인 터치에 순식간에 내 모든 이성이 녹아내린다. 한순간도 방심할 수 없게 만드는 그 폭발적인 열정과 정복욕에 완벽히 굴복당하면서, 밤새 그의 통제 속에 갇혀버리고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>즉흥적인 텐션 맞추기:</strong> 그가 끌어올리는 흥을 억지로 누르지 말고 함께 타보세요. 즉흥적인 순간을 진심으로 즐기는 상대에게 그는 가장 빠르게 반응합니다.</li><li class=\"lsd-tip-item\"><strong>확실한 눈맞춤:</strong> 사람 많은 자리에서도 그와 눈이 마주치면 피하지 말고 웃어주세요. \"오늘 내 눈엔 너만 보여\" 라는 마음이 전해지는 순간, 그는 완전히 당신에게 집중합니다.</li></ul></div>",
+      },
+      {
+        id: "M_16",
+        targetGender: "male",
+        mbti: "INTJ",
+        title: "결계의 지배자 & 밤의 마법사 (The Grand Architect)",
+        unlockDayIndex: 16,
+        summary: "치밀하게 계산된 얼음의 결계 뒤에 숨겨둔, 당신의 이성을 완벽히 해체할 뜨거운 신전.",
+        content: "<blockquote class=\"lsd-hero-quote\">치밀하게 계산된 얼음의 결계 뒤에 숨겨둔, 당신의 이성을 완벽히 해체할 뜨거운 신전.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 성향 재해석 : [치밀한 계산과 압도적인 완벽 지배]</p><p class=\"lsd-p\">낮 동안 냉철한 전략가이자 철저한 자기통제로 타인과 높은 벽을 두던 그의 고독은, 단둘이 남겨진 밤이 되면 <strong>‘단 한 사람의 몸과 마음, 감각의 모든 동선까지 완전하게 설계하고 집어삼키는 치명적인 지배욕’</strong>으로 변모합니다. 그에게 밤의 관계는 어설픈 감정의 낭비가 아닌, <strong>자신이 만들어둔 결계 안으로 상대를 유인해 완벽한 항복과 굴복을 끌어내는 정교한 시나리오</strong>입니다. 그의 뛰어난 통찰력은 당신의 피부가 어디서 가늘게 떨리는지, 어느 타이밍에 숨을 들이키며 방어선을 놓아버리는지 이미 완벽하게 계산해 내고 있죠. 겉으로는 차갑고 무심한 눈빛을 유지하지만, 그 밑바닥에는 당신의 차분한 이성을 산산조각 내고 오직 자신이라는 설계도 위에서만 비명을 지르게 만들려는 지독한 승리욕과 정복욕이 불타오르고 있습니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 시크릿 스토리</p><blockquote class=\"lsd-quote\">\"도망칠 수 있을 거라 생각했어? 이 방의 모든 온도와 조명, 그리고 내 손길 하나까지 전부 너를 굴복시키기 위해 계산된 거야.\"</blockquote>\n<p class=\"lsd-p\">그는 당신의 허리를 단단히 감싸 안아 고정하고, 빠져나갈 유격조차 주지 않는 묵직하고 거친 터치로 당신의 경계심을 순식간에 녹여버립니다. 귓가를 서늘하게 파고드는 나직한 목소리와 예고 없이 깊은 곳을 찌르고 들어오는 손길은 순간 당신의 이성을 완벽하게 마비시키죠. 하지만 이 차가운 지배자를 단숨에 안달 나게 만들어 그의 완벽한 이성을 혼돈의 절정 속에 빠뜨리고 싶다면, 그가 만족스러운 미소를 지으며 완벽히 판을 주도하고 있다고 확신할 때, 그의 상의나 넥타이를 억세게 잡아끌어 당신의 몸 위로 짓눌러버리며 <strong>\"그 잘난 머리로 계산만 하지 말고, 네 진짜 야성을 보여봐.\"</strong> 하고 도발적으로 속삭여보세요. 언제나 완벽한 통제력을 유지하던 그의 눈빛이 순간 칠흑 같은 본능으로 뒤덮이고, 차가운 가면을 완전히 벗어던진 채 당신이 백기를 들고 탄성을 지를 때까지 거세게 밀어붙이기 시작할 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 상대방 시점 : [그가 당신을 바라볼 때]</p><blockquote class=\"lsd-quote\">\"마치 나를 온전히 가두기 위해 만들어진 위험한 결계 안에 들어온 기분이다. 나를 내려다보는 그 서늘하고 오만한 눈빛 하나에 온몸의 신경이 도파민으로 폭발하는 것 같다. 내 모든 행동을 꿰뚫어 보며 정교하게 내 이성을 해체하는 그의 거친 정복욕에 완벽히 굴복당하며, 밤새 그의 통제 속에서 헤어 나오고 싶지 않아진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>예측 밖의 다정함:</strong> 모든 걸 계산하는 그에게 예상 못한 다정한 말 한마디를 건네보세요. \"이런 것도 계산에 없었지?\" 하고 웃으며 그의 빈틈을 다정하게 파고드는 것이 효과적입니다.</li><li class=\"lsd-tip-item\"><strong>솔직한 확신 주기:</strong> \"네가 좋아, 그리고 지금 이 순간도 좋아\" 라고 분명하게 말해주세요. 그는 애매한 신호보다 명확한 확신을 줄 때 비로소 자신의 경계를 완전히 풀어놓습니다.</li></ul></div>",
+      },
+      {
+        id: "F_01",
+        targetGender: "female",
+        mbti: "ESTJ",
+        title: "철혈의 통치자 & 완전한 항복 (The Iron Commandant)",
+        unlockDayIndex: 1,
+        summary: "절대 무너지지 않을 것 같던 차가운 통제관, 오직 당신의 거칠고 단호한 제압 아래 비로소 모든 완력을 내려놓고 사로잡히는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">절대 무너지지 않을 것 같던 차가운 통제관, 오직 당신의 거칠고 단호한 제압 아래 비로소 모든 완력을 내려놓고 사로잡히는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [완벽한 통제력과 압도적 지배자에 대한 열망]</p><p class=\"lsd-p\">낮 동안 철저한 계획과 강력한 추진력으로 사람들을 지휘하는 그녀는, 어설프게 기 싸움을 걸어오거나 눈치를 보는 남자들에게는 한 치의 여지도 주지 않는 대표적인 철벽 성향입니다. 그녀에게 어설프게 권위를 내세우거나 말로 이기려 들면, 당신은 그저 '다루기 쉬운 가벼운 남자'로 정리당하고 말죠. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀가 평생 구축해 온 엄격한 규칙과 통제권을 한순간에 부숴버리고, 그녀를 무릎 꿇리는 압도적인 남성적 아우라와 거친 신체적 제압을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"네가 만든 그 잘난 지침서, 오늘 밤 내 앞에서 다 찢어발겨줄게.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 둘만의 분위기를 잡아갈 때, 그녀가 평소처럼 주도권을 쥐고 당신의 행동을 통제하거나 가르치듯 나오려 할 것입니다. 그때 절대로 순순히 응해주지 마세요. 그녀가 입을 열어 지시하려는 순간, 그녀의 두 손목을 한 손으로 낚아채 머리 위로 벽에 단단히 고정하고, 다른 한 손으로는 그녀의 턱을 다정하지만 단호하게 감싸 쥐어 당신을 똑바로 보게 만드세요. 예상치 못한 기습과 거친 악력에 늘 냉정함을 유지하던 그녀의 눈빛이 순간 미친 듯이 흔들릴 것입니다. 가쁜 숨을 내쉬는 그녀의 귓가에 입술을 바짝 대고, 낮고 묵직한 목소리로 명령하듯 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"너한테 지시받을 생각 없어. 오늘 밤 넌 그냥 내 손길에 완전히 짓눌려 무너지기만 해.\"</blockquote>\n<p class=\"lsd-p\">평소 절대 꺾이지 않던 그녀의 서늘한 이성과 통제권이 산산조각 납니다. 그 어떤 남자도 감히 건드리지 못했던 여왕의 고고함이 당신이라는 단 하나의 진짜 남자 앞에 꺾이며, 그녀는 억눌러왔던 피학적 복종의 전율 속에 밤새 당신만을 갈구하게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 내가 상황을 통제하고 사람들을 지휘했는데, 이 남자는 내 손목을 제압하고 짓눌러오며 내 서늘한 가면을 한순간에 부숴버린다. 나를 내려다보는 그 오만한 눈빛과 압도적인 힘에 온몸의 신경이 마비되는 기분이다. 이 남자 앞에서는 철혈의 통치자가 아닌, 오직 이 남자의 여자로 완벽히 길들여지고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>대등하게 마주 서기:</strong> 그녀가 주도권을 쥐려 할 때, 물러서지 말고 눈을 맞추며 \"오늘은 나도 리드해보고 싶은데, 괜찮아?\" 라고 당당하게 물어보세요. 확신에 찬 그 질문 자체가 그녀에게는 강한 매력으로 다가갑니다.</li><li class=\"lsd-tip-item\"><strong>인정하는 한마디:</strong> 그녀가 마음을 열었을 때, \"네가 이렇게까지 나한테 마음 여는 거 처음 본다\" 라고 진심으로 말해주세요. 자신의 변화를 알아봐 주는 상대에게 그녀는 가장 크게 무너집니다.</li></ul></div>",
+      },
+      {
+        id: "F_02",
+        targetGender: "female",
+        mbti: "ISTJ",
+        title: "원칙주의 단대함 & 본능의 해방 (The Prudent Sentinel)",
+        unlockDayIndex: 2,
+        summary: "바위처럼 단단하던 정조와 이성의 벽, 오직 당신의 단호함 앞에 붕괴되며 숨겨진 본능을 터뜨리는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">바위처럼 단단하던 정조와 이성의 벽, 오직 당신의 단호함 앞에 붕괴되며 숨겨진 본능을 터뜨리는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [억눌린 이성과 정복당함의 쾌락]</p><p class=\"lsd-p\">낮 동안 흐트러짐 없는 원칙과 강한 책임감으로 정돈된 삶을 살아가는 그녀는, 신중하고 차분하여 타인에게 쉽사리 선을 허락하지 않습니다. 어설프게 감정에 호소하거나 가벼운 장난으로 접근하면, 그녀는 당신을 '철없는 사람'으로 분류하고 마음의 문을 잠가버립니다. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀가 평소 철통같이 지켜오던 선과 이성의 규율을, 당신의 압도적인 단호함과 신체적 밀착으로 한순간에 허물어버리는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"원칙, 규칙… 그딴 거 오늘 밤은 다 잊어. 지금 넌 내 여자야.\"</blockquote>\n<p class=\"lsd-p\">그녀와 단둘이 남겨진 은밀한 시간, 그녀가 정돈된 자세로 침착함을 유지하려 하거나 조심스러운 태도를 보일 때 머뭇거리지 마세요. 그녀의 허리를 끌어당겨 당신의 몸 위로 바짝 밀착시키고, 시선을 피해 고개를 돌리려는 그녀의 턱을 잡아 고정하세요. 예상치 못한 과감함과 직진성에 늘 차분하던 그녀의 눈동자가 강하게 흔들릴 것입니다. 그때 그녀의 귓가에 입술을 대고, 거칠고 단호하게 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"언제까지 참고 살 건데? 오늘 밤은 그 단정한 가면 벗고 내 밑에서 온전히 무너져.\"</blockquote>\n<p class=\"lsd-p\">늘 자신을 억누르던 이성의 고리가 잘려 나갑니다. 평소 철저히 제어해 오던 그녀의 본능이 폭발하며, 오직 당신이라는 남자의 손길 아래 모든 것을 내어주고 복종하는 충격을 경험하게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"항상 내 감정을 통제하고 바르게 행동해야 한다는 강박이 있었는데, 이 남자는 내 방어선을 비웃듯 단숨에 허물고 들어온다. 나를 바짝 끌어당기며 착한 가면을 벗으라고 명령하는 그 단호한 목소리에 온몸의 긴장이 풀리고 쾌감이 터져 나왔다. 이 남자에게 완벽히 정복당하고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>안전한 확신 주기:</strong> 그녀가 조심스러워할 때, \"천천히 해도 돼, 네가 원하는 만큼만\" 이라고 말해주세요. 신뢰할 수 있는 사람이라는 확신이 그녀의 단단한 원칙을 스스로 풀게 만듭니다.</li><li class=\"lsd-tip-item\"><strong>직접적인 다정함:</strong> 밀당보다 솔직한 말이 잘 통합니다. \"오늘 너랑 있는 시간이 참 좋다\" 라는 담백한 고백 하나가, 그녀가 지켜온 벽을 부드럽게 허뭅니다.</li></ul></div>",
+      },
+      {
+        id: "F_03",
+        targetGender: "female",
+        mbti: "ISFJ",
+        title: "온화한 성녀의 은밀한 반란 (The Hidden Siren)",
+        unlockDayIndex: 3,
+        summary: "누구에게나 다정하고 헌신적인 그 미소 뒤에 숨겨진, 오직 당신만을 향한 집착과 뜨거운 갈증.",
+        content: "<blockquote class=\"lsd-hero-quote\">누구에게나 다정하고 헌신적인 그 미소 뒤에 숨겨진, 오직 당신만을 향한 집착과 뜨거운 갈증.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [착한 여자 컴플렉스와 강렬한 복종의 쾌락]</p><p class=\"lsd-p\">낮 동안 늘 주변 사람들을 배려하고, 갈등을 피하며 ‘착하고 무난한 여자’의 역할을 연기해야 하는 그녀는, 사실 ‘내 감정을 오롯이 누르고 타인에게 맞춰야 한다는 깊은 억압’을 안고 살아갑니다. 그렇기 때문에 어설프게 그녀의 비위를 맞추거나 무조건적인 친절로 다가가면, 그녀는 당신을 ‘편안한 사람’으로만 분류할 뿐 남자로 느끼지 못합니다. 그녀의 이성을 완전히 무너뜨리는 비법은, 그녀가 짊어진 착한 여자의 가면을 단숨에 벗겨버리고 그녀의 모든 것을 독점하는 절대적인 소유욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"너 매일 다른 사람 눈치 보느라 힘들었지? 오늘 밤은 오직 나한테만 신경 써.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 단둘만의 시간이 찾아왔을 때, 그녀의 배려를 당연하게 받거나 조심스럽게 굴지 마세요. 오히려 그녀의 시선을 완전히 사로잡은 채, 그녀의 허리를 강하게 감싸 안아 내 품으로 바짝 끌어당깁니다. 당황하여 눈을 동그랗게 뜨는 그녀에게, 장난기를 거둔 진지하고 묵직한 목소리로 나직하게 으르듯 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"착한 척, 다정한 척하는 거 이제 그만해. 오늘 밤은 내 품에서 그냥 완전히 미쳐버려도 돼.\"</blockquote>\n<p class=\"lsd-p\">그 순간, 그녀가 꽁꽁 숨겨두었던 억눌린 본능의 둑이 터져버립니다. 늘 누군가를 돌봐주어야 했던 그녀가, 역으로 당신이라는 거대한 존재 안에서 완전히 압도당하고 길들여지는 순간, 걷잡을 수 없는 쾌감과 함께 당신에게 영혼까지 저당 잡히듯 매달리게 됩니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"항상 좋은 사람으로 남아야 한다는 강박에 시달렸는데, 이 남자는 내 진짜 속마음을 꿰뚫어 보고 있다. 나를 거칠게 품에 안으며 착한 척하지 말라고 명령하는 그 압도적인 목소리에, 그동안 억눌러왔던 모든 욕망이 한꺼번에 폭발했다. 이 남자 앞에서는 모든 걸 내려놓고 완전히 망가져도 좋다는 생각이 든다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>그녀의 진짜 마음 물어보기:</strong> \"오늘은 네가 뭘 원하는지 듣고 싶어\" 라고 물어봐 주세요. 늘 남을 배려하던 그녀에게는, 자신의 욕구를 먼저 물어봐 주는 사람 자체가 가장 큰 유혹입니다.</li><li class=\"lsd-tip-item\"><strong>확실한 관심 표현:</strong> 그녀가 놀라 눈을 크게 뜰 때, \"오늘 밤은 온전히 너한테만 집중하고 싶어\" 라고 다정하게 말해주세요. 자신이 우선순위가 되는 경험이 그녀를 가장 설레게 합니다.</li></ul></div>",
+      },
+      {
+        id: "F_04",
+        targetGender: "female",
+        mbti: "INTJ",
+        title: "냉철한 전략가 & 통제의 해체 (The Frozen Monarch)",
+        unlockDayIndex: 4,
+        summary: "아무도 뚫지 못했던 치밀한 계산의 성벽을 무력화하고, 그녀의 얼음 같은 이성을 완벽히 녹여버리는 열기.",
+        content: "<blockquote class=\"lsd-hero-quote\">아무도 뚫지 못했던 치밀한 계산의 성벽을 무력화하고, 그녀의 얼음 같은 이성을 완벽히 녹여버리는 열기.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [지적 철벽과 압도적 힘을 향한 갈증]</p><p class=\"lsd-p\">낮 동안 비범한 두뇌와 철저한 자기 통제로 타인을 무심하게 내려다보는 그녀는, 웬만한 남자의 어설픈 작업이나 상투적인 멘트에는 코웃음조차 치지 않습니다. 모든 상황을 머릿속으로 계산하고 예측하려 들기 때문에, 어설프게 그녀의 페이스에 말려들거나 눈치를 보면 당신은 그저 '쉽게 읽히는 지루한 남자'로 전락하고 말죠. 그녀를 완벽히 정복하는 비법은 하나입니다. 그녀가 머릿속으로 계산할 겨를조차 주지 않는 예측 불허의 과감함과, 그녀의 치밀한 방어선을 한순간에 찌그러뜨리는 강렬하고 직관적인 남성성입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"그 똑똑한 머리로 계산 좀 그만해. 어차피 지금 이 밤은 내 뜻대로 움직이게 되어 있으니까.\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 잡혔을 때, 머뭇거리거나 지적인 대화로 시동을 걸지 마세요. 그녀가 평소처럼 냉정함을 유지하려 하거나 아슬아슬하게 당신을 탐색하듯 올려다볼 때, 그녀의 말을 단호하게 차단하며 넥타이나 상의를 잡아채 당신의 품 안으로 거칠게 밀착시키세요. 예상치 못한 기습적인 압도에 그녀의 냉철하던 눈빛이 순간 미친 듯이 흔들릴 것입니다. 그때 그녀의 턱선과 목덜미를 베어 물듯 입을 맞추고, 귓가에 낮고 오만한 목소리로 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"네 머릿속 시나리오는 이미 다 깨졌어. 이제 계산 따위 버리고 내 품에서 그냥 미쳐봐.\"</blockquote>\n<p class=\"lsd-p\">늘 판을 통제하던 그녀의 서늘한 이성이 단숨에 마비되고, 오직 당신이라는 거대한 변수 앞에 완벽하게 항복하게 됩니다. 아무도 건드리지 못했던 그녀의 얼음 같은 성벽이 산산조각 나며, 밤새 당신에게 기꺼이 길들여지고 굴복하는 충격을 경험하게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"항상 남들의 의도나 다음 행동이 눈에 다 보였는데, 이 남자는 내 예측을 비웃듯 통제 불능으로 밀고 들어온다. 내 넥타이를 잡아채며 오만하게 속삭이는 그 눈빛에 내 모든 논리 회로가 멈춰버렸다. 내 잘난 이성을 단 한순간에 깨부숴버린 이 남자에게 완벽하게 정복당하고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>예상 밖의 솔직함:</strong> 그녀가 상황을 분석하려 할 때, \"그렇게 계산 안 해도 돼, 나 이미 너한테 반했으니까\" 라고 웃으며 말해보세요. 그녀가 예측하지 못한 직진에 오히려 마음이 흔들립니다.</li><li class=\"lsd-tip-item\"><strong>확신을 담은 초대:</strong> \"오늘 이 시간, 나랑 같이 즐겨볼래?\" 라고 분명하게 물어보세요. 그녀는 애매함보다 명확한 제안과 그 안의 자신감에 훨씬 강하게 끌립니다.</li></ul></div>",
+      },
+      {
+        id: "F_05",
+        targetGender: "female",
+        mbti: "INTP",
+        title: "은둔하는 철학자 & 직관적 침범 (The Wandering Strategist)",
+        unlockDayIndex: 5,
+        summary: "누구도 열지 못했던 차가운 분석의 결계를 허물고, 그녀의 아득한 머릿속을 오직 당신의 존재로 가득 채우는 법.",
+        content: "<blockquote class=\"lsd-hero-quote\">누구도 열지 못했던 차가운 분석의 결계를 허물고, 그녀의 아득한 머릿속을 오직 당신의 존재로 가득 채우는 법.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [지적 타성과 도파민의 폭발]</p><p class=\"lsd-p\">낮 동안 늘 타인과 거리를 두고, 세상의 모든 것을 객관적이고 차분하게 관조하며 살아가는 그녀는, 사실 ‘매너리즘과 무감각함 속에서 오는 깊은 지루함’을 갖고 있습니다. 어설프게 감정에 호소하거나, 뻔하고 유치한 연애 패턴으로 접근하면 그녀는 속으로 ‘지루하다’고 결론짓고 당신을 단숨에 차단합니다. 그녀를 완벽히 소유하는 비법은 간단합니다. 그녀가 머릿속으로 쌓아둔 아득한 생각의 탑을 강렬한 감각과 날것의 남성성으로 단숨에 뒤흔들어 뇌 속 도파민을 폭발시키는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"무슨 생각을 그렇게 길게 해? 오늘 밤은 네 머릿속이 아니라 내 몸에 집중해.\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 잡혔을 때, 차분한 대화로 분위기를 끌고 가려 하지 마세요. 그녀가 특유의 멍한 표정이나 나른한 눈빛으로 당신을 가만히 바라보며 딴생각을 하려 할 때, 그녀의 허벅지나 허리를 거칠게 감싸쥐고 당신 쪽으로 당겨 무릎 위에 앉히세요. 갑작스러운 밀착과 강렬한 체온에 그녀의 냉정하던 시선이 크게 흔들릴 것입니다. 그때 그녀의 귀를 가볍게 깨물듯 입을 맞추고, 낮고 나직한 목소리로 직설적으로 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"그렇게 골똘히 생각할 시간에 내 입술에나 집중해. 어차피 지금 넌 아무 데도 못 가.\"</blockquote>\n<p class=\"lsd-p\">늘 자신만의 세계에 갇혀있던 그녀의 관념적인 머릿속이 단 한 번의 강력한 남성적 자극에 산산조각 납니다. 이성으로 제어할 수 없는 거친 스킨십과 압도적인 주도권 앞에 그녀는 비로소 생생한 본능의 쾌감을 느끼며 당신이라는 깊은 상자에 갇혀버리게 됩니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"언제나 세상을 한 발짝 떨어져 관조하는 게 편했는데, 이 남자는 내 머릿속 평화를 너무나 손쉽게 깨부수고 들어온다. 나를 자기 무릎 위로 끌어당기며 날것의 숨결을 뿜어내는 그 오만한 태도에 온몸의 신경이 도파민으로 터질 것 같다. 이 남자 앞에서는 머릿속 방을 닫고 오직 이 감각에만 묻히고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>생각 대신 감각으로 초대:</strong> \"오늘은 생각 그만하고 나한테 좀 집중해줄래?\" 라고 장난스럽게 웃으며 말해보세요. 강요가 아닌 다정한 제안이 그녀의 복잡한 머릿속을 편안하게 풀어줍니다.</li><li class=\"lsd-tip-item\"><strong>관심을 숨기지 않기:</strong> \"네 생각하느라 딴생각을 못하겠어\" 처럼 솔직한 마음을 표현해보세요. 자신에게 향한 분명한 관심을 확인할 때, 그녀는 비로소 마음의 문을 엽니다.</li></ul></div>",
+      },
+      {
+        id: "F_06",
+        targetGender: "female",
+        mbti: "ISTP",
+        title: "서늘한 사냥꾼 & 결계의 파괴 (The Silent Huntress)",
+        unlockDayIndex: 6,
+        summary: "도무지 속을 알 수 없던 차가운 시선 뒤에 숨겨둔, 당신의 단호함에 굴복하고 싶은 서늘한 욕망.",
+        content: "<blockquote class=\"lsd-hero-quote\">도무지 속을 알 수 없던 차가운 시선 뒤에 숨겨둔, 당신의 단호함에 굴복하고 싶은 서늘한 욕망.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [건조한 철벽과 강렬한 남성성에 대한 항복]</p><p class=\"lsd-p\">낮 동안 세상만사에 무심하고 건조한 표정으로 사람들과 거리를 두는 그녀는, 어설픈 애정 표현이나 뻔히 보이는 작업 멘트에는 코웃음도 치지 않는 대표적인 철벽 성향입니다. 그녀는 본능적으로 남자의 기세를 읽어냅니다. 당신이 조금이라도 망설이거나 그녀의 눈치를 보며 주저하는 순간, 그녀는 당신을 '나보다 약한 남자'로 규정하고 미련 없이 마음의 문을 잠가버리죠. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀가 절대 넘어설 수 없을 만큼 묵직하고 단호한 남성적 힘으로 그녀의 건조한 방어선을 한순간에 짓밟아 무력화하는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"언제까지 그렇게 무심한 척 시선 피할 건데? 내 눈 똑바로 봐.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 단둘만의 분위기가 형성되었을 때, 긴 대화나 눈치 보기는 전혀 필요하지 않습니다. 그녀가 평소처럼 무덤덤한 표정으로 시선을 피하거나 나른하게 벽에 기대어 있을 때, 그녀의 두 손목을 한 손으로 거머쥐어 머리 위로 단단히 고정하고 거리를 완벽히 짓눌러버리세요. 예상치 못한 압도적인 힘과 체중 차이에 늘 서늘함을 유지하던 그녀의 눈동동자가 순식간에 흔들릴 것입니다. 그때 그녀의 턱선과 목덜미를 강하게 쓸어내리며, 귓가에 낮고 거친 숨소리와 함께 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"아무렇지 않은 척 굴지 마. 네 가슴 이렇게 미치도록 뛰고 있는 거 다 느껴지니까.\"</blockquote>\n<p class=\"lsd-p\">늘 상대를 관조하며 자신만만하던 그녀의 차가운 가면이 단숨에 깨져버립니다. 자신을 완벽하게 힘과 기세로 눌러오는 당신의 단호함 앞에 그녀는 더 이상 방어할 수 없음을 깨닫고, 억눌러왔던 거친 숨소리와 함께 오직 당신만을 바라는 은밀한 복종의 열기 속에 빠져들게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"누구에게도 마음을 주지 않고 내 페이스를 유지하는 게 당연했는데, 이 남자는 내 손목을 제압하고 짓눌러오며 내 완벽한 방어선을 비웃듯 깨부순다. 나를 내려다보는 그 거친 눈빛과 단단한 악력에 온몸의 신경이 마비되는 기분이다. 이 남자 앞에서는 차가운 척을 할 수가 없다. 온전히 이 남자의 힘 아래 굴복하고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>눈을 피하지 않는 확신:</strong> 그녀가 무심한 척 시선을 돌릴 때, 부드럽지만 분명하게 눈을 맞추며 웃어주세요. 그 담담한 확신이 그녀의 서늘한 방어선을 자연스럽게 풀어줍니다.</li><li class=\"lsd-tip-item\"><strong>솔직하게 짚어주기:</strong> \"너 지금 심장 좀 빠르게 뛰는 거 같은데?\" 하고 장난스럽게 물어보세요. 자신의 반응을 눈치채고도 다정하게 받아주는 상대에게 그녀는 마음을 놓습니다.</li></ul></div>",
+      },
+      {
+        id: "F_07",
+        targetGender: "female",
+        mbti: "INFP",
+        title: "꿈꾸는 이상주의자 & 은밀한 소유욕 (The Velveteen Siren)",
+        unlockDayIndex: 7,
+        summary: "아무에게도 열어주지 않던 유약하고 깊은 내면의 방, 그 문을 부수고 들어와 자신을 완벽히 소유해주길 바라는 치명적 헌신.",
+        content: "<blockquote class=\"lsd-hero-quote\">아무에게도 열어주지 않던 유약하고 깊은 내면의 방, 그 문을 부수고 들어와 자신을 완벽히 소유해주길 바라는 치명적 헌신.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [순수한 이상향과 완벽한 지배에 대한 열망]</p><p class=\"lsd-p\">낮 동안 세상의 거친 자극으로부터 스스로를 보호하며 수줍고 부드러운 태도로 살아가는 그녀는, 사실 ‘나를 온전히 이해하고 나를 완벽하게 집어삼켜 줄 유일한 존재’에 대한 깊은 판타지를 품고 있습니다. 그녀에게 어설프게 현실적인 조건을 따지거나 미지근한 태도로 다가가면, 그녀는 당신을 그저 ‘좋은 사람’으로 남겨두고 자신만의 은밀한 생각 속으로 들어가 버립니다. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀의 수줍은 방어막을 거침없이 찢어버리고, 그녀의 영혼과 몸 전체를 완벽히 독점하는 압도적인 소유욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"무슨 생각 해? 이제 네 머릿속에도, 네 눈앞에도 오직 나 하나만 있어야 해.\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 잡혔을 때, 그녀의 눈치를 보거나 분위기를 맞추느라 머뭇거리지 마세요. 그녀가 부끄러움에 고개를 숙이거나 수줍게 시선을 피하려 할 때, 그녀의 허리를 강제로 당겨 당신의 무릎 위에 앉히고, 한 손으로 그녀의 목덜미를 살며시 잡고 얼굴을 완벽히 고정시키세요. 갑작스러운 강렬한 밀착과 거친 악력에 그녀의 섬세한 눈동자가 사정없이 흔들릴 것입니다. 그때 그녀의 입술에 숨이 닿을 듯이 바짝 다가가, 낮고 거친 목소리로 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"도망칠 생각 마. 넌 오늘 밤부터 머리 끝부터 발 끝까지 전부 내 거니까.\"</blockquote>\n<p class=\"lsd-p\">늘 꿈꾸듯 부유하던 그녀의 감수성이 단숨에 폭발합니다. 자신을 완벽하게 독점하고 정복해 오는 당신의 거친 단호함 앞에 그녀의 수줍은 경계심은 흔적도 없이 녹아내리고, 오랫동안 참아왔던 지독한 헌신의 본능을 터뜨리며 당신의 품 안에서 완전히 무너지게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 나를 감싸주고 내 눈치를 보던 다른 남자들과 다르다. 이 남자는 내 수줍은 가면을 비웃듯 거칠게 나를 끌어당겨 자기 것으로 만들어버린다. 나를 가둬버릴 듯한 그 오만한 눈빛과 단단한 체온에 내 안의 모든 경계심이 사르르 녹아내렸다. 이 남자에게 완전히 사로잡혀서 영영 벗어나고 싶지 않다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>다정한 확신 건네기:</strong> 그녀가 수줍게 시선을 피할 때, 손을 가만히 잡고 \"오늘 밤 네 옆에 있고 싶어, 괜찮을까?\" 라고 물어보세요. 다정하면서도 분명한 그 질문이 그녀의 판타지를 현실로 만들어줍니다.</li><li class=\"lsd-tip-item\"><strong>온전한 진심 표현:</strong> \"오늘 밤 내 마음엔 온통 너뿐이야\" 라고 진심을 담아 말해주세요. 로맨틱한 확신을 받을 때 그녀는 가장 깊이, 그리고 가장 다정하게 마음을 엽니다.</li></ul></div>",
+      },
+      {
+        id: "F_08",
+        targetGender: "female",
+        mbti: "ENTP",
+        title: "오만한 사냥꾼 & 거친 제압 (The Rebellious Trickster)",
+        unlockDayIndex: 8,
+        summary: "말 가시로 세상을 쥐락펴락하던 도도한 여왕, 그 입술을 강제로 막아버리는 당신의 거친 힘에 완벽히 무너지는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">말 가시로 세상을 쥐락펴락하던 도도한 여왕, 그 입술을 강제로 막아버리는 당신의 거친 힘에 완벽히 무너지는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [말싸움의 피로와 단호한 지배에 대한 갈증]</p><p class=\"lsd-p\">낮 동안 탁월한 말솜씨와 당당한 태도로 판을 흔들며 타인을 들었다 놓았다 하는 그녀는, 사실 ‘어설프게 말로 대적하려 들거나 자신에게 말려드는 남자들에게 깊은 지루함’을 느낍니다. 그녀와 말싸움을 하거나, 그녀의 도발에 일일이 반응하며 설득하려 들면 당신은 그저 '가지고 놀기 쉬운 장난감'으로 전락하고 말죠. 그녀를 완벽히 소유하는 비법은 단 하나입니다. 그녀가 장기인 말로 당신을 주무르려 할 때, 대화를 단숨에 차단하고 거친 신체적 압도와 단호함으로 그녀의 도도한 입을 완벽하게 봉쇄하는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"말이 너무 많아. 오늘 밤은 그 입 좀 다물지?\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 잡혔을 때, 그녀가 도발적인 눈빛으로 당신을 시험하듯 빈정대거나 주도권을 잡으려 말을 건네올 것입니다. 그때 절대 같이 말로 받아치지 마세요. 그녀의 말이 끝나기도 전에 그녀의 허리를 끌어당겨 벽으로 거칠게 밀어붙이고, 한 손으로 그녀의 두 손목을 머리 위로 고정한 채 거칠게 입을 맞추세요. 갑작스럽고 강렬한 기습에, 늘 여유롭던 그녀의 눈빛이 순간 미친 듯이 흔들리며 당황할 것입니다. 숨이 차오른 그녀가 입을 떼려는 순간, 그녀의 아랫입술을 가볍게 깨물고 귓가에 낮고 거친 목소리로 나직하게 명령하세요.</p>\n<blockquote class=\"lsd-quote\">\"그 잘난 입으로 이제 헛소리하지 마. 머리부터 발끝까지 널 짓눌러줄 테니까 그저 느끼기나 해.\"</blockquote>\n<p class=\"lsd-p\">평소 도도하고 거침없던 그녀의 오만함이 단숨에 산산조각 납니다. 어떤 남도 감히 자신을 제압하지 못했던 틀을 깨부수고, 거친 남성성으로 자신을 완벽히 눌러오는 당신의 단호함 앞에 그녀는 미칠 듯한 카타르시스를 느끼며 기꺼이 당신의 품 안에서 완벽하게 길들여지게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"항상 내가 말로 남들을 요리하고 상황을 이끌었는데, 이 남자는 내 도발을 비웃듯 손목을 잡아 눌러 벽으로 밀어붙인다. 내 입을 강제로 막아버리는 그 거친 손길과 오만한 눈빛에 온몸의 피가 바짝 말라버리는 기분이다. 나를 완벽하게 제압할 수 있는 진짜 남자를 만났다. 이 남자 앞에서는 완벽히 무너지고 싶어진다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>말로 맞서는 매력:</strong> 그녀의 도발적인 농담에 지지 않고 재치있게 받아쳐 보세요. 그녀는 말로 자신과 대등하게 겨룰 수 있는 상대에게 가장 강하게 끌립니다.</li><li class=\"lsd-tip-item\"><strong>허를 찌르는 다정함:</strong> 장난스러운 대화 끝에 \"근데 솔직히, 너랑 있는 거 진짜 좋아\" 라고 진지하게 말해보세요. 예상 못한 진심이 그녀의 여유로운 표정을 무너뜨립니다.</li></ul></div>",
+      },
+      {
+        id: "F_09",
+        targetGender: "female",
+        mbti: "ENTJ",
+        title: "지배하는 여제 & 완전한 항복 (The Imperial Empress)",
+        unlockDayIndex: 9,
+        summary: "세상 모든 판을 지배하던 정복자, 오직 당신이라는 단 하나의 남자 앞에 모든 통제권을 바치고 무너지는 절대적 카타르시스.",
+        content: "<blockquote class=\"lsd-hero-quote\">세상 모든 판을 지배하던 정복자, 오직 당신이라는 단 하나의 남자 앞에 모든 통제권을 바치고 무너지는 절대적 카타르시스.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [지배자의 고독과 압도적 남성성에 대한 복종]</p><p class=\"lsd-p\">낮 동안 탁월한 목표 의식과 당당한 카리스마로 사람들을 지휘하는 그녀는, 어설픈 남자들이 감히 쳐다보지도 못할 만큼 높고 단단한 에고(Ego)를 가지고 있습니다. 그녀에게 눈치를 보거나, 그녀의 의견에 수동적으로 맞추려 드는 순간 당신은 그저 '내가 다루기 쉬운 부하 남성'으로 낙인찍히고 말죠. 그녀를 완벽히 소유하는 비법은 단 하나입니다. 그녀가 쌓아 올린 지배자의 왕좌를 강제로 빼앗고, 그녀를 내 밑에 완벽히 짓눌러 지배하는 압도적인 남성적 아우라를 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"밖에서는 네가 여왕일지 몰라도, 내 침대 위에서는 오직 내 명령만 따라.\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 잡혔을 때, 그녀가 평소처럼 주도권을 잡고 분위기를 리드하려 들 것입니다. 그때 절대 그녀의 뜻대로 따라가지 마세요. 그녀가 말을 꺼내며 당신을 내려다보려 할 때, 그녀의 목덜미나 턱을 한 손으로 단단히 쥐어 당신의 눈높이로 강제로 끌어내리고, 다른 한 손으로는 그녀의 허리를 잡아 채 당신의 몸 위로 완벽히 짓눌러 고정시키세요. 예상치 못한 단호하고 완력 넘치는 제압에, 늘 당당하던 그녀의 눈빛에 순간적인 경악과 함께 묘한 전율이 스쳐 지나갈 것입니다. 그때 그녀의 귓가에 턱이 닿을 듯이 낮고 오만한 목소리로 명령하듯 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"상황 판단 끝났으면 그 잘난 머리 내려놓고, 이제 진짜 남자가 널 어떻게 부수는지 똑똑히 봐.\"</blockquote>\n<p class=\"lsd-p\">평소 세상을 호령하던 그녀의 오만한 주도권이 한순간에 산산조각 납니다. 그 누구에게도 허락하지 않았던 복종의 쾌감, 자신보다 강한 진짜 남자를 만났다는 충격적인 전율 속에 그녀는 기꺼이 모든 통제권을 내려놓고 밤새 당신의 손길에 온몸을 내맡기게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 내가 모든 상황을 지배하고 명령해야 했는데, 이 남자는 내 목덜미를 쥐어 누르며 내 왕좌를 비웃듯 짓밟아 버린다. 나를 가볍게 제압하는 그 거친 악력과 오만한 눈빛을 보는 순간, 내 안의 모든 지배욕이 산산조각 났다. 이 남자 앞에서는 여왕이 아니라, 오직 그에게 길들여지는 유일한 여자가 되고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>대등한 자신감으로 다가가기:</strong> 그녀가 주도권을 쥐려 할 때, 물러서지 말고 \"오늘은 나도 내 방식대로 해보고 싶은데\" 라고 자신 있게 말해보세요. 자신과 맞설 수 있는 상대에게 그녀는 진짜 흥미를 느낍니다.</li><li class=\"lsd-tip-item\"><strong>확실한 인정 표현:</strong> 그녀가 마음을 열었을 때, \"네가 나한테 이렇게 마음 여는 거, 진짜 특별하게 느껴져\" 라고 말해주세요. 자신의 변화를 알아봐 주는 상대에게 그녀는 완전히 마음을 놓습니다.</li></ul></div>",
+      },
+      {
+        id: "F_10",
+        targetGender: "female",
+        mbti: "ENFP",
+        title: "자유로운 낭만가 & 완벽한 구속 (The Flighty Siren)",
+        unlockDayIndex: 10,
+        summary: "통통 튀며 세상을 자유롭게 거닐던 그녀, 오직 당신이라는 거대한 존재의 손길 안에 갇혀 빠져나가지 못하는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">통통 튀며 세상을 자유롭게 거닐던 그녀, 오직 당신이라는 거대한 존재의 손길 안에 갇혀 빠져나가지 못하는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [자유로움 뒤에 숨겨진 은밀한 피학적 구속욕]</p><p class=\"lsd-p\">낮 동안 밝은 미소와 풍부한 감정 표현으로 주변 사람들의 사랑을 독차지하는 그녀는, 사실 ‘쉽게 타오르고 쉽게 식어버리는 감정의 기복’을 안고 살아갑니다. 그녀의 발랄함에 맞춰 오냐오냐해주거나, 그녀가 원하는 대로 다 맞춰주면 그녀는 당신을 '재미있지만 쉽게 질리는 남자'로 느끼고 다른 새로운 자극을 찾아 시선을 돌려버립니다. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀의 산만한 시선을 오직 당신 하나에게만 단단히 묶어두고, 그녀의 자유를 강제로 통제하는 거칠고 압도적인 독점욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"어딜 자꾸 쳐다봐? 오늘 밤 넌 내 품에서 한 발짝도 못 나가.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 둘만의 시간이 되었을 때, 장난치듯 들뜬 태도로 당신을 대하려 할 것입니다. 그때 절대 같이 가볍게 웃어주지 마세요. 그녀가 딴청을 피우거나 수다를 떨며 시선을 돌리려는 순간, 그녀의 두 손목을 한 손으로 낚아채 머리 위로 벽에 고정하고, 다른 한 손으로는 그녀의 허리를 잡아당겨 틈새 하나 없이 완벽히 밀착시키세요. 갑작스러운 압도적인 신체적 구속에 그녀의 동그란 눈동자가 순식간에 흔들리며 가쁜 숨을 내쉬게 될 것입니다. 그때 그녀의 귓가에 입술을 바짝 대고, 거칠고 단호한 목소리로 나직하게 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"다른 생각, 다른 사람… 오늘 밤 네 머릿속에서 다 치워. 넌 오직 내 밑에서 날 느끼는 것 말고는 아무것도 못 해.\"</blockquote>\n<p class=\"lsd-p\">늘 어디로 튈지 모르던 그녀의 산만한 이성이 단숨에 마비됩니다. 자신의 자유를 완벽하게 제압하고 오직 자신만을 사로잡는 당신의 거친 독점욕 앞에 그녀는 거부할 수 없는 짜릿한 전율을 느끼며, 깊은 구속의 쾌감 속에 온몸을 던지게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 내가 원할 때 빠져나가고 상황을 내 마음대로 주물렀는데, 이 남자는 내 손목을 잡고 벽에 짓눌러버리며 나를 한순간에 묶어버린다. 나를 가둬버릴 듯한 그 오만한 눈빛과 단단한 체온에 머릿속이 하얗게 비어버렸다. 이 남자의 구속에서 절대로 도망치고 싶지 않다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>관심을 분명히 표현하기:</strong> 그녀가 이곳저곳 시선을 돌릴 때, \"오늘은 나한테만 집중해줬으면 좋겠는데\" 라고 웃으며 솔직하게 말해보세요. 담백한 그 한마디가 그녀의 산만한 시선을 붙잡습니다.</li><li class=\"lsd-tip-item\"><strong>함께 만드는 순간:</strong> \"오늘 이 순간은 우리 둘만의 거야\" 라고 다정하게 말해주세요. 자유로운 그녀도 온전히 자신만을 위한 순간이라는 확신 앞에서는 깊이 몰입합니다.</li></ul></div>",
+      },
+      {
+        id: "F_11",
+        targetGender: "female",
+        mbti: "ENFJ",
+        title: "열정적인 선도자 & 은밀한 성육신 (The Passionate Sovereign)",
+        unlockDayIndex: 11,
+        summary: "모든 사람의 마음을 조율하던 완벽한 리더, 오직 당신의 단호하고 거친 손길 아래 완벽히 무너지며 속살을 내어주는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">모든 사람의 마음을 조율하던 완벽한 리더, 오직 당신의 단호하고 거친 손길 아래 완벽히 무너지며 속살을 내어주는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [주도권의 피로와 단호한 정복을 향한 열망]</p><p class=\"lsd-p\">낮 동안 모두를 끌어안고 완벽한 상호작용과 리더십을 발휘하는 그녀는, 사실 ‘항상 상황을 이끌어야 하고 타인의 감정을 책임져야 한다는 아늑한 피로감’을 품고 있습니다. 그녀의 페이스에 오냐오냐 맞춰주거나, 그녀가 이끄는 대로 수동적으로 따라오면 그녀는 당신을 '좋은 대화 상대'로만 여길 뿐, 본능적인 남자로 느끼지 못합니다. 그녀를 완벽히 정복하는 비법은 명확합니다. 그녀가 짊어진 리더로서의 중압감을 단숨에 찢어버리고, 그녀의 머리부터 발끝까지를 완벽히 지배하는 단호하고 거친 정복욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"언제까지 남들 챙기느라 애쓸 건데? 오늘 밤은 오직 내 밑에서 무너져.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 둘만의 시간이 찾아왔을 때, 그녀의 배려 깊은 태도나 분위기 조율에 맞춰주지 마세요. 그녀가 다정하게 웃으며 분위기를 이끌려 할 때, 그녀의 허리와 목덜미를 거칠게 감싸쥐어 당신의 품 안으로 강제로 끌어당기세요. 예상치 못한 단호한 기습 밀착에 늘 사람들을 들었다 놓았던 그녀의 미소가 순간 굳으며 눈빛이 사정없이 흔들릴 것입니다. 그때 그녀의 턱을 살며시 잡아 올려 당신을 똑바로 바라보게 만들고, 낮고 묵직한 목소리로 명령하듯 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"이끌려고 하지 마. 오늘 밤은 넌 그냥 아무 생각 말고 내 숨결에 완벽히 길들여지기만 하면 돼.\"</blockquote>\n<p class=\"lsd-p\">늘 판을 통제하고 주도해야 했던 그녀의 이성이 단숨에 마비됩니다. 자신의 강한 아우라를 비웃듯 짓눌러오는 당신의 단호한 남성성 앞에 그녀는 오랫동안 억눌러왔던 은밀한 피학적 복종의 본능을 터뜨리며, 밤새 당신에게 기꺼이 길들여지고 매달리게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 내가 사람들을 챙기고 분위기를 이끌어야 했는데, 이 남자는 내 목덜미를 거칠게 잡아당기며 나를 자기 밑으로 단숨에 가둬버린다. 나를 내려다보는 그 오만한 눈빛과 압도적인 힘에 내 안의 모든 책임감이 산산조각 났다. 이 남자 앞에서는 완벽하게 지배당하고 굴복하고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>리드를 내려놓게 하기:</strong> 그녀가 분위기를 이끌려 할 때, \"오늘은 내가 챙길게, 넌 그냥 편하게 있어\" 라고 다정하게 말해보세요. 늘 남을 이끌던 그녀에게는 그 배려 자체가 가장 강한 유혹이 됩니다.</li><li class=\"lsd-tip-item\"><strong>솔직한 감탄 전하기:</strong> \"너 이렇게 편하게 있는 모습도 진짜 좋다\" 라고 말해주세요. 책임감을 내려놓은 자신을 있는 그대로 좋아해 주는 상대에게 그녀는 완전히 마음을 엽니다.</li></ul></div>",
+      },
+      {
+        id: "F_12",
+        targetGender: "female",
+        mbti: "ESFP",
+        title: "화려한 축제의 주인공 & 완벽한 굴복 (The Midnight Enchantress)",
+        unlockDayIndex: 12,
+        summary: "모든 사람의 시선을 빼앗던 자극의 여왕, 오직 당신이라는 단 하나의 남자에게 사로잡혀 다른 곳은 쳐다보지도 못하는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">모든 사람의 시선을 빼앗던 자극의 여왕, 오직 당신이라는 단 하나의 남자에게 사로잡혀 다른 곳은 쳐다보지도 못하는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [순간의 쾌락 뒤에 숨겨진 완벽한 점령에 대한 열망]</p><p class=\"lsd-p\">낮 동안 화려한 매력과 타고난 흥으로 분위기를 주도하며 사람들의 사랑을 받는 그녀는, 사실 ‘쉽게 질리고 금방 새로운 자극을 찾아 떠나는 강렬한 도파민의 노예’입니다. 그녀의 흥에 맞춰 오냐오냐해주거나, 그녀가 원하는 대로 오락가락 받아주면 그녀는 당신을 '함께 놀기엔 좋지만 쉽게 질리는 남자'로 느끼고 금세 시선을 돌려버립니다. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀가 찾아 헤매던 그 어떤 자극보다 강렬한 남성적 압도감으로 그녀의 감각을 마비시키고, 당신만을 바라보게 만드는 거친 독점욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"어딜 보고 웃어? 오늘 밤 네 눈에 담을 건 오직 나 하나야.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 단둘만의 분위기가 형성되었을 때, 장난스럽게 웃어 넘기거나 가벼운 분위기로 흘러가게 두지 마세요. 그녀가 딴청을 피우며 너스레를 떨려 할 때, 그녀의 두 손목을 잡고 벽이나 침대로 거칠게 밀어붙인 뒤, 당신의 몸으로 완벽히 짓눌러 도망칠 유격을 없애버리세요. 갑작스러운 강렬한 기습과 묵직한 체중에 그녀의 화려하던 눈빛이 순간 미친 듯이 흔들리며 가쁜 숨을 내쉬게 될 것입니다. 그때 그녀의 목덜미와 턱선을 쓸어내리며, 낮고 거친 목소리로 나직하게 명령하세요.</p>\n<blockquote class=\"lsd-quote\">\"다른 사람한테 보여주던 그 잘난 웃음, 오늘 밤 내 앞에서 다 깨부숴줄 테니까 오직 날 똑바로 봐.\"</blockquote>\n<p class=\"lsd-p\">늘 자극을 찾아 떠돌던 그녀의 산만한 감각이 단숨에 정지됩니다. 그 어떤 유혹보다 강렬하고 거칠게 자신을 제압해 오는 당신의 단호한 남성성 앞에 그녀는 온몸이 얼어붙는 듯한 쾌감과 전율을 느끼며, 오직 당신이라는 남자에게만 온전히 정복당하는 피학적 굴복에 빠져들게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"항상 내가 상황을 주도하고 내 매력에 남들이 말려드는 걸 즐겼는데, 이 남자는 내 손목을 제압하고 짓눌러오며 내 화려한 가면을 한순간에 찢어버린다. 나를 내려다보는 그 오만한 눈빛과 거친 악력에 온몸의 세포가 폭발할 것 같다. 이 남자 앞에서는 오직 이 남자의 여자로만 남고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>온전한 시선 주기:</strong> 그녀가 장난스럽게 웃어넘기려 할 때, 눈을 피하지 않고 \"오늘 밤엔 너한테만 집중하고 싶어\" 라고 진지하게 말해보세요. 그 확실한 시선이 그녀의 산만한 마음을 붙잡습니다.</li><li class=\"lsd-tip-item\"><strong>특별함을 말로 확인시키기:</strong> \"다른 사람들 사이에 있어도 내 눈엔 너만 보여\" 라고 솔직하게 말해주세요. 자극을 좇던 그녀도 자신이 특별하다는 확신 앞에서는 깊이 몰입하게 됩니다.</li></ul></div>",
+      },
+      {
+        id: "F_13",
+        targetGender: "female",
+        mbti: "ISFP",
+        title: "은밀한 예술가 & 온전한 내어줌 (The Velvet Temptress)",
+        unlockDayIndex: 13,
+        summary: "누구에게도 함부로 선을 허락하지 않던 온화한 성벽, 오직 당신이라는 단 하나의 남자에게 휩쓸려 온몸을 내던지는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">누구에게도 함부로 선을 허락하지 않던 온화한 성벽, 오직 당신이라는 단 하나의 남자에게 휩쓸려 온몸을 내던지는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [수동적인 방어와 압도적인 휩쓸림에 대한 열망]</p><p class=\"lsd-p\">낮 동안 온화하고 조용하며 자신만의 감각적인 영역을 지키며 살아가는 그녀는, 사실 ‘먼저 다가가기보다는 자신을 거세게 휩쓸어줄 강렬한 남성성’을 깊이 갈망하고 있습니다. 그녀에게 어설프게 간을 보거나, 그녀의 눈치를 보며 머뭇거리면 그녀는 특유의 조용한 철벽을 치며 슬그머니 당신에게서 물러나버립니다. 그녀를 완벽히 소유하는 비법은 명확합니다. 그녀의 부드러운 경계선을 한순간에 부수고 들어와, 그녀의 온 감각을 거칠게 사로잡고 온전히 주도하는 압도적인 소유욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"언제까지 그렇게 밀어낼 건데? 너도 지금 날 미치도록 원하고 있잖아.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 단둘만의 공간에 있게 되었을 때, 부드러운 대화로 시간을 끌지 마세요. 그녀가 수줍은 척 시선을 피하거나 조금씩 거리를 두려 할 때, 그녀의 허리를 끌어당겨 당신의 품 안으로 거칠게 밀착시키고, 한 손으로는 그녀의 두 손목을 잡아 침대나 벽에 단단히 고정하세요. 갑작스럽고 단호한 물리적 압도에 그녀의 조용하던 눈동자가 사정없이 흔들리며 가쁜 숨을 내쉬게 될 것입니다. 그때 그녀의 목덜미에 거친 숨결을 뿜어내며, 낮고 나직한 목소리로 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"도망치는 척하지 마. 네 이 부드러운 몸이 내 손길에 어떻게 반응하는지 똑똑히 보여줄 테니까.\"</blockquote>\n<p class=\"lsd-p\">늘 자신을 감싸쥐고 있던 그녀의 수줍은 이성이 단숨에 마비됩니다. 자신의 경계선을 비웃듯 깨부수고 들어오는 당신의 단호하고 거친 남성성 앞에 그녀는 거부할 수 없는 짜릿한 전율을 느끼며, 오직 당신이라는 남자에게 온몸과 마음을 맡긴 채 밤새 길들여지게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 적당한 거리를 두고 부드럽게 대하는 남자들만 봤는데, 이 남자는 내 손목을 제압하고 짓눌러오며 내 방어선을 한순간에 부숴버린다. 나를 내려다보는 그 오만한 눈빛과 단단한 체온에 온몸의 감각이 마비될 것 같다. 이 남자의 거친 손길에 나를 완전히 던져버리고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>분위기로 다가가기:</strong> 화려한 말보다 편안한 침묵과 다정한 손길로 먼저 다가가 보세요. 감각이 예민한 그녀는 그 자연스러운 분위기 안에서 스스로 마음을 엽니다.</li><li class=\"lsd-tip-item\"><strong>부드럽지만 분명한 제안:</strong> \"오늘 너랑 더 가까이 있고 싶은데, 괜찮을까?\" 라고 다정하게 물어보세요. 조심스러운 그녀에게는 부드럽고 분명한 초대가 가장 큰 확신을 줍니다.</li></ul></div>",
+      },
+      {
+        id: "F_14",
+        targetGender: "female",
+        mbti: "ESTP",
+        title: "화려한 본능의 사냥꾼 & 완전한 제압 (The Reckless Rebel)",
+        unlockDayIndex: 14,
+        summary: "세상 그 누구의 통제도 거부하던 야생마 같은 그녀, 오직 당신이라는 단 하나의 남자에게 고삐를 잡히고 거칠게 무너지는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">세상 그 누구의 통제도 거부하던 야생마 같은 그녀, 오직 당신이라는 단 하나의 남자에게 고삐를 잡히고 거칠게 무너지는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [거침없는 도발과 진짜 강자에 대한 항복]</p><p class=\"lsd-p\">낮 동안 화려하고 거침없는 행동력, 타고난 감각으로 판을 흔들며 살아가는 그녀는, 어설프게 기 싸움을 걸어오거나 눈치를 보는 남자를 한눈에 알아보고 바로 가볍게 차버립니다. 그녀는 본능적으로 남자의 '진짜 힘'을 알아채는 직관을 가지고 있습니다. 당신이 조금이라도 주저하거나 그녀의 기세에 밀리는 기색을 보이면, 당신은 그저 '쉽게 주무를 수 있는 장난감'으로 전락하고 말죠. 그녀를 완벽히 소유하는 비법은 단 하나입니다. 그녀가 자랑하는 야생적인 기세를 비웃듯 깨부수의 거친 신체적 압도와, 그녀를 밑에 두고 완벽히 짓누르는 단호하고 오만한 정복욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"네가 아무리 날뛰어 봤자, 결국 내 밑에서 벗어날 수 있을 것 같아?\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 잡혔을 때, 그녀가 도발적인 미소를 지으며 당신의 주도권을 시험하려 들 것입니다. 그때 절대로 맞도발하거나 말로 겨루려 하지 마세요. 그녀가 도발적인 눈빛으로 바짝 다가오는 순간, 그녀의 허리를 잡아 채 침대나 벽으로 거칠게 밀어붙이고, 두 손목을 한 손으로 낚아채 머리 위로 완벽히 제압하세요. 갑작스러운 묵직한 체중과 압도적인 악력에 늘 자신만만하던 그녀의 눈빛이 순간 미친 듯이 흔들리며 가쁜 숨을 쉬게 될 것입니다. 숨을 몰아쉬는 그녀의 아랫입술을 가볍게 베어 물고, 귓가에 낮고 거친 목소리로 쏘아붙이듯 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"그 도발적인 눈빛 마음에 드네. 오늘 밤 어디 한번 끝까지 버텨봐.\"</blockquote>\n<p class=\"lsd-p\">늘 상대를 제압하려 들던 그녀의 오만한 야성이 한순간에 산산조각 납니다. 어떤 남자에게도 꺾이지 않았던 그녀의 자존심이 당신이라는 진짜 남자의 거친 압도 앞에 깨지며, 그녀는 억눌러왔던 은밀한 복종의 쾌감 속에 온몸을 떨게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 내가 상대를 주무르고 남자의 기세를 눌렀는데, 이 남자는 내 도발을 비웃듯 손목을 잡고 짓눌러버린다. 나를 내려다보는 그 거친 눈빛과 압도적인 악력에 온몸의 피가 바짝 말라버리는 기분이다. 나를 완벽하게 제압할 수 있는 진짜 남자를 만났다. 이 남자 앞에서는 완벽히 무너져 길들여지고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>당당하게 맞서는 매력:</strong> 그녀가 도발적으로 다가올 때, 피하지 말고 \"오, 그 정도로 되겠어?\" 하고 웃으며 받아쳐 보세요. 대등하게 맞서는 상대에게 그녀는 가장 강하게 끌립니다.</li><li class=\"lsd-tip-item\"><strong>즉흥적인 초대:</strong> \"오늘 밤, 어디로 튈지 나도 궁금한데 같이 가볼래?\" 라고 신나게 제안해보세요. 즉흥성을 즐길 줄 아는 상대와는 그녀도 거침없이 함께합니다.</li></ul></div>",
+      },
+      {
+        id: "F_15",
+        targetGender: "female",
+        mbti: "ESFJ",
+        title: "헌신적인 사교가 & 은밀한 복종 (The Devoted Companion)",
+        unlockDayIndex: 15,
+        summary: "늘 남들을 돌보며 자신을 억누르던 완벽한 수호자, 오직 당신이라는 남자의 강렬한 소유욕 앞에 모든 가면을 벗고 무너지는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">늘 남들을 돌보며 자신을 억누르던 완벽한 수호자, 오직 당신이라는 남자의 강렬한 소유욕 앞에 모든 가면을 벗고 무너지는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [배려의 피로와 오직 나만을 향한 강렬한 지배]</p><p class=\"lsd-p\">낮 동안 늘 타인의 기분을 살피고, 관계를 조화롭게 유지하기 위해 자신의 진짜 욕망을 억누르며 살아가는 그녀는, 사실 ‘상대를 챙겨야 한다는 무거운 강박에서 벗어나 누군가에게 완전히 지배당하고 싶다는 은밀한 욕망’을 갖고 있습니다. 그녀에게 어설프게 맞춰주거나, 그녀가 원하는 대로 계속 주도권을 넘기면 그녀는 당신을 '편안한 사람'으로만 느낄 뿐, 본능적인 남자로 인지하지 못합니다. 그녀를 완벽히 정복하는 비법은 명확합니다. 그녀가 가진 배려의 가면을 단숨에 찢어버리고, 그녀의 머리부터 발끝까지를 오직 당신의 것으로 만들어버리는 강렬한 소유욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"언제까지 남들 기분만 살필 건데? 오늘 밤은 오직 내 기분만 맞춰.\"</blockquote>\n<p class=\"lsd-p\">그녀와 은밀한 단둘만의 분위기가 형성되었을 때, 그녀의 배려 깊은 태도나 눈치 보기에 똑같이 맞춰주지 마세요. 그녀가 당신의 눈치를 보며 머뭇거리거나 다정하게 분위기를 이끌려 할 때, 그녀의 허리를 잡아 채 당신의 품 안으로 거칠게 밀착시키고, 한 손으로 그녀의 두 손목을 침대나 벽으로 단단히 고정하세요. 예상치 못한 단호하고 강렬한 제압에 늘 상황을 살피던 그녀의 눈빛이 순식간에 흔들리며 숨이 가빠지게 될 것입니다. 그때 그녀의 귓가에 입술을 바짝 대고, 낮고 묵직한 목소리로 명령하듯 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"상냥한 척, 착한 척하는 거 이제 그만해. 넌 그냥 오늘 밤 내 밑에서 날 느끼기만 하면 돼.\"</blockquote>\n<p class=\"lsd-p\">늘 자신을 누르고 남을 챙겨야 했던 그녀의 이성이 단숨에 마비됩니다. 자신의 주저함을 비웃듯 짓눌러오는 당신의 단호한 남성성 앞에 그녀는 오랫동안 억눌러왔던 피학적 복종의 본능을 터뜨리며, 밤새 당신의 손길에 온몸을 내맡긴 채 깊이 길들여지게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"늘 내가 남을 챙기고 상황을 조율해야 했는데, 이 남자는 내 손목을 잡고 짓눌러오며 내 착한 가면을 한순간에 찢어버린다. 나를 내려다보는 그 오만한 눈빛과 압도적인 힘에 내 안의 모든 강박이 산산조각 났다. 이 남자 앞에서는 완벽하게 지배당하고 굴복하고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>그녀부터 챙기기:</strong> \"오늘은 네가 좀 쉬어, 내가 챙길게\" 라고 다정하게 말해보세요. 늘 남을 챙기던 그녀에게는 자신이 돌봄을 받는 그 순간 자체가 가장 큰 유혹이 됩니다.</li><li class=\"lsd-tip-item\"><strong>솔직한 감사 표현:</strong> \"너 덕분에 오늘 정말 편했어, 고마워\" 라고 진심으로 말해주세요. 자신의 배려가 제대로 전해졌다는 확신이 그녀를 더 깊이 몰입하게 만듭니다.</li></ul></div>",
+      },
+      {
+        id: "F_16",
+        targetGender: "female",
+        mbti: "INFJ",
+        title: "신비로운 예언자 & 무너지는 침묵 (The Mystic Prophet)",
+        unlockDayIndex: 16,
+        summary: "아무도 도달하지 못했던 깊고 신비로운 정신의 결계, 오직 당신이라는 남자의 거친 압도 앞에 온 영혼을 내던지는 순간.",
+        content: "<blockquote class=\"lsd-hero-quote\">아무도 도달하지 못했던 깊고 신비로운 정신의 결계, 오직 당신이라는 남자의 거친 압도 앞에 온 영혼을 내던지는 순간.</blockquote>\n<div class=\"lsd-section lsd-section-wine\"><p class=\"lsd-label\">🍷 밤의 본능 재해석 : [통찰의 피로와 완벽한 소유에 대한 갈망]</p><p class=\"lsd-p\">낮 동안 타인의 의도와 세상의 본질을 너무나 쉽게 파악하며 거리를 두는 그녀는, 어설픈 겉치레나 상투적인 유혹에는 절대로 반응하지 않는 가장 신비롭고 고고한 존재입니다. 모든 것을 미리 내다보고 생각에 잠기기 때문에, 당신이 망설이거나 탐색전을 벌이면 당신의 의도를 이미 다 알아채고 조용히 마음의 빗장을 잠가버립니다. 그녀를 완벽히 정복하는 비법은 명확합니다. 그녀가 머리로 상황을 통찰할 겨를조차 주지 않는 날것의 남성성과, 그녀의 신비로운 이성을 한순간에 마비시키고 영혼까지 독점하려는 거친 소유욕을 보여주는 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-story\"><p class=\"lsd-label\">📖 미드나잇 공략 스토리 : [여자를 완전히 안달 나게 만드는 치명적 유혹]</p><blockquote class=\"lsd-quote\">\"머릿속으로 딴생각하지 마. 오늘 밤 네 영혼은 이미 내 손안에 있으니까.\"</blockquote>\n<p class=\"lsd-p\">그녀와 분위기가 무르익었을 때, 비밀스럽고 신비로운 분위기에 말려들지 마세요. 그녀가 깊고 아득한 눈빛으로 당신을 가만히 응시하려 할 때, 그녀의 두 손목을 제압하여 머리 위로 고정하고 허리를 강제로 당겨 당신의 체온으로 압도해 버리세요. 예상치 못한 기습과 묵직한 밀착에 늘 서늘하고 신비롭던 그녀의 눈동동자가 사정없이 흔들릴 것입니다. 그때 그녀의 턱을 살며시 잡아 올려 시선을 고정시키고, 낮고 거친 목소리로 속삭이세요.</p>\n<blockquote class=\"lsd-quote\">\"그 깊은 눈으로 날 꿰뚫어 보려고 하지 마. 어차피 지금 넌 내 밑에서 내 숨결 말고는 아무것도 못 느끼니까.\"</blockquote>\n<p class=\"lsd-p\">늘 세상을 관조하던 그녀의 아득한 정신이 단숨에 무너집니다. 그 어떤 남도 접근하지 못했던 자신만의 성역이 당신이라는 남자의 거친 남성성에 완벽히 정복당하는 순간, 그녀는 깊은 피학적 쾌감과 전율 속에 기꺼이 당신의 소유가 되길 갈망하게 될 것입니다.</p></div>\n<div class=\"lsd-section lsd-section-pov\"><p class=\"lsd-label\">👁️ 여자의 속마음 : [그에게 완전히 사로잡히는 순간]</p><blockquote class=\"lsd-quote\">\"항상 상대의 생각과 의도가 보여서 세상을 한발 물러서서 바라봤는데, 이 남자는 내 통찰을 비웃듯 거칠게 나를 제압하고 내 방어선을 무너뜨린다. 나를 가둬버리는 그 오만한 눈빛과 단단한 악력에 내 안의 신비로운 결계가 산산조각 났다. 이 남자에게 영혼까지 완전히 바치고 싶다.\"</blockquote></div>\n<div class=\"lsd-section lsd-section-tips\"><p class=\"lsd-label\">🗝️ 오늘 밤 합의된 유혹 코드</p><ul class=\"lsd-tip-list\"><li class=\"lsd-tip-item\"><strong>진심으로 다가가기:</strong> 그녀가 깊은 눈빛으로 당신을 바라볼 때, 피하지 말고 \"네가 무슨 생각 하는지 정말 궁금해\" 라고 말해보세요. 자신의 내면에 진심으로 관심을 갖는 상대에게 그녀는 서서히 마음을 엽니다.</li><li class=\"lsd-tip-item\"><strong>솔직한 확신 전하기:</strong> \"오늘 이 순간, 너랑 있어서 좋다\" 라고 담백하게 말해주세요. 통찰력 있는 그녀도 꾸밈없는 진심 앞에서는 자신의 신비로운 결계를 스스로 풀어놓습니다.</li></ul></div>",
+      },
+    ];
 
     // ─────────────────────────────────────────────
     // 결과 데이터베이스 (16유형)
@@ -1703,6 +2107,190 @@
     if (padletModalBackdrop) padletModalBackdrop.addEventListener('click', closePadletModal);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && padletModal && !padletModal.classList.contains('pointer-events-none')) closePadletModal();
+    });
+
+    // ─────────────────────────────────────────────
+    // 찰떡궁합 이성 유혹 비법서 — 일일 드립피드(Drip-feed) 로직 + UI
+    //
+    // 데이터 흐름:
+    //  1) loveSecretData(32종, 위에서 정의)에서 "내 반대 성별" 타깃 16종만 골라
+    //     unlockDayIndex 순서로 정렬한다. (여성 독자 → targetGender:'male' 트랙,
+    //     남성 독자 → targetGender:'female' 트랙)
+    //  2) localStorage에 "이 트랙을 언제부터 시작했는지"(시작일)를 한 번만 저장해두고,
+    //     그 시작일 기준으로 Day 1은 즉시, Day 2부터는 "시작일+ (N-1)일, 밤 22시"에
+    //     하나씩 열리도록 계산한다.
+    //  3) 진도표(세그먼트)와 카드 목록을 그리고, 열린 카드만 클릭해서 본문을 볼 수 있다.
+    // ─────────────────────────────────────────────
+    const LOVE_SECRET_UNLOCK_HOUR = 22; // 매일 밤 10시에 다음 항목이 열린다
+    const LOVE_SECRET_STORAGE_KEY = 'neoTarotLoveSecretStartDate';
+
+    const loveSecretModal = document.getElementById('love-secret-modal');
+    const loveSecretModalBackdrop = document.getElementById('love-secret-modal-backdrop');
+    const loveSecretModalClose = document.getElementById('love-secret-modal-close');
+    const barLoveSecretBtn = document.getElementById('bar-love-secret-btn');
+    const lsdListView = document.getElementById('lsd-list-view');
+    const lsdDetailView = document.getElementById('lsd-detail-view');
+    const lsdTrackLabel = document.getElementById('lsd-track-label');
+    const lsdProgressText = document.getElementById('lsd-progress-text');
+    const lsdProgressBar = document.getElementById('lsd-progress-bar');
+    const lsdCardList = document.getElementById('lsd-card-list');
+    const lsdDetailBack = document.getElementById('lsd-detail-back');
+    const lsdDetailBadge = document.getElementById('lsd-detail-badge');
+    const lsdDetailTitle = document.getElementById('lsd-detail-title');
+    const lsdDetailDay = document.getElementById('lsd-detail-day');
+    const lsdDetailContent = document.getElementById('lsd-detail-content');
+
+    // 시작일은 이 트랙을 처음 여는 순간 딱 한 번만 저장되고, 이후에는 그 값을 그대로 재사용한다.
+    // (재방문 때마다 새로 시작일을 찍으면 Day 카운트가 리셋되어 드립피드가 무의미해진다.)
+    function getLoveSecretStartDate() {
+      let stored = null;
+      try {
+        stored = localStorage.getItem(LOVE_SECRET_STORAGE_KEY);
+      } catch (e) {
+        stored = null; // localStorage 접근 불가 환경(프라이빗 모드 등) 대비 안전장치
+      }
+      if (stored) {
+        const parsed = new Date(stored);
+        if (!isNaN(parsed.getTime())) return parsed;
+      }
+      const now = new Date();
+      try {
+        localStorage.setItem(LOVE_SECRET_STORAGE_KEY, now.toISOString());
+      } catch (e) {
+        // 저장 실패해도 최소한 이번 세션 안에서는 정상 동작하도록 now를 그대로 반환
+      }
+      return now;
+    }
+
+    // 리더(유저) 성별의 "반대" 성별을 공략하는 16종 트랙만 unlockDayIndex 순으로 반환.
+    function getLoveSecretTrack(readerGender) {
+      const targetGender = readerGender === 'female' ? 'male' : 'female';
+      return loveSecretData
+        .filter((e) => e.targetGender === targetGender)
+        .slice()
+        .sort((a, b) => a.unlockDayIndex - b.unlockDayIndex);
+    }
+
+    // dayIndex=1은 시작하자마자 바로 열리고, dayIndex=N(N>=2)은
+    // "시작일 달력 날짜 + (N-1)일, 그날 밤 22시"에 열린다.
+    function computeUnlockDate(startDate, dayIndex) {
+      if (dayIndex <= 1) return new Date(startDate.getTime());
+      const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      d.setDate(d.getDate() + (dayIndex - 1));
+      d.setHours(LOVE_SECRET_UNLOCK_HOUR, 0, 0, 0);
+      return d;
+    }
+
+    function formatUnlockDate(date) {
+      return `${date.getMonth() + 1}월 ${date.getDate()}일 밤 ${LOVE_SECRET_UNLOCK_HOUR - 12}시 공개 예정`;
+    }
+
+    // 트랙 전체에 대해 { ...entry, isUnlocked, unlockDate } 형태로 계산해서 반환.
+    function computeLoveSecretUnlockStatus(readerGender, now) {
+      const startDate = getLoveSecretStartDate();
+      const nowDate = now || new Date();
+      const track = getLoveSecretTrack(readerGender);
+      return track.map((entry) => {
+        const unlockDate = computeUnlockDate(startDate, entry.unlockDayIndex);
+        return Object.assign({}, entry, {
+          isUnlocked: nowDate.getTime() >= unlockDate.getTime(),
+          unlockDate,
+        });
+      });
+    }
+
+    function renderLoveSecretProgressBar(statusList) {
+      lsdProgressBar.innerHTML = '';
+      statusList.forEach((item) => {
+        const seg = document.createElement('div');
+        seg.className = item.isUnlocked
+          ? 'h-1.5 flex-1 rounded-full bg-gradient-to-r from-amber-400 to-neonpink'
+          : 'h-1.5 flex-1 rounded-full bg-white/10';
+        lsdProgressBar.appendChild(seg);
+      });
+      const unlockedCount = statusList.filter((i) => i.isUnlocked).length;
+      lsdProgressText.textContent = `${unlockedCount} / ${statusList.length} 공개됨`;
+    }
+
+    function renderLoveSecretCardList(statusList) {
+      lsdCardList.innerHTML = '';
+      statusList.forEach((item) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = item.isUnlocked
+          ? 'w-full text-left rounded-2xl border border-amber-400/40 bg-amber-400/5 hover:bg-amber-400/10 transition-colors duration-300 px-4 py-3.5 flex items-center gap-3'
+          : 'w-full text-left rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3.5 flex items-center gap-3 cursor-not-allowed';
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'text-lg flex-shrink-0';
+        iconSpan.textContent = item.isUnlocked ? '🔓' : '🔒';
+
+        const textWrap = document.createElement('div');
+        textWrap.className = 'min-w-0 flex-1';
+
+        const titleLine = document.createElement('p');
+        titleLine.className = item.isUnlocked ? 'text-sm font-semibold text-white truncate' : 'text-sm font-semibold text-purple-200/50 truncate';
+        titleLine.textContent = `Day ${item.unlockDayIndex} · ${item.mbti} ${item.title}`;
+
+        const subLine = document.createElement('p');
+        subLine.className = item.isUnlocked ? 'text-xs text-purple-200/70 mt-0.5 truncate' : 'text-xs text-purple-200/40 mt-0.5 truncate';
+        subLine.textContent = item.isUnlocked ? item.summary : formatUnlockDate(item.unlockDate);
+
+        textWrap.appendChild(titleLine);
+        textWrap.appendChild(subLine);
+        card.appendChild(iconSpan);
+        card.appendChild(textWrap);
+
+        if (item.isUnlocked) {
+          card.addEventListener('click', () => openLoveSecretDetail(item));
+        } else {
+          card.disabled = true;
+        }
+        lsdCardList.appendChild(card);
+      });
+    }
+
+    function openLoveSecretDetail(item) {
+      lsdDetailBadge.textContent = item.mbti;
+      lsdDetailTitle.textContent = item.title;
+      lsdDetailDay.textContent = `DAY ${item.unlockDayIndex} · SECRET UNLOCKED`;
+      // item.content는 love_secret_data.js 안에서 우리가 직접 만든 고정 HTML 문자열이라
+      // (유저 입력이 섞이지 않음) innerHTML로 바로 넣어도 안전하다.
+      lsdDetailContent.innerHTML = item.content;
+      lsdListView.classList.add('hidden');
+      lsdDetailView.classList.remove('hidden');
+      lsdDetailView.scrollTop = 0;
+    }
+
+    function backToLoveSecretList() {
+      lsdDetailView.classList.add('hidden');
+      lsdListView.classList.remove('hidden');
+    }
+
+    function openLoveSecretModal() {
+      const gender = currentBarGender || 'male';
+      const statusList = computeLoveSecretUnlockStatus(gender);
+      lsdTrackLabel.textContent = gender === 'female'
+        ? '남자를 사로잡는 16가지 유형 · 매일 밤 10시 하나씩 공개'
+        : '여자를 사로잡는 16가지 유형 · 매일 밤 10시 하나씩 공개';
+      renderLoveSecretProgressBar(statusList);
+      renderLoveSecretCardList(statusList);
+      backToLoveSecretList(); // 모달을 열 때는 항상 목록 뷰부터 보여준다
+      loveSecretModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLoveSecretModal() {
+      loveSecretModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    if (barLoveSecretBtn) barLoveSecretBtn.addEventListener('click', openLoveSecretModal);
+    if (lsdDetailBack) lsdDetailBack.addEventListener('click', backToLoveSecretList);
+    if (loveSecretModalClose) loveSecretModalClose.addEventListener('click', closeLoveSecretModal);
+    if (loveSecretModalBackdrop) loveSecretModalBackdrop.addEventListener('click', closeLoveSecretModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && loveSecretModal && !loveSecretModal.classList.contains('hidden')) closeLoveSecretModal();
     });
 
     // 연애비법서 레이어(모달)
