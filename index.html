@@ -255,6 +255,54 @@
   .lsd-tip-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .lsd-tip-item { line-height: 1.75; }
   .lsd-tip-item strong { color: #fde68a; }
+
+  /* [남성/여성 MBTI 심층 성향 분석] 아코디언(personalityDeepDiveData) 렌더링용 클래스.
+     guide-modal 최하단에 접혀 있다가 펼쳐지는 카드 안에서 innerHTML로 그대로 삽입된다. */
+  .pdd-accordion-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .pdd-accordion-panel.pdd-open { grid-template-rows: 1fr; }
+  .pdd-accordion-inner { overflow: hidden; }
+  .pdd-accordion-arrow { display: inline-block; transition: transform 0.35s ease; }
+  .pdd-accordion-arrow.pdd-open { transform: rotate(180deg); }
+  .pdd-section { margin-bottom: 14px; }
+  .pdd-section:last-child { margin-bottom: 0; }
+  .pdd-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-bottom: 8px;
+  }
+  .pdd-p { margin: 0 0 8px; line-height: 1.75; color: #e9e2ff; }
+  .pdd-p:last-child { margin-bottom: 0; }
+  .pdd-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .pdd-list li { line-height: 1.7; color: #e9e2ff; }
+  .pdd-list strong { color: #ff9ed6; }
+  .pdd-quote-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .pdd-line-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #b26bff;
+    border: 1px solid rgba(178,107,255,0.4);
+    border-radius: 999px;
+    padding: 2px 10px;
+    margin-bottom: 4px;
+  }
+  .pdd-style-grid { display: flex; flex-direction: column; gap: 10px; }
+  .pdd-style-item { border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 10px 12px; }
+  .pdd-style-label { font-size: 11px; color: #d9c9ff; margin-bottom: 3px; }
+  .pdd-style-brand { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .pdd-style-brand strong { color: #fbbf24; }
+  .pdd-style-desc { font-size: 12.5px; color: #cbb8f0; line-height: 1.6; }
+  .pdd-weapon-item { margin-bottom: 12px; }
+  .pdd-weapon-item:last-child { margin-bottom: 0; }
+  .pdd-weapon-label { font-size: 12.5px; font-weight: 700; color: #ff9ed6; margin-bottom: 6px; }
+  .pdd-section-pov .lsd-quote { font-style: italic; }
 </style>
 </head>
 <body class="font-body text-white min-h-screen overflow-x-hidden relative">
@@ -759,6 +807,26 @@
       </div>
 
       <p id="guide-secret-code" class="text-center text-[11px] tracking-[0.15em] text-amber-400 font-semibold"></p>
+
+      <!-- [남성/여성 MBTI 심층 성향 분석] 아코디언 — VIP 연애비법서 최하단, 기본 접힘 상태.
+           그리드(grid-template-rows: 0fr → 1fr) 트랜지션으로 순수 CSS만으로 "스르륵" 펼침을 구현했다
+           (height:auto는 transition이 안 걸리기 때문에 이 방식을 씀). 내부 콘텐츠는 max-height +
+           overflow-y-auto로 길어도 카드 안에서 스크롤되게 했다. -->
+      <div class="mt-6">
+        <button
+          id="guide-pdd-toggle" type="button"
+          class="w-full flex items-center justify-between gap-3 rounded-2xl border border-amber-400/40 bg-amber-400/5 px-5 py-4 text-left transition-colors duration-300 hover:bg-amber-400/10"
+          aria-expanded="false"
+        >
+          <span id="guide-pdd-headline" class="text-sm font-semibold text-amber-200 leading-snug">🔮 심층 성향 & 연애 본능 분석 (클릭하여 펼치기)</span>
+          <span id="guide-pdd-arrow" class="pdd-accordion-arrow flex-shrink-0 text-amber-300 text-xs">▼</span>
+        </button>
+        <div id="guide-pdd-panel" class="pdd-accordion-panel">
+          <div class="pdd-accordion-inner">
+            <div id="guide-pdd-content" class="mt-3 max-h-[420px] overflow-y-auto rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-purple-100 leading-relaxed"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1391,6 +1459,179 @@
     //   nightFactAttack(⚡ 밤의 팩폭 — 은밀한 공간에서 깨어나는 진짜 본능),
     //   match(찰떡 궁합) / bad(파국 궁합)
     // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────
+    // [남성/여성 MBTI 심층 성향 분석] — m_personality_data.md / f_personality_data.md 파싱 결과.
+    // personalityDeepDiveData.male.<MBTI> / .female.<MBTI> 로 접근한다.
+    // (콘텐츠 검토 메모: 원문 중 상대의 언어적 거부 의사를 대놓고 무시하라는 뉘앙스의
+    // 문구 3곳만 톤은 유지한 채 표현을 다듬었고, 나머지는 원문 그대로 살렸다.)
+    // ─────────────────────────────────────────────
+    const personalityDeepDiveData = {
+      male: {
+        ESTJ: {
+          title: "정복된 지배자",
+          tagline: "낮의 내가 세상을 다스린다면, 밤의 나는 오직 한 사람을 완벽히 소유한다.",
+          content: "<blockquote class=\"lsd-hero-quote\">낮의 내가 세상을 다스린다면, 밤의 나는 오직 한 사람을 완벽히 소유한다.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">당신은 어설픈 감정 놀이를 하지 않습니다. 여자의 시선, 숨소리, 떨림까지 당신의 통제 아래 둘 때 가장 완벽한 쾌락을 선사하죠. 당신의 단호하고 압도적인 리드 앞에서 거부할 수 있는 여자는 세상에 존재하지 않습니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>압도적인 주도권:</strong> 당신이 낮에 쌓아 올린 완벽함은 밤이 되면 '절대적인 지배력'으로 바뀝니다.</li><li><strong>통제된 카리스마:</strong> 당황하지 않고 판을 이끄는 당신의 묵직한 태도에 여자는 완벽한 안도감과 동시에 은밀한 굴복감을 느낍니다.</li><li><strong>결정적인 한 방:</strong> 당신의 손길 한 번, 단호한 눈빛 하나에 여자는 이성을 잃고 당신에게 완벽히 빠져듭니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">판을 주도할 때</span><blockquote class=\"lsd-quote\">\"딴생각하지 마. 오늘 밤 네가 할 일은 오직 나한테 온전히 갇히는 것뿐이야.\"</blockquote></li><li><span class=\"pdd-line-tag\">스킨십이 깊어질 때</span><blockquote class=\"lsd-quote\">\"그렇게 긴장할 필요 없어. 오늘 밤 네가 할 수 있는 건 그냥 날 믿고 따라오는 거야.\"</blockquote></li><li><span class=\"pdd-line-tag\">결정적인 순간</span><blockquote class=\"lsd-quote\">\"어디 봐, 눈 피하지 마. 네가 내 눈을 똑바로 볼 때 내가 얼마나 미치는지 알고 싶어서 그래?\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>솔리드옴므(Solid Homme)</strong> 또는 <strong>타임옴므(TIME HOMME)</strong></p><p class=\"pdd-style-desc\">깔끔하게 떨어지는 다크 네이비/블랙 슬림핏 셔츠에 슬랙스 조합. 단추는 상단 1~2개만 풀어 완벽함 속에 은밀한 빈틈을 연출하세요.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>크리드(Creed) - 어벤투스 (Aventus)</strong></p><p class=\"pdd-style-desc\">압도적인 남성성과 리더의 품격을 보여주는 스모키한 스파이시 앤 우디 향. '성공한 남자의 향'으로 불리며 여자가 남자의 목덜미에 코를 묻게 만드는 향입니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>태그호이어(Tag Heuer) - 까레라 오토매틱</strong></p><p class=\"pdd-style-desc\">묵직한 메탈/가죽 시계. 손목을 움직일 때마다 드러나는 은근한 럭셔리함이 당신의 지배적 매력을 완성합니다.</p></div></div></div>",
+        },
+        ISTJ: {
+          title: "금욕의 집행자",
+          tagline: "가장 굳게 닫힌 문 뒤에, 세상에서 가장 위험하고 뜨거운 밤이 숨어 있다.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 굳게 닫힌 문 뒤에, 세상에서 가장 위험하고 뜨거운 밤이 숨어 있다.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">평소의 단정함과 철저한 절제력은 당신의 완벽한 위장일 뿐입니다. 단둘이 남겨진 밤, 단단했던 결계를 깨부수고 드러내는 당신의 집요하고 깊은 본능은 여자를 소름 돋는 전율과 강렬한 쾌락에 빠뜨립니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>반전의 야성미:</strong> 아무에게나 보여주지 않는 당신의 위험한 본능. 당신이 선을 넘어서는 순간, 여자는 완벽히 사로잡힙니다.</li><li><strong>묵직한 신뢰감:</strong> 가볍지 않고 단단한 당신의 존재감은 여자에게 깊은 안정감과 폭발적인 스릴을 동시에 선사합니다.</li><li><strong>집요한 집중력:</strong> 한번 목표를 정하면 여자의 온몸이 반응할 때까지 타협 없이 밀어붙이는 압도적 집중력을 가졌습니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">선을 넘어설 때</span><blockquote class=\"lsd-quote\">\"내가 정한 선을 넘어온 건 너야. 이제 와서 돌아서겠다고 해도, 그 문은 이미 잠겼어.\"</blockquote></li><li><span class=\"pdd-line-tag\">반전을 보여줄 때</span><blockquote class=\"lsd-quote\">\"내가 늘 단정해 보였어? 오늘 밤엔 네가 알던 모습 따위 기대하지 마.\"</blockquote></li><li><span class=\"pdd-line-tag\">깊어지는 순간</span><blockquote class=\"lsd-quote\">\"아무 데도 못 가. 내가 만족할 때까지 넌 내 품 안에 있어야 하니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>엠포리오 아르마니(Emporio Armani)</strong> 또는 <strong>수트서플라이(Suitsupply)</strong></p><p class=\"pdd-style-desc\">딱 떨어지는 네이비/그레이 톤의 싱글 재킷과 셔츠 조합. 군더더기 없는 단정함이 벗겨졌을 때의 반전 매력을 극대화합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>샤넬(Chanel) - 블루 드 샤넬 오 드 파르펭 (Bleu de Chanel)</strong></p><p class=\"pdd-style-desc\">깊고 그윽한 아로마틱 우디 향. 단정함 뒤에 숨겨진 그윽한 남성적 관능미를 은근하게 풍겨줍니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>몽블랑(Montblanc) - 1858 시계</strong> 또는 <strong>레더 카키 카드지갑</strong></p><p class=\"pdd-style-desc\">차분하면서도 고급스러운 가죽 가공의 아이템. 클래식함 속에 깃든 단단한 남성성을 증명해 줍니다.</p></div></div></div>",
+        },
+        ESTP: {
+          title: "금지된 자극의 사냥꾼",
+          tagline: "생각은 나중에 해. 지금 네 눈앞에 있는 건 나잖아.",
+          content: "<blockquote class=\"lsd-hero-quote\">생각은 나중에 해. 지금 네 눈앞에 있는 건 나잖아.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">머뭇거림 없는 야생의 직진성. 거친 숨소리와 망설임 없는 터치로 여자의 이성을 순식간에 마비시키는 동물적인 본능을 타고났습니다. 당신과의 밤은 오감을 폭발시키는 폭풍 같은 아드레날린 그 자체입니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>압도적 본능:</strong> 거침없이 다가가는 당신의 자신감에 여자는 거부할 생각조차 하지 못하고 휘둘립니다.</li><li><strong>순발력과 자극:</strong> 여자의 작은 반응도 놓치지 않고 더 강렬한 자극으로 바꿔버리는 타고난 본능적 감각이 있습니다.</li><li><strong>치명적인 스릴:</strong> 당신과 함께하는 순간 여자는 도파민이 폭발하며 평생 잊지 못할 밤을 경험합니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">분위기를 끌어올릴 때</span><blockquote class=\"lsd-quote\">\"복잡하게 계산하지 마. 그냥 온몸으로 느껴, 지금 날 가지는 게 어떤 건지.\"</blockquote></li><li><span class=\"pdd-line-tag\">도발할 때</span><blockquote class=\"lsd-quote\">\"너 지금 망설이는 척하지만, 내 손길에 떨리고 있는 거 다 알아.\"</blockquote></li><li><span class=\"pdd-line-tag\">직진할 때</span><blockquote class=\"lsd-quote\">\"장난은 여기까지야. 진짜 밤이 뭔지 지금 보여줄게.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>올세인츠(AllSaints)</strong> 또는 <strong>디젤(Diesel)</strong></p><p class=\"pdd-style-desc\">무심하게 입은 가죽 재킷이나 피티드 블랙 티셔츠. 은근히 탄탄한 몸매를 드러내는 거친 야생미 룩.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>톰포드(Tom Ford) - 패뷸러스 (F</strong>*ing Fabulous)**</p><p class=\"pdd-style-desc\">스파이시하고 도발적인 가죽 향과 엠버 향. 존재만으로 상대를 압도하는 대담하고 치명적인 향입니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>크롬하츠(Chrome Hearts)</strong> 실버 반지 또는 <strong>비비안웨스트우드</strong> 가죽 팔찌</p><p class=\"pdd-style-desc\">손가락이나 손목에 포인트를 주는 실버 액세서리. 스킨십 시 여자의 피부에 닿는 차가운 감촉이 자극을 극대화합니다.</p></div></div></div>",
+        },
+        ISTP: {
+          title: "서늘한 미로의 지배자",
+          tagline: "가장 조용한 얼굴로, 여자의 결계를 가장 정교하게 풀어헤친다.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 조용한 얼굴로, 여자의 결계를 가장 정교하게 풀어헤친다.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">말수가 적어도 상관없습니다. 타인의 약점과 미세한 반응을 귀신같이 읽어내는 당신의 손길은 정교한 칼날 같습니다. 여자의 신체적 약점을 정확히 짚어내는 차가운 관능으로 상대를 완벽히 무력화시킵니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>정교한 테크닉:</strong> 서두르지 않고 여자가 무너지는 과정을 관찰하며 조종하는 정밀한 스킨십을 자랑합니다.</li><li><strong>서늘한 여유:</strong> 당황하지 않는 차가운 여유에 여자는 미칠 듯한 안달을 느끼며 먼저 당신을 갈구하게 됩니다.</li><li><strong>반전의 강렬함:</strong> 무심하던 표정이 뜨겁게 굳어지며 집중할 때, 여자는 당신의 자극에서 빠져나올 수 없습니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">관찰하며 반응할 때</span><blockquote class=\"lsd-quote\">\"어디까지 참을 수 있는지 보고 싶어서. 긴장 풀어, 이제 시작이니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">약점을 짚을 때</span><blockquote class=\"lsd-quote\">\"여기 만지면 숨 가빠지는 거 알고 있었어? 거짓말은 못 하네.\"</blockquote></li><li><span class=\"pdd-line-tag\">무심하게 끌어당길 때</span><blockquote class=\"lsd-quote\">\"더 애원해 봐. 그럼 네가 원하는 대로 해줄 테니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>아크네 스튜디오(Acne Studios)</strong> 또는 <strong>우영미(Wooyoungmi)</strong></p><p class=\"pdd-style-desc\">오버핏 미니멀 셔츠나 다크 톤의 니트. 조용하지만 감각적인 핏으로 차가운 도시 남자의 관능을 연출합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>딥티크(Diptyque) - 탐다오 (Tam Dao)</strong></p><p class=\"pdd-style-desc\">깊고 서늘한 우디 샌달우드 향. 차분하고 절제되어 있지만 은근하게 퍼지는 고급스러운 관능을 안겨줍니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>메종 마르지엘라(Maison Margiela)</strong> 실버 넘버링 반지</p><p class=\"pdd-style-desc\">심플하지만 감각적인 실버 리브드 반지. 여자의 온몸을 쓸어내릴 때 정교한 느낌을 배가시켜 줍니다.</p></div></div></div>",
+        },
+        INFJ: {
+          title: "은밀한 구원자",
+          tagline: "가장 다정한 미소 뒤에 가꿔둔, 당신만을 위한 깊은 유토피아.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 다정한 미소 뒤에 가꿔둔, 당신만을 위한 깊은 유토피아.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">여자의 가장 깊은 감정과 신체적 자극을 기가 막히게 꿰뚫어 봅니다. 다정하고 부드럽게 감싸 안아주면서도, 그 속에는 여자의 영혼까지 완전히 집어삼키려는 치명적인 집착이 숨어 있습니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>영혼을 흔드는 깊이:</strong> 단순한 육체적 스킨십을 넘어 여자의 마음과 영혼까지 온전히 독점하는 힘이 있습니다.</li><li><strong>치명적인 집착:</strong> 다정함 속에 скры형된 깊은 독점욕은 여자가 자신이 세상에서 가장 특별한 존재라고 느끼게 만듭니다.</li><li><strong>완벽한 몰입:</strong> 당신의 깊은 시선과 온기에 휩싸이면 여자는 스스로 당신이라는 신전에 빠져듭니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">감정을 흔들 때</span><blockquote class=\"lsd-quote\">\"너의 가장 약한 모습까지 전부 내게 보여줘. 내가 온전히 다 안아줄 테니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">깊게 다가갈 때</span><blockquote class=\"lsd-quote\">\"다들 겉모습만 보지만, 네 진심을 다 느끼는 건 나뿐이야. 날 믿어.\"</blockquote></li><li><span class=\"pdd-line-tag\">소유를 선언할 때</span><blockquote class=\"lsd-quote\">\"이제 넌 내 안에서 벗어날 수 없어. 영원히 내 품에 갇힌 거야.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>아미(Ami)</strong> 또는 <strong>메종키츠네(Maison Kitsuné)</strong></p><p class=\"pdd-style-desc\">포근한 부클레 니트나 부드러운 소재의 셔츠. 안기고 싶은 포근함 뒤에 가려진 치명적인 매력을 연출합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>바이레도(Byredo) - 집시워터 (Gypsy Water)</strong></p><p class=\"pdd-style-desc\">은은한 우디 향과 바닐라의 은은함이 섞인 몽환적인 향. 오랫동안 여운이 남아 상대를 맴돌게 만듭니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>구찌(Gucci)</strong> 얇은 실버 체인 목걸이</p><p class=\"pdd-style-desc\">셔츠 사이로 은은하게 보이는 심플한 체인 목걸이. 감성적이면서도 비밀스러운 분위기를 완성합니다.</p></div></div></div>",
+        },
+        ENFJ: {
+          title: "성스러운 유혹자",
+          tagline: "모두를 향하던 온기가, 오직 너 한 사람만을 가두는 뜨거운 태양이 된다.",
+          content: "<blockquote class=\"lsd-hero-quote\">모두를 향하던 온기가, 오직 너 한 사람만을 가두는 뜨거운 태양이 된다.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">여자가 무엇에 갈증을 느끼는지 본능적으로 알아채는 압도적인 세심함. 당신이 내리는 완벽한 헌신과 치명적인 다정함 앞에 여자는 자진해서 완벽하게 굴복합니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>완벽한 소유욕:</strong> 오직 한 여자에게만 폭발시키는 뜨거운 열정으로 상대를 정신 못 차리게 만듭니다.</li><li><strong>감각적 매너:</strong> 친절함과 세심함으로 방심하게 만든 뒤, 결정적인 순간에 압도적인 남성성으로 판을 지배합니다.</li><li><strong>극상의 만족감:</strong> 상대가 원하는 것을 미리 읽고 선사하여, 당신 없이는 만족할 수 없는 몸으로 만들어 버립니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">여자를 가둘 때</span><blockquote class=\"lsd-quote\">\"나 말고 다른 생각은 1초도 하지 마. 지금 이 순간, 네 세상엔 나만 있어야 해.\"</blockquote></li><li><span class=\"pdd-line-tag\">몰입을 유도할 때</span><blockquote class=\"lsd-quote\">\"내가 너를 얼마나 특별하게 만들어줄 수 있는지, 몸으로 느끼게 해줄게.\"</blockquote></li><li><span class=\"pdd-line-tag\">감정을 극대화할 때</span><blockquote class=\"lsd-quote\">\"숨기지 마. 네가 원하는 건 내가 다 채워줄 수 있으니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>라코스테(Lacoste) 가디건</strong> 또는 <strong>폴로 라코스테 셔츠 룩</strong></p><p class=\"pdd-style-desc\">따뜻하고 댄디한 느낌의 니트 가디건과 단정한 팬츠. '친절하고 완벽한 오빠'의 정석 스타일.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>조말론(Jo Malone) - 우드세이지 앤 씨솔트</strong></p><p class=\"pdd-style-desc\">포근하면서도 청량한 향. 여자가 부담 없이 끌려오게 만들며 스킨십 욕구를 극대화합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>프레드(Fred) - 포스텐 팔찌</strong> 또는 <strong>가죽 스트랩 시계</strong></p><p class=\"pdd-style-desc\">세련되고 따뜻한 느낌의 팔찌. 손길이 닿을 때 부드러운 고급스러움을 전해줍니다.</p></div></div></div>",
+        },
+        ENFP: {
+          title: "쾌락의 환상가",
+          tagline: "가장 유쾌한 미소 뒤에 숨겨둔, 여자를 미치게 만들 은밀하고 뜨거운 열병.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 유쾌한 미소 뒤에 숨겨둔, 여자를 미치게 만들 은밀하고 뜨거운 열병.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">평소의 밝은 모습과 대비되는 어둠 속의 광기 어린 눈빛. 예측 불가능한 템포와 폭발적인 열정으로 여자의 밤을 혼돈과 쾌락의 도파민으로 가득 채워버립니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>반전 도파민:</strong> 귀엽고 유쾌한 평소 모습 뒤에 숨겨진 거친 야성미가 여자에게 엄청난 쾌감을 선사합니다.</li><li><strong>지루할 틈 없는 템포:</strong> 완급 조절과 예측 불가능한 스킨십으로 여자의 감각을 끊임없이 들었다 놓습니다.</li><li><strong>순수한 열정:</strong> 장난스러움이 진지함으로 변하는 순간, 폭발하는 당신의 열정에 여자는 미쳐버립니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">반전을 보여줄 때</span><blockquote class=\"lsd-quote\">\"나한테서 도망칠 수 있을 거라 생각했어? 오늘 밤 네가 아는 순한 난 없어.\"</blockquote></li><li><span class=\"pdd-line-tag\">열기를 올릴 때</span><blockquote class=\"lsd-quote\">\"어때? 생각했던 것보다 내가 훨씬 더 위험하지?\"</blockquote></li><li><span class=\"pdd-line-tag\">몰입시킬 때</span><blockquote class=\"lsd-quote\">\"딴 데 보지 마. 지금부터 펼쳐질 건 너랑 나만의 미친 환상이니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>스투시(Stüssy)</strong> 오버핏 셔츠 또는 <strong>젠틀몬스터</strong> 스타일링</p><p class=\"pdd-style-desc\">트렌디하면서도 위트 있는 감각의 캐주얼 룩. 자유분방함 속에서 드러나는 은근한 핏.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>킬리안(Kilian) - 엔젤스 쉐어 (Angels' Share)</strong></p><p class=\"pdd-style-desc\">달콤한 럼주와 바닐라, 스파이스가 섞인 중독적인 향. 달콤하면서도 알코올처럼 여자를 취하게 만듭니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>보테가 베네타(Bottega Veneta)</strong> 땋은 가죽 팔찌</p><p class=\"pdd-style-desc\">위트 있고 스타일리시한 위빙 가죽 팔찌. 스포티하면서도 은근한 세련미를 더해줍니다.</p></div></div></div>",
+        },
+        INTP: {
+          title: "이성의 파괴자",
+          tagline: "가장 차가운 지성 뒤에 숨겨둔, 정교하고 서늘한 탐닉의 시간.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 차가운 지성 뒤에 숨겨둔, 정교하고 서늘한 탐닉의 시간.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">무표정한 얼굴로 상대를 내려다보는 서늘한 관능미. 여자의 모든 방어기제를 완벽하게 계산해 내고, 느리지만 확실하게 상대의 이성을 산산조각 냅니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>이성적인 해체:</strong> 여자가 어디에 약한지 머릿속으로 계산하여 정확하게 공략하는 정교함이 있습니다.</li><li><strong>서늘한 카리스마:</strong> 당황하지 않는 차가운 시선과 분위기에 여자는 스스로 주도권을 내어주게 됩니다.</li><li><strong>깊은 탐닉:</strong> 한 번 빠져들면 호기심과 분석력을 바탕으로 여자의 신체 오감을 끝까지 파헤칩니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">이성을 무너뜨릴 때</span><blockquote class=\"lsd-quote\">\"늘 이성적일 수 있을 거라 생각했어? 네가 무너지는 건 내 완벽한 계산 결과야.\"</blockquote></li><li><span class=\"pdd-line-tag\">반응을 확인할 때</span><blockquote class=\"lsd-quote\">\"거봐, 여기 만지니까 이성이 날아가지? 네 몸은 정직해.\"</blockquote></li><li><span class=\"pdd-line-tag\">서늘하게 다가갈 때</span><blockquote class=\"lsd-quote\">\"도망치려고 애쓰지 마. 이미 넌 내 계산대로 움직이고 있으니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>코스(COS)</strong> 미니멀 셔츠 또는 <strong>르메르(Lemaire)</strong> 드레이프 니트</p><p class=\"pdd-style-desc\">군더더기 없이 차갑고 깔끔하게 떨어지는 미니멀 블랙/모노톤 룩. 지적인 냉철함을 강조합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>르라보(Le Labo) - 상탈 33 (Santal 33)</strong></p><p class=\"pdd-style-desc\">스모키한 가죽 향과 알싸한 우디 향. 스페셜하고 차가운 독보적 지성을 표현합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>티파니앤코(Tiffany &amp; Co.)</strong> 심플 실버 링</p><p class=\"pdd-style-desc\">차갑게 빛나는 실버 링. 여자의 관자놀이나 목을 짚을 때 차분한 느낌을 선사합니다.</p></div></div></div>",
+        },
+        INFP: {
+          title: "탐닉의 시인",
+          tagline: "가장 헌신적인 사랑 뒤에 숨겨진, 상대를 녹여버릴 지독한 집착.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 헌신적인 사랑 뒤에 숨겨진, 상대를 녹여버릴 지독한 집착.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">순수함과 애절함 속에 억눌려 있던 거친 본능. 여자의 작은 피부 떨림 하나까지 섬세하게 포착하여, 여자가 자신의 온기 외에는 아무것도 느끼지 못하도록 완벽히 물들입니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>감성적 폭주:</strong> 수줍은 모습 뒤에 가둬둔 깊은 열정이 터져 나올 때, 여자에게 엄청난 전율을 안깁니다.</li><li><strong>섬세한 오감:</strong> 상대의 호흡 하나, 피부의 떨림 하나도 놓치지 않고 반응해 주는 깊은 섬세함이 있습니다.</li><li><strong>지독한 몰입:</strong> 당신이 내뿜는 몽환적이고 애절한 집착에 여자는 거부감 없이 깊이 빠져듭니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">집착을 드러낼 때</span><blockquote class=\"lsd-quote\">\"나를 망가뜨려도 좋아. 하지만 내 품에서 벗어날 생각은 하지 마.\"</blockquote></li><li><span class=\"pdd-line-tag\">깊게 다가갈 때</span><blockquote class=\"lsd-quote\">\"네 모든 숨소리가 다 내 거였으면 좋겠어. 날 너로 채워줘.\"</blockquote></li><li><span class=\"pdd-line-tag\">허락을 구할 때</span><blockquote class=\"lsd-quote\">\"더 이상 못 참겠어. 오늘 밤은 날 네가 원하는 대로 망가뜨려 봐.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>스튜디오 니콜슨(Studio Nicholson)</strong> 또는 <strong>산드로 옴므(Sandro Homme)</strong></p><p class=\"pdd-style-desc\">내추럴하면서도 감성적인 핏의 셔츠와 와이드 팬츠. 부드러움과 몽환적인 섹시함을 풍깁니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>메종 마르지엘라(Maison Margiela) - 재즈클럽 (Jazz Club)</strong></p><p class=\"pdd-style-desc\">럼주와 타바코 잎이 어우러진 감성적이고 달콤한 쌉싸름함. 몽환적인 여운을 길게 남깁니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>비비안웨스트우드(Vivienne Westwood)</strong> 실버 팬던트</p><p class=\"pdd-style-desc\">은은하게 감성을 자극하는 실버 목걸이. 유니크하면서도 위태로운 매력을 더해줍니다.</p></div></div></div>",
+        },
+        ESFJ: {
+          title: "밤의 신전",
+          tagline: "상대를 완벽히 사육하고 소유하는, 끊임없는 완벽주의적 열기.",
+          content: "<blockquote class=\"lsd-hero-quote\">상대를 완벽히 사육하고 소유하는, 끊임없는 완벽주의적 열기.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">여자가 가빠지는 숨소리, 미세한 떨림 하나 놓치지 않는 완벽한 오감 배려. 겉으로는 끝없이 헌신하는 것 같지만, 실제로는 여자의 감각을 자신의 온기로 완벽히 메워버리는 밤의 지배자입니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>완벽한 소유:</strong> 여자가 최고로 만족하는 순간을 만들어내며 상대를 당신의 온기 속에 완벽히 가둡니다.</li><li><strong>안정적인 도발:</strong> 여자에게 완벽한 안전지대를 제공하면서 동시에 감각을 끝까지 몰아붙이는 능력.</li><li><strong>압도적인 만족:</strong> 여자가 '나를 이렇게 다뤄준 남자는 처음'이라고 고백하게 만드는 절정의 헌신.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">독점할 때</span><blockquote class=\"lsd-quote\">\"다른 곳에 신경 쓸 여유 따윈 안 줄 거야. 오늘 밤은 오직 나로만 채워줄 테니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">만족감을 줄 때</span><blockquote class=\"lsd-quote\">\"좋아? 숨기지 말고 다 표현해 봐. 네가 만족할 때까지 안 멈출 테니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">끌어안을 때</span><blockquote class=\"lsd-quote\">\"넌 그냥 가만히 내 품에 맡기기만 하면 돼. 내가 알아서 다 할 테니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>빈폴(Beanpole)</strong> 또는 <strong>헤지스(HAZZYS)</strong> 프리미엄 라인</p><p class=\"pdd-style-desc\">깔끔하고 신뢰감을 주는 슬림핏 니트와 깔끔한 인상을 주는 톤온톤 룩.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>샤넬(Chanel) - 알뤼르 옴므 스포츠 (Allure Homme Sport)</strong></p><p class=\"pdd-style-desc\">세련되고 활력 넘치는 프레시 우디 향. 다정하면서도 강렬한 남성적 매력을 더해줍니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>엠포리오 아르마니</strong> 스틸 시계</p><p class=\"pdd-style-desc\">클래식하고 단정한 세련미를 더해주는 정갈한 메탈 시계.</p></div></div></div>",
+        },
+        ISFP: {
+          title: "본능의 조각가",
+          tagline: "가장 조용한 숨결로, 여자의 결계를 하나씩 해체하는 은밀한 예술가.",
+          content: "<blockquote class=\"lsd-hero-quote\">가장 조용한 숨결로, 여자의 결계를 하나씩 해체하는 은밀한 예술가.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">말이 필요 없는 완벽한 오감 탐닉. 수줍은 미소 뒤에 숨겨진 조용하고 야성적인 손길로 여자의 허점과 약점을 하나씩 침식해 들어가는 은밀한 본능을 가졌습니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>반전 매력:</strong> 평소의 순둥함 뒤에 숨겨진 나른하고 과감한 스킨십이 상대를 폭발시킵니다.</li><li><strong>감각적인 손길:</strong> 피부에 닿는 감촉과 분위기를 예술적으로 컨트롤하여 여자를 녹아내리게 만듭니다.</li><li><strong>나른한 관능:</strong> 서두르지 않고 분위기에 젖어들며 여자의 반응을 이끌어내는 내추럴한 섹시함.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">분위기를 잡을 때</span><blockquote class=\"lsd-quote\">\"아무 말도 하지 마. 그냥 지금 날 느끼는 데에만 집중해.\"</blockquote></li><li><span class=\"pdd-line-tag\">과감하게 다가갈 때</span><blockquote class=\"lsd-quote\">\"나 보기보다 되게 과감한데, 감당할 수 있겠어?\"</blockquote></li><li><span class=\"pdd-line-tag\">귓가에 속삭일 때</span><blockquote class=\"lsd-quote\">\"긴장하지 마... 네가 좋아하는 거 다 알고 있으니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>메종 키츠네(Maison Kitsuné)</strong> 또는 <strong>LMC</strong></p><p class=\"pdd-style-desc\">편안하면서도 스타일리시한 드롭 숄더 셔츠나 부드러운 가디건. 자연스러운 분위기 연출.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>이솝(Aesop) - 테싯 (Tacit) 또는 카르스트 (Karst)</strong></p><p class=\"pdd-style-desc\">감각적이고 은은한 숲과 흙, 감귤 향. 자연스러우면서도 기억에 오래 남는 잔향을 가졌습니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>불가리(Bulgari)</strong> 가죽 끈 원 포인트 팔찌</p><p class=\"pdd-style-desc\">과하지 않고 부드럽게 감기는 가죽 팔찌. 스킨십 시 부드러운 느낌을 안겨줍니다.</p></div></div></div>",
+        },
+        ISFJ: {
+          title: "칠흑의 사육자",
+          tagline: "헌신이라는 이름의 사슬로 여자의 밤을 단단히 묶어버리는 정교한 소유.",
+          content: "<blockquote class=\"lsd-hero-quote\">헌신이라는 이름의 사슬로 여자의 밤을 단단히 묶어버리는 정교한 소유.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">다정한 눈동자 뒤에 숨겨둔 소름 돋을 만큼 깊은 독점욕. 빠져나갈 여지조차 주지 않는 묵직한 체중과 압도적인 악력으로 여자를 자신의 품 안에 온전히 가둡니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>묵직한 독점욕:</strong> 오직 나만 볼 수 있는 은밀한 공간에서 터져 나오는 강렬한 집착과 거친 야성.</li><li><strong>절대적 안도감:</strong> 여자에게 세상 가장 단단한 품을 제공하면서 깊은 성적 항복을 받아냅니다.</li><li><strong>반전의 사육:</strong> 친절한 오빠에서 순간 밤의 지배자로 변하는 차가운 억압이 상대의 쾌감을 극대화합니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">가둬둘 때</span><blockquote class=\"lsd-quote\">\"도망치지 마. 내가 준 사랑 안에서 그냥 온전히 내게 갇히는 거야.\"</blockquote></li><li><span class=\"pdd-line-tag\">거칠어질 때</span><blockquote class=\"lsd-quote\">\"착한 척 안 해도 돼. 오늘 밤 내 진짜 모습은 너만 아는 거니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">귓가에 나직하게</span><blockquote class=\"lsd-quote\">\"다른 사람은 생각지도 마. 넌 오직 내 품에서만 숨 쉬는 거야.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>시리즈(Series)</strong> 또는 <strong>커스텀멜로우(Customellow)</strong></p><p class=\"pdd-style-desc\">단정하면서도 차분한 톤의 라운드 니트와 체소 스타일 팬츠. 깔끔한 남친 룩의 정석.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>딥티크(Diptyque) - 플레르 드 빠오 (Fleur de Peau)</strong></p><p class=\"pdd-style-desc\">살냄새와 어우러지는 기분 좋은 머스크 향. 안기고 싶게 만드는 치명적인 부드러움을 풍깁니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>시티즌(Citizen)</strong> 또는 <strong>세이코(Seiko)</strong> 다크 메탈 시계</p><p class=\"pdd-style-desc\">차분하고 단단한 인상을 심어주는 묵직한 메탈 시계.</p></div></div></div>",
+        },
+        ENTJ: {
+          title: "밤의 절대 군주",
+          tagline: "세상을 복종시키는 카리스마가, 오직 여자의 밤을 완전하게 굴복시킨다.",
+          content: "<blockquote class=\"lsd-hero-quote\">세상을 복종시키는 카리스마가, 오직 여자의 밤을 완전하게 굴복시킨다.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">압도적인 정복욕과 오만한 자신감. 여자의 두 손목을 다정하지만 단호하게 감싸 쥐는 거친 악력과 직진성으로 상대의 마음을 완전히 사로잡고 뜨거운 호응을 이끌어냅니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>압도적 정복:</strong> 당신 앞에 서면 그 어떤 도도한 여자라도 기꺼이 당신에게 주도권을 내어줍니다.</li><li><strong>거부할 수 없는 리드:</strong> 완벽한 카리스마와 도도한 분위기로 여자의 마음을 산산조각 내고 제압합니다.</li><li><strong>절대적 완벽성:</strong> 말 한마디, 손길 하나에도 거침없는 자신감이 넘쳐흘러 상대를 무릎 꿇게 만듭니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">주도권을 쥘 때</span><blockquote class=\"lsd-quote\">\"딴생각할 겨를 따위는 안 줄 거야. 오늘 밤 넌 완벽하게 내 것이 되는 거니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">항복을 받아낼 때</span><blockquote class=\"lsd-quote\">\"날 똑바로 봐. 네가 누구한테 굴복하고 있는지 똑똑히 기억해.\"</blockquote></li><li><span class=\"pdd-line-tag\">깊게 다가갈 때</span><blockquote class=\"lsd-quote\">\"눈 피하지 마. 너도 지금 이렇게 무너지는 게 기분 좋다는 거, 나 다 보이니까.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>휴고보스(Hugo Boss)</strong> 또는 <strong>질스튜어트 뉴욕</strong></p><p class=\"pdd-style-desc\">딱 맞춰 입은 각 잡힌 슈트나 테일러드 재킷. 절제된 고급스러움과 절대적 권력을 연출합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>톰포드(Tom Ford) - 블랙 오키드 (Black Orchid)</strong></p><p class=\"pdd-style-desc\">감각적이고 압도적인 스파이시 앤 플로럴 우디 향. 강렬한 권력과 관능을 연출합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>까르띠에(Cartier) - 탱크 솔로</strong> 또는 <strong>골드 핀</strong></p><p class=\"pdd-style-desc\">럭셔리함의 상징. 손목에 차는 순간 당신의 오만하고 완벽한 카리스마가 완성됩니다.</p></div></div></div>",
+        },
+        ENTP: {
+          title: "오만한 도발자",
+          tagline: "여자의 이성을 경계선 끝까지 몰아붙여, 완벽한 굴복을 끌어내는 밤의 침략자.",
+          content: "<blockquote class=\"lsd-hero-quote\">여자의 이성을 경계선 끝까지 몰아붙여, 완벽한 굴복을 끌어내는 밤의 침략자.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">여자의 한계점을 아슬아슬하게 넘나드는 미친 정복욕. 느긋한 미소와 은밀한 도발로 여자의 차분한 이성을 산산조각 내고 오직 당신만을 갈구하게 만듭니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>아슬아슬한 밀당:</strong> 상대를 들었다 놨다 하며 이성을 마비시키는 최고의 정복적 밀당 능력.</li><li><strong>오만한 도발:</strong> 여자가 스스로 자존심을 버리고 당신에게 달려들게 만드는 은밀한 승부욕 자극.</li><li><strong>폭발적 쾌락:</strong> 경계선을 아슬아슬하게 넘나드는 스릴으로 상대를 유혹하고 정복합니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">도발할 때</span><blockquote class=\"lsd-quote\">\"어디까지 참을 수 있는지 볼까? 오늘 밤은 네가 만든 방어선 따위 소용없어.\"</blockquote></li><li><span class=\"pdd-line-tag\">비웃듯이 말할 때</span><blockquote class=\"lsd-quote\">\"말로는 그렇게 튕기면서, 몸은 이미 다 반응하고 있잖아?\"</blockquote></li><li><span class=\"pdd-line-tag\">승리를 선언할 때</span><blockquote class=\"lsd-quote\">\"거봐, 결국 내 뜻대로 됐잖아. 넌 나한테서 절대 못 벗어나.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>비비안웨스트우드 옴므</strong> 또는 <strong>준지(Juun.J)</strong></p><p class=\"pdd-style-desc\">오버핏 재킷이나 유니크한 핏의 셔츠. 스타일리시하면서도 오만한 아우라를 뿜어냅니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>메종 프란시스 커정 - 바카라 루주 540 (Baccarat Rouge 540)</strong></p><p class=\"pdd-style-desc\">달콤하면서도 쌉싸름한 앰버 향. 한 번 맡으면 절대 잊을 수 없는 유혹적인 향입니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>구찌(Gucci)</strong> 가죽 체인 팔찌</p><p class=\"pdd-style-desc\">과감하고 독창적인 디자인의 액세서리. 위트 있는 도발을 완성합니다.</p></div></div></div>",
+        },
+        ESFP: {
+          title: "본능의 무용수",
+          tagline: "여자의 오감을 한순간에 마비시킬 폭발적이고 거침없는 본능.",
+          content: "<blockquote class=\"lsd-hero-quote\">여자의 오감을 한순간에 마비시킬 폭발적이고 거침없는 본능.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">망설일 틈조차 주지 않는 과감하고 뜨거운 스킨십. 찰나의 자극을 놓치지 않는 동물적 감각으로 여자의 몸을 단단히 고정하고 밤을 온전히 지배합니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>폭발적 에너지를 선사:</strong> 당신의 거침없는 열정 앞에 여자는 아무런 저항 없이 순식간에 녹아내립니다.</li><li><strong>동물적 감각:</strong> 여자가 원하는 자극을 본능적으로 알아채고 망설임 없이 밀어붙이는 패기.</li><li><strong>순간의 몰입:</strong> 당신과 함께하는 밤은 세상에서 가장 뜨겁고 화려한 무대가 됩니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">눈을 맞출 때</span><blockquote class=\"lsd-quote\">\"나한테서 눈 떼지 마. 오늘 밤 네가 느낄 수 있는 모든 건 다 내가 줄 테니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">밀어붙일 때</span><blockquote class=\"lsd-quote\">\"망설일 시간 없어. 지금 이 순간을 온몸으로 즐겨.\"</blockquote></li><li><span class=\"pdd-line-tag\">열기를 폭발시킬 때</span><blockquote class=\"lsd-quote\">\"소리 숨기지 마. 네 숨소리가 날 얼마나 미치게 만드는지 알아?\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>자라(ZARA) 프리미엄</strong> 또는 <strong>디스퀘어드2</strong></p><p class=\"pdd-style-desc\">화려한 패턴의 오버핏 셔츠나 슬림핏 스판 데님. 단숨에 시선을 사로잡는 섹시한 스타일.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>베르사체(Versace) - 에로스 (Eros)</strong></p><p class=\"pdd-style-desc\">정열적이고 도발적인 민트와 바닐라, 우디 향. '유혹의 신'이라는 이름답게 폭발적인 열정을 보여줍니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>엠포리오 아르마니</strong> 볼드한 메탈 팔찌</p><p class=\"pdd-style-desc\">손목에서 화려하게 빛나는 볼드한 액세서리. 거친 남성성을 배가해 줍니다.</p></div></div></div>",
+        },
+        INTJ: {
+          title: "밤의 대설계자",
+          tagline: "치밀하게 계산된 얼음의 결계 뒤에 숨겨둔, 여자를 해체할 뜨거운 신전.",
+          content: "<blockquote class=\"lsd-hero-quote\">치밀하게 계산된 얼음의 결계 뒤에 숨겨둔, 여자를 해체할 뜨거운 신전.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">👑 당신만의 독보적인 매력</p><p class=\"pdd-p\">방의 온도, 조명, 손길 하나까지 상대를 굴복시키기 위해 계산하는 완벽주의. 당신이 설계해 둔 결계 안으로 여자를 유인해 치명적이고 거친 본능으로 밤을 정복합니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🔥 자신감을 200% 올려주는 포인트</p><ul class=\"pdd-list\"><li><strong>치밀한 판짜기:</strong> 분위기부터 스킨십의 단계까지 여자가 저항할 수 없도록 완벽히 설계합니다.</li><li><strong>서늘한 카리스마:</strong> 지적이고 차가운 눈빛 하나로 상대의 이성을 마비시키는 압도적인 분위기.</li><li><strong>반전의 폭주:</strong> 차가운 가면에 가려져 있던 본능이 터져 나올 때, 여자에게 소름 돋는 절정을 안깁니다.</li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">💋 여자를 녹이는 당신의 한 마디</p><ul class=\"pdd-quote-list\"><li><span class=\"pdd-line-tag\">판을 선언할 때</span><blockquote class=\"lsd-quote\">\"도망칠 수 있을 거라 생각했어? 이 공간의 모든 건 너를 굴복시키기 위해 계산된 거야.\"</blockquote></li><li><span class=\"pdd-line-tag\">이성을 해체할 때</span><blockquote class=\"lsd-quote\">\"머리로 생각하려 하지 마. 어차피 넌 내 뜻대로 무너지게 되어 있으니까.\"</blockquote></li><li><span class=\"pdd-line-tag\">결계 속으로 끌어당길 때</span><blockquote class=\"lsd-quote\">\"내 완벽한 설계 속에서 네가 할 수 있는 건 온전한 항복뿐이야.\"</blockquote></li></ul></div><div class=\"pdd-section\"><p class=\"pdd-label\">👔 당신을 돋보이게 하는 스타일링</p><div class=\"pdd-style-grid\"><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">👔 코디</p><p class=\"pdd-style-brand\"><strong>솔리드옴므(Solid Homme)</strong> 또는 <strong>송지오 옴므(SONGZIO)</strong></p><p class=\"pdd-style-desc\">차갑고 날카로운 핏의 올 블랙 셔츠와 슬랙스. 범접할 수 없는 카리스마를 연출합니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">🍷 향수</p><p class=\"pdd-style-brand\"><strong>톰포드(Tom Ford) - 오드우드 (Oud Wood)</strong></p><p class=\"pdd-style-desc\">희귀한 우드 향과 스파이스가 섞인 은밀하고 지적인 향. 범접하기 힘든 오만한 관능미를 안겨줍니다.</p></div><div class=\"pdd-style-item\"><p class=\"pdd-style-label\">⌚ 액세서리</p><p class=\"pdd-style-brand\"><strong>프레드릭 콘스탄트</strong> 오토매틱 가죽 시계</p><p class=\"pdd-style-desc\">클래식하고 정교한 시계. 당신의 치밀한 완벽주의를 시각적으로 완성합니다.</p></div></div></div>",
+        },
+      },
+      female: {
+        ESTJ: {
+          title: "철혈의 통치자 ➔ 완벽한 반전의 여왕 (The Iron Commandant)",
+          tagline: "절대 무너지지 않을 것 같던 차가운 통제관, 오직 그의 압도적인 기세 아래 모든 통제권을 내어주고 사로잡히는 반전의 카타르시스.",
+          content: "<blockquote class=\"lsd-hero-quote\">절대 무너지지 않을 것 같던 차가운 통제관, 오직 그의 압도적인 기세 아래 모든 통제권을 내어주고 사로잡히는 반전의 카타르시스.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">낮 동안 철저한 계획과 리더십으로 사람들을 지휘하는 당신. 어설프게 눈치를 보거나 당신에게 휘둘리는 남자에게는 쉽게 지루함을 느낍니다. 당신의 진짜 밤의 치명함은 <strong>'평소 완벽하게 유지하던 방어선과 통제권을 오직 한 사람의 진짜 남자에게 완전히 빼앗길 때 나오는 폭발적인 복종의 전율'</strong>에 있습니다. 절대 꺾이지 않을 것 같던 당신의 서늘한 이성이 자신 앞에서 무너지는 순간, 남자는 세상 그 어떤 것과도 바꿀 수 없는 정복감과 충성심을 품게 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">통제권 넘겨주기 (Surrender of Control)</p><p class=\"pdd-p\">그와 단둘이 있을 때, 늘 상황을 주도하려던 습관을 잠시 내려놓고 그의 눈을 차분히 바라보세요.</p><blockquote class=\"lsd-quote\">\"나 오늘 밤은 아무것도 판단하고 싶지 않아. 네가 전부 다 알아서 이끌어봐.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">도발적인 눈빛과 항복</p><p class=\"pdd-p\">그가 거칠게 주도권을 쥐어 올 때, 살짝 저항하는 척하다가 이내 그의 눈빛 아래 시선을 깔며 깊은 숨을 내쉬어 보세요. 남자의 야성이 폭발합니다.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">늘 모든 상황을 지휘하던 그녀가 내 손길 아래 모든 완력을 내려놓고 가쁜 숨을 짓눌려 내쉬고 있다. 이 당당한 여왕을 완벽히 정복하고 길들인 남자는 오직 나뿐이다.</blockquote></div>",
+        },
+        ISTJ: {
+          title: "원칙주의 단대함 ➔ 본능의 해방 (The Prudent Sentinel)",
+          tagline: "바위처럼 단단하던 원칙과 이성의 벽, 오직 그의 단호함 앞에 붕괴되며 숨겨진 본능을 터뜨리는 순간.",
+          content: "<blockquote class=\"lsd-hero-quote\">바위처럼 단단하던 원칙과 이성의 벽, 오직 그의 단호함 앞에 붕괴되며 숨겨진 본능을 터뜨리는 순간.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">낮 동안 흐트러짐 없는 원칙과 강한 책임감으로 정돈된 삶을 살아가는 당신. 쉽게 선을 허락하지 않는 당신의 진중함은 남자로 하여금 고고한 성벽을 보는 듯한 승부욕을 자극합니다. 당신의 진짜 밤의 본능은 <strong>'늘 스스로를 억누르던 규율의 끈이 그의 남성적인 단호함 앞에 단숨에 끊겨 나갈 때 느끼는 해방감'</strong>에 있습니다. 착한 가면과 엄격한 이성을 벗어던지고 그에게 온전히 귀속되는 순간, 남자는 당신의 깊은 본능을 독점했다는 깊은 쾌감에 빠져듭니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">이성의 끈을 내려놓는 신호 (Disrupting Order)</p><p class=\"pdd-p\">그가 머뭇거리거나 망설일 때, 가만히 그의 옷깃을 잡고 시선을 고정하세요.</p><blockquote class=\"lsd-quote\">\"언제까지 조심스럽게 굴 건데? 오늘 밤은 그 단정한 규칙 같은 거 다 잊어버려.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">본능의 파헤쳐짐을 인정하기</p><p class=\"pdd-p\">스킨십이 깊어질 때, 그를 거부하지 않고 그의 가슴에 깊이 파묻히며 오직 그의 손길에 반응해 보세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">항상 곧고 바른 선을 지키던 그녀가 내 품 안에서 이성의 끈을 놓아버렸다. 내 단호한 속삭임에 온몸의 긴장을 풀고 무너져 내리는 그녀를 평생 독점하고 싶다.</blockquote></div>",
+        },
+        ISFJ: {
+          title: "온화한 성녀 ➔ 은밀한 반전의 시렌 (The Hidden Siren)",
+          tagline: "누구에게나 다정하고 헌신적인 미소 뒤에 숨겨진, 오직 단 한 사람만을 향한 은밀한 갈증과 폭발하는 복종.",
+          content: "<blockquote class=\"lsd-hero-quote\">누구에게나 다정하고 헌신적인 미소 뒤에 숨겨진, 오직 단 한 사람만을 향한 은밀한 갈증과 폭발하는 복종.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">낮 동안 주변 사람들을 배려하고 '착하고 무난한 여자'의 역할을 연기해 온 당신. 사실 당신의 마음 한구석에는 내 감정을 누르고 타인에게 맞춰야 한다는 깊은 피로감이 자리 잡고 있습니다. 당신의 밤의 진짜 매력은 <strong>'모두에게 천사 같던 내가, 오직 그 사람 앞에서는 착한 가면을 벗고 거칠게 지배당하고 싶어 하는 반전'</strong>에 있습니다. 남자는 자신 앞에서만 억눌린 본능을 터뜨리며 완전히 길들여지는 당신의 모습에 깊은 중독을 느낍니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">착한 가면 벗어던지기 (Stripping Persona)</p><p class=\"pdd-p\">늘 남을 배려하던 부드러운 태도 대신, 그와 밀착했을 때 그만을 열망하는 솔직한 눈빛을 보여주세요.</p><blockquote class=\"lsd-quote\">\"나 원래 다른 사람한테는 이러지 않는데… 너 앞에서는 착하게 있을 수가 없어.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">소유욕 자극하기</p><p class=\"pdd-p\">그가 당신을 품에 안고 강하게 압도하려 할 때, 도망치지 말고 그의 목을 감싸 안으며 완전히 내어주는 태도를 보여주세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">누구에게나 온화하고 다정하던 그녀가 내 품에서는 오직 나만을 바라보며 완전히 무너져 내린다. 내가 그녀의 숨겨진 본능을 일깨운 유일한 남자라는 사실에 미칠 것 같다.</blockquote></div>",
+        },
+        INTJ: {
+          title: "냉철한 전략가 ➔ 통제의 해체 (The Frozen Monarch)",
+          tagline: "아무도 뚫지 못했던 치밀한 계산의 성벽을 무력화하고, 얼음 같은 이성을 완전히 녹여버리는 뜨거운 항복.",
+          content: "<blockquote class=\"lsd-hero-quote\">아무도 뚫지 못했던 치밀한 계산의 성벽을 무력화하고, 얼음 같은 이성을 완전히 녹여버리는 뜨거운 항복.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">비범한 두뇌와 철저한 자기 통제로 타인을 관조하는 당신. 상투적인 유혹이나 어설픈 작업에는 코웃음조차 치지 않는 단단한 지적 철벽을 가지고 있습니다. 당신의 진짜 밤의 성향은 <strong>'머릿속으로 계산할 겨를조차 주지 않는 그 남자의 예측 불허한 강렬함 앞에, 내 치밀한 방어선이 산산조각 나는 경험'</strong>에 있습니다. 아무도 건드리지 못하던 당신의 얼음 성벽이 그 남자의 오만한 남성성 앞에 무너질 때, 당신과 남자 모두 극상의 전율을 경험합니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">지적 방어선의 해체 (Overcoming Logic)</p><p class=\"pdd-p\">그와 단둘이 있을 때, 분석하려는 태도를 멈추고 그의 넥타이나 상의를 살짝 잡아채며 거리를 좁혀보세요.</p><blockquote class=\"lsd-quote\">\"내 머릿속 계산이 안 통하는 남자는 네가 처음이야. 책임져.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">오만한 정복감 안겨주기</p><p class=\"pdd-p\">그가 당신의 이성을 깨부수고 밀어붙일 때, 그의 시선을 똑바로 바라보며 가쁜 숨을 내쉬어 보세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">늘 세상을 내려다보며 계산하던 그녀의 눈빛이 내 강렬한 기습 앞에 순식간에 흔들렸다. 그 똑똑한 머리를 멈추고 내 품에 갇혀버린 그녀를 내 뜻대로 주무르고 싶다.</blockquote></div>",
+        },
+        INTP: {
+          title: "은둔하는 철학자 ➔ 직관적 침범 (The Wandering Strategist)",
+          tagline: "누구도 열지 못했던 차가운 분석의 결계를 허물고, 아득한 머릿속을 오직 그 남자의 존재로 가득 채우는 감각의 폭발.",
+          content: "<blockquote class=\"lsd-hero-quote\">누구도 열지 못했던 차가운 분석의 결계를 허물고, 아득한 머릿속을 오직 그 남자의 존재로 가득 채우는 감각의 폭발.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">늘 타인과 거리를 두고 세상을 객관적으로 관조하는 당신. 복잡한 생각과 매너리즘 속에서 은근한 지루함을 안고 살아가곤 합니다. 당신의 진짜 밤의 치명함은 <strong>'아득했던 생각의 탑을 날것의 감각과 강렬한 남성성으로 단숨에 뒤흔들어, 뇌 속 도파민을 터뜨려주는 남자에게 빠져드는 태도'</strong>에 있습니다. 머릿속 방을 닫고 오직 그 남자의 체온과 거친 숨결에만 몰입하는 순간, 당신은 가장 매혹적인 본능의 화신이 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">생각 멈추기 &amp; 감각적 밀착 (Sensory Overload)</p><p class=\"pdd-p\">멍하니 딴생각을 하는 척하다가, 그의 가슴에 은근히 머리를 대거나 손가락을 쓸어내려 보세요.</p><blockquote class=\"lsd-quote\">\"생각이 너무 많아서 머리가 아파. 네 체온으로 내 머릿속 좀 멈춰줘.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">오직 그에게만 집중하는 반응</p><p class=\"pdd-p\">그가 당신의 시선을 사로잡고 주도권을 쥘 때, 그의 명령에 순응하며 직관적인 자극에 온몸을 맡기세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">나른하고 무심하던 그녀가 내 거친 밀착 한 번에 온몸을 떨며 내 체온에 몰입한다. 그녀의 아득한 머릿속을 오직 나라는 존재 하나로 가득 채워버린 기분이다.</blockquote></div>",
+        },
+        ISTP: {
+          title: "서늘한 사냥꾼 ➔ 결계의 파괴 (The Silent Huntress)",
+          tagline: "도무지 속을 알 수 없던 차가운 시선 뒤에 숨겨둔, 진짜 강자의 단호함 앞에 굴복하고 싶은 서늘한 욕망.",
+          content: "<blockquote class=\"lsd-hero-quote\">도무지 속을 알 수 없던 차가운 시선 뒤에 숨겨둔, 진짜 강자의 단호함 앞에 굴복하고 싶은 서늘한 욕망.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">세상만사에 무심하고 건조한 표정으로 자신만의 결계를 지키는 당신. 어설픈 작업 멘트나 눈치를 보는 가벼운 남자는 한눈에 알아보고 바로 선을 그어버립니다. 당신의 진짜 밤의 본능은 <strong>'내가 절대 넘어설 수 없을 만큼 묵직하고 단호한 남성적 기세 앞에 내 차가운 방어선이 기분 좋게 짓밟히는 경험'</strong>에 있습니다. 당신의 건조한 가면을 부수고 손목을 제압해 오는 진짜 남자를 만났을 때, 당신 안의 은밀한 복종심과 거친 열기가 터져 나옵니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">무심함 속의 도발 (Physical Silence)</p><p class=\"pdd-p\">무덤덤한 표정으로 그를 가만히 바라보다가, 그가 다가올 때 살짝 시선을 피하며 남자의 야성을 자극하세요.</p><blockquote class=\"lsd-quote\">\"말만 번지르르하게 하지 마. 날 진짜 누를 수 있으면 힘으로 보여주든가.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">솔직한 신체적 반응 내어주기</p><p class=\"pdd-p\">그가 압도적인 힘으로 밀착해 올 때, 거짓말을 못 하는 가슴 뛰는 숨소리와 체온을 그에게 숨기지 마세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">그 어떤 자극에도 눈 하나 눈쩍 안 하던 차가운 그녀가, 내 악력과 단호한 기세 아래 짓눌려 심장을 미친 듯이 띄우고 있다. 이 야생마 같은 여자를 완전히 제압했다.</blockquote></div>",
+        },
+        INFP: {
+          title: "꿈꾸는 이상주의자 ➔ 은밀한 소유욕 (The Velveteen Siren)",
+          tagline: "아무에게도 열어주지 않던 깊은 내면의 방, 그 문을 부수고 들어와 자신을 완벽히 소유해 주길 바라는 치명적 헌신.",
+          content: "<blockquote class=\"lsd-hero-quote\">아무에게도 열어주지 않던 깊은 내면의 방, 그 문을 부수고 들어와 자신을 완벽히 소유해 주길 바라는 치명적 헌신.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">수줍고 부드러운 태도로 스스로를 보호하는 당신. 사실 당신의 마음속에는 '나를 온전히 이해하고, 나의 섬세한 영혼과 몸 전체를 완벽하게 집어삼켜 줄 유일한 존재'에 대한 치명적인 판타지가 있습니다. 당신의 밤의 진짜 매력은 <strong>'수줍은 경계심 뒤에 숨겨진 지독한 피학적 구속욕과, 오직 한 남자에게 완벽히 독점당하고 싶어 하는 헌신'</strong>에 있습니다. 그 남자의 거친 소유욕 앞에 모든 경계를 허물고 무너져 내릴 때, 당신은 그 무엇보다 유혹적인 존재가 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">수줍은 항복과 내어줌 (Absolute Possession)</p><p class=\"pdd-p\">수줍어 고개를 숙이면서도, 그의 손길을 피하지 않고 그의 품으로 바짝 파묻혀 보세요.</p><blockquote class=\"lsd-quote\">\"나 오늘 밤 너한테 완전히 갇혀서… 아무 데도 도망치고 싶지 않아.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">깊은 눈빛 각인</p><p class=\"pdd-p\">그가 당신의 몸을 제압하고 강하게 밀 붙일 때, 눈동자를 사정없이 흔들며 그에게 온 영혼을 맡기듯 바라보세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">늘 수줍게 거리를 두던 그녀가 내 강렬한 독점욕 앞에 경계를 풀고 완벽히 무너졌다. 나 없이는 아무것도 못 할 것처럼 매달리는 그녀를 영원히 가둬두고 싶다.</blockquote></div>",
+        },
+        ENTP: {
+          title: "오만한 사냥꾼 ➔ 거친 제압 (The Rebellious Trickster)",
+          tagline: "말 가시로 세상을 쥐락펴락하던 도도한 여왕, 그 입술을 강제로 막아서는 남자의 거친 힘에 기꺼이 무너지는 카타르시스.",
+          content: "<blockquote class=\"lsd-hero-quote\">말 가시로 세상을 쥐락펴락하던 도도한 여왕, 그 입술을 강제로 막아서는 남자의 거친 힘에 기꺼이 무너지는 카타르시스.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">탁월한 말솜씨와 당당함으로 판을 흔드는 당신. 말싸움을 걸어오거나 어설프게 당신에게 말려드는 남자들에게 깊은 지루함을 느낍니다. 당신의 진짜 밤의 성향은 <strong>'내 도도한 말장난을 논리가 아닌 압도적인 남성적 힘과 거친 스킨십으로 단숨에 봉쇄해 버리는 진짜 강자에게 굴복하는 갈망'</strong>에 있습니다. 말로 세상을 요리하던 당신의 입술이 그 남자의 손길에 강제로 막히는 순간, 당신은 생전 처음 느껴보는 짜릿한 복종의 전율을 맛보게 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">도발 후 주도권 넘겨주기 (Challenging the Strong)</p><p class=\"pdd-p\">그를 자극하는 도발적인 멘트로 기 싸움을 걸다가, 그가 거칠게 밀어붙일 때 슬며시 굴복해 주세요.</p><blockquote class=\"lsd-quote\">\"말로만 이기려 들지 마. 날 진짜 제압할 수 있으면 네 힘으로 내 입부터 막아보든가.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">도도함의 산산조각</p><p class=\"pdd-p\">그가 당신의 손목을 제압하거나 벽으로 밀어붙일 때, 기분 좋은 당황함과 함께 가쁜 숨을 내쉬어 보세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">항상 말로 남들을 주무르던 도도한 그녀가, 내 거친 기습과 제압 한 번에 입을 다물고 완벽히 굴복했다. 세상 모든 사람을 가지고 놀던 그녀를 내 밑에 눌러두는 기분이 최고다.</blockquote></div>",
+        },
+        ENTJ: {
+          title: "지배하는 여제 ➔ 완전한 항복 (The Imperial Empress)",
+          tagline: "세상 모든 판을 지배하던 정복자, 오직 단 하나의 진짜 남자 앞에 모든 통제권을 바치고 무너지는 절대적 카타르시스.",
+          content: "<blockquote class=\"lsd-hero-quote\">세상 모든 판을 지배하던 정복자, 오직 단 하나의 진짜 남자 앞에 모든 통제권을 바치고 무너지는 절대적 카타르시스.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">높은 목표 의식과 카리스마로 세상을 지휘하는 당신. 어설프게 눈치를 보거나 당신에게 수동적으로 맞추려는 남자는 '다루기 쉬운 부하' 정도로 느껴질 뿐입니다. 당신의 진짜 밤의 본능은 <strong>'내가 오랫동안 지켜온 지배자의 왕좌를 강제로 빼앗고, 나를 자신의 밑에 완벽히 짓눌러 주는 압도적인 남자를 만나는 것'</strong>입니다. 세상 모든 상황을 통제하던 여왕인 당신이 오직 그 사람의 손길 아래 모든 완력을 내려놓고 복종할 때, 남자는 미칠 듯한 정복감에 사로잡힙니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">왕좌 내어주기 (Subjugation of the Sovereign)</p><p class=\"pdd-p\">그가 주도권을 잡으려 할 때, 기 싸움을 하는 척하다가 그의 목덜미나 어깨를 잡고 순순히 주도권을 넘겨주세요.</p><blockquote class=\"lsd-quote\">\"밖에서는 내가 왕이지만… 오늘 밤 이 침대 위에서는 오직 네 명령만 따를게.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">절대적인 복종의 눈빛</p><p class=\"pdd-p\">그가 당신을 내려다보며 오만하게 속삭일 때, 불꽃 같은 눈빛을 슬며시 거두고 오직 그에게 길들여진 여자의 눈빛을 보여주세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">모든 사람을 호령하던 카리스마 넘치는 그녀가 내 손아귀 안에서 완벽히 통제권을 잃고 길들여지고 있다. 이 위대한 여왕의 유일한 지배자가 된 전율을 잊을 수 없다.</blockquote></div>",
+        },
+        ENFP: {
+          title: "자유로운 낭만가 ➔ 완벽한 구속 (The Flighty Siren)",
+          tagline: "통통 튀며 세상을 자유롭게 거닐던 그녀, 오직 그 남자의 거대한 손길 안에 갇혀 빠져나가지 못하는 구속의 쾌감.",
+          content: "<blockquote class=\"lsd-hero-quote\">통통 튀며 세상을 자유롭게 거닐던 그녀, 오직 그 남자의 거대한 손길 안에 갇혀 빠져나가지 못하는 구속의 쾌감.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">밝은 미소와 풍부한 감정 표현으로 사랑받는 당신. 당신에게 다 맞춰주거나 오냐오냐해주는 남자는 쉽게 질리고 자극을 주지 못합니다. 당신의 진짜 밤의 치명함은 <strong>'산만하게 떠돌던 내 시선과 자유를 강제로 통제하고, 나를 벽이나 침대에 완벽히 묶어두는 남자의 거친 독점욕'</strong>에 있습니다. 어디로 튈지 모르던 당신이 그 남자의 압도적인 구속 아래 갇혀 한 발짝도 도망치지 못할 때, 당신은 거부할 수 없는 짜릿한 안도감과 쾌감을 느낍니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">장난스러운 도발과 구속 유도 (Absolute Restraint)</p><p class=\"pdd-p\">장난치듯 들뜬 태도로 딴청을 피우다가, 그가 당신의 손목을 낚아채 제압할 기회를 만들어 주세요.</p><blockquote class=\"lsd-quote\">\"나 어디로 튈지 몰라. 날 확실히 안 가둬두면 오늘 밤 도망칠지도 몰라.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">독점당함의 환희</p><p class=\"pdd-p\">그가 당신의 몸을 완벽히 밀착시키고 \"넌 내 밑에서 아무것도 못 해\"라고 선언할 때, 기분 좋게 갇혀주는 태도를 보이세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">어디로 튈지 몰라 시선을 빼앗던 그녀가 내 압도적인 구속 한 번에 손목이 묶인 채 내 밑에서 가쁜 숨을 쉰다. 그녀의 자유를 내가 완전히 통제하고 있다.</blockquote></div>",
+        },
+        ENFJ: {
+          title: "열정적인 선도자 ➔ 은밀한 성육신 (The Passionate Sovereign)",
+          tagline: "모든 사람의 마음을 조율하던 완벽한 리더, 오직 그 남자의 단호하고 거친 손길 아래 완벽히 무너지며 속살을 내어주는 순간.",
+          content: "<blockquote class=\"lsd-hero-quote\">모든 사람의 마음을 조율하던 완벽한 리더, 오직 그 남자의 단호하고 거친 손길 아래 완벽히 무너지며 속살을 내어주는 순간.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">모두를 끌어안고 리더십을 발휘하는 당신. 사실 당신의 마음 깊은 곳에는 항상 상황을 이끌어야 하고 타인을 책임져야 한다는 무거운 피로감이 쌓여 있습니다. 당신의 밤의 진짜 매력은 <strong>'내가 짊어진 리더로서의 중압감을 단숨에 찢어버리고, 나의 머리부터 발끝까지를 완벽히 지배해 주는 남자를 만나는 반전'</strong>에 있습니다. 늘 남을 케어하던 당신이 그 남자의 오만한 남성성 앞에 길들여져 모든 책임감을 내려놓을 때, 남자는 당신의 진짜 속살을 소유했다는 깊은 카타르시스를 느낍니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">리더십의 내려놓음 (Stripping Control)</p><p class=\"pdd-p\">다정하게 분위기를 이끌려다가, 그가 단호하게 당신을 당겨 안을 때 순순히 그의 체온 아래 갇혀보세요.</p><blockquote class=\"lsd-quote\">\"매일 남들 챙기는 거 너무 지쳤어. 오늘 밤은 네가 날 완벽히 지배해 줘.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">완벽한 길들여짐</p><p class=\"pdd-p\">그가 당신을 내려다보며 명령하듯 속삭일 때, 배려하는 가면을 벗고 오직 그의 숨결에만 반응하는 피학적 복종을 보여주세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">모든 사람을 조율하던 완벽한 리더인 그녀가, 내 품 안에서는 오직 내 명령에만 반응하며 완벽하게 무너져 내린다. 이 다정한 여왕을 온전히 정복했다.</blockquote></div>",
+        },
+        ESFP: {
+          title: "화려한 축제의 주인공 ➔ 완벽한 굴복 (The Midnight Enchantress)",
+          tagline: "모든 사람의 시선을 빼앗던 자극의 여왕, 오직 단 하나의 남자에게 사로잡혀 다른 곳은 쳐다보지도 못하는 오롯한 점령.",
+          content: "<blockquote class=\"lsd-hero-quote\">모든 사람의 시선을 빼앗던 자극의 여왕, 오직 단 하나의 남자에게 사로잡혀 다른 곳은 쳐다보지도 못하는 오롯한 점령.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">화려한 매력과 타고난 흥으로 분위기를 주도하는 당신. 쉽게 질리고 금방 새로운 자극을 찾아 나서는 감각적인 성향을 가지고 있습니다. 당신의 진짜 밤의 본능은 <strong>'내가 찾아 헤매던 그 어떤 자극보다 강렬한 그 남자의 신체적 압도감 앞에 감각이 완전히 마비되는 경험'</strong>에 있습니다. 화려한 가면을 벗겨내고 당신의 손목을 제압해 오직 자신만을 똑바로 바라보게 만드는 남자의 거친 독점욕 앞에, 당신은 최고의 도파민과 완벽한 굴복의 쾌감을 느끼게 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">자극적인 시선 고정 (Sensory Takeover)</p><p class=\"pdd-p\">화려하게 웃어 넘기며 너스레를 떨다가, 그가 당신을 거칠게 밀어붙일 때 그의 눈을 피하지 말고 똑바로 응시하세요.</p><blockquote class=\"lsd-quote\">\"나 자극적인 거 좋아하는 거 알지? 어설프게 하지 말고 완벽하게 날 짓눌러봐.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">다른 곳을 보지 못하는 상태 내어주기</p><p class=\"pdd-p\">그가 당신의 몸을 완벽히 밀착해 눌러올 때, 오직 그 남자 하나에게만 온 감각이 사로잡힌 반응을 보이세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">늘 남들의 시선을 끌며 화려하게 굴던 그녀가, 내 손길과 체중 아래 완전히 사로잡혀 오직 나 하나만을 바라보며 숨을 몰아쉬고 있다. 이 자극의 여왕을 내가 완벽히 점령했다.</blockquote></div>",
+        },
+        ISFP: {
+          title: "은밀한 예술가 ➔ 온전한 내어줌 (The Velvet Temptress)",
+          tagline: "누구에게도 함부로 선을 허락하지 않던 온화한 성벽, 오직 그 남자의 거친 기세에 휩쓸려 온몸을 내던지는 감각의 내어줌.",
+          content: "<blockquote class=\"lsd-hero-quote\">누구에게도 함부로 선을 허락하지 않던 온화한 성벽, 오직 그 남자의 거친 기세에 휩쓸려 온몸을 내던지는 감각의 내어줌.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">온화하고 조용하며 자신만의 감각적 영역을 지키는 당신. 먼저 다가가기보다는 자신을 거세게 휩쓸어줄 강렬한 남성성을 은밀히 갈망합니다. 당신의 밤의 진짜 치명함은 <strong>'내가 지켜오던 수줍은 경계선을 그 남자가 단숨에 부수고 들어와, 내 온 감각을 거칠게 사로잡고 주도하는 경험'</strong>에 있습니다. 당신의 조용한 철벽을 비웃듯 손목을 제압하고 강하게 밀착해 오는 남자의 단호함 앞에, 당신은 모든 것을 내어주고 길들여지는 깊은 카타르시스를 경험합니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">경계선의 해체 (Breaking the Line)</p><p class=\"pdd-p\">수줍게 거리를 두는 척하다가, 그가 단호하게 허리를 끌어당길 때 기분 좋게 그 품으로 휩쓸려 들어가세요.</p><blockquote class=\"lsd-quote\">\"나 밀어내는 거 아니야… 네가 더 세게 날 사로잡아주길 기다리는 거지.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">감각적인 반응 내어주기</p><p class=\"pdd-p\">그가 당신의 체온과 숨결을 짚어낼 때, 몸을 떨며 그 남자의 손길에 완전히 맡겨지는 온순한 복종을 보여주세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">적당한 거리를 두며 부드럽게 굴던 그녀가, 내 강렬한 밀착 한 번에 방어선을 버리고 완벽히 내 품으로 휩쓸려 들어왔다. 그녀의 온 감각을 내가 완벽하게 지배하고 있다.</blockquote></div>",
+        },
+        ESTP: {
+          title: "화려한 본능의 사냥꾼 ➔ 완전한 제압 (The Reckless Rebel)",
+          tagline: "세상 그 누구의 통제도 거부하던 야생마 같은 그녀, 오직 단 하나의 진짜 남자에게 고삐를 잡히고 거칠게 무너지는 야성의 항복.",
+          content: "<blockquote class=\"lsd-hero-quote\">세상 그 누구의 통제도 거부하던 야생마 같은 그녀, 오직 단 하나의 진짜 남자에게 고삐를 잡히고 거칠게 무너지는 야성의 항복.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">거침없는 행동력과 감각으로 판을 흔드는 당신. 기 싸움을 걸어오거나 눈치를 보는 가벼운 남자는 한눈에 알아보고 단숨에 차버립니다. 당신의 진짜 밤의 성향은 <strong>'내가 자랑하는 야생적인 기세를 비웃듯 깨부수는 그 남자의 거친 신체적 압도와, 나를 밑에 두고 완벽히 짓눌러 주는 단호한 정복욕'</strong>에 있습니다. 어떠한 남자에게도 꺾이지 않던 당신의 오만함이 진짜 남자의 단단한 악력 아래 깨질 때, 당신은 억눌려 있던 피학적 복종의 전율을 맛보게 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">도발과 신체적 제압 유도 (Taming the Wild)</p><p class=\"pdd-p\">도발적인 미소로 그를 기 싸움에 끌어들이다가, 그가 당신의 두 손목을 제압해 벽으로 밀어붙일 때 야성적인 항복을 보여주세요.</p><blockquote class=\"lsd-quote\">\"내가 아무한테나 꺾일 것 같아? 날 진짜 무릎 꿇릴 수 있으면 어디 끝까지 제압해 봐.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">오만함의 깨어짐</p><p class=\"pdd-p\">그가 당신의 도발을 비웃듯 짓 눌러올 때, 당황함과 함께 쾌감 어린 숨소리로 그 남자의 압도적인 힘을 인정해 주세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">늘 남자의 기세를 누르고 야생마처럼 날뛰던 그녀가, 내 손목 제압 한 번에 내 밑에 갇혀 가쁜 숨을 쉬고 있다. 세상 그 누구도 꺾지 못했던 이 여자를 내가 완벽히 길들였다.</blockquote></div>",
+        },
+        ESFJ: {
+          title: "헌신적인 사교가 ➔ 은밀한 복종 (The Devoted Companion)",
+          tagline: "늘 남들을 돌보며 자신을 억누르던 수호자, 오직 그 남자의 강렬한 소유욕 앞에 착한 가면을 벗고 무너지는 복종의 카타르시스.",
+          content: "<blockquote class=\"lsd-hero-quote\">늘 남들을 돌보며 자신을 억누르던 수호자, 오직 그 남자의 강렬한 소유욕 앞에 착한 가면을 벗고 무너지는 복종의 카타르시스.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">타인의 기분을 살피고 관계를 위해 자신의 진짜 욕망을 억누르며 살아가는 당신. 배려라는 무거운 강박에서 벗어나 누군가에게 완전히 지배당하고 싶다는 은밀한 욕망을 품고 있습니다. 당신의 밤의 진짜 매력은 <strong>'내가 가진 착한 수호자의 가면을 그 남자가 단숨에 찢어버리고, 나의 머리부터 발끝까지를 오직 자신의 것으로 만들어버리는 거친 소유욕'</strong>에 있습니다. 상냥하던 당신이 그 남자의 오만한 지배 아래 무너져 내릴 때, 당신은 극상의 안도감과 복종의 쾌감을 느끼게 됩니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">착한 가면의 해제 (Stripping the Persona)</p><p class=\"pdd-p\">그의 눈치를 살피는 척하다가, 그가 단호하게 당신의 손목을 제압할 때 순순히 자신의 본능을 내어주세요.</p><blockquote class=\"lsd-quote\">\"나 매일 남들 기분 맞추느라 힘들었어… 오늘 밤은 오직 네 기분만 맞추게 날 지배해 줘.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">독점당함의 안도감</p><p class=\"pdd-p\">그가 \"착한 척은 그만하고 내 밑에서 느끼기나 해\"라고 명령할 때, 그 남자의 품에 완벽히 길들여지는 태도를 보이세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">늘 남을 챙기느라 바쁘던 착한 그녀가, 내 거친 손길 아래 배려 강박을 버리고 오직 나만을 열망하며 무너져 내린다. 이 착한 여자의 숨겨진 주인은 오직 나 뿐이다.</blockquote></div>",
+        },
+        INFJ: {
+          title: "신비로운 예언자 ➔ 무너지는 침묵 (The Mystic Prophet)",
+          tagline: "아무도 도달하지 못했던 깊고 신비로운 정신의 결계, 오직 그 남자의 거친 압도 앞에 온 영혼을 내던지는 구원의 순간.",
+          content: "<blockquote class=\"lsd-hero-quote\">아무도 도달하지 못했던 깊고 신비로운 정신의 결계, 오직 그 남자의 거친 압도 앞에 온 영혼을 내던지는 구원의 순간.</blockquote><div class=\"pdd-section\"><p class=\"pdd-label\">🍷 당신의 밤의 본능</p><p class=\"pdd-p\">타인의 의도와 세상의 본질을 쉽게 통찰하며 고고하게 거리를 두는 당신. 어설픈 겉치레나 상투적인 유혹에는 절대로 반응하지 않는 신비로운 존재입니다. 당신의 진짜 밤의 성향은 <strong>'머리로 상황을 통찰할 겨를조차 주지 않는 그 남자의 날것의 남성성과, 내 신비로운 이성을 마비시키고 영혼까지 독점하려는 거친 소유욕'</strong>에 있습니다. 아무도 접근하지 못했던 당신의 깊은 성역이 그 남자의 거친 손길에 정복당할 때, 당신은 비로소 깊은 피학적 쾌감과 구원감을 경험합니다.</p></div><div class=\"pdd-section\"><p class=\"pdd-label\">🗝️ 남자를 안달 나게 만드는 유혹의 무기</p><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">통찰의 내려놓음 (Overwhelming the Prophet)</p><p class=\"pdd-p\">그를 꿰뚫어 보듯 깊은 눈빛으로 응시하다가, 그가 당신을 제압해 올 때 복잡한 생각을 멈추고 그의 체온에 몰입하세요.</p><blockquote class=\"lsd-quote\">\"내 깊은 생각들도… 네 거친 숨결 앞에서는 다 아무 소용없어지네.\"</blockquote></div><div class=\"pdd-weapon-item\"><p class=\"pdd-weapon-label\">영혼의 바침</p><p class=\"pdd-p\">그가 당신의 신비로운 방어선을 허물고 강하게 압도할 때, 오직 그 사람에게 영혼까지 내어주는 듯한 눈빛을 보여주세요.</p></div></div><div class=\"pdd-section pdd-section-pov\"><p class=\"pdd-label\">👁️ 남자의 이성을 마비시키는 순간</p><blockquote class=\"lsd-quote\">항상 내 머릿속을 다 내다보는 듯 신비롭던 그녀가, 내 거친 밀착과 제압 앞에 통찰을 멈추고 눈을 내리깐다. 아무도 닿지 못했던 그녀의 깊은 영혼을 내가 완벽히 소유했다.</blockquote></div>",
+        },
+      },
+    };
+
     const resultData = {
       ESTJ: {
         title: '황제 (Emperor)',
@@ -2315,6 +2556,13 @@
     const guideMidnightMission = document.getElementById('guide-midnight-mission');
     const guideSecretCode = document.getElementById('guide-secret-code');
 
+    // [남성/여성 MBTI 심층 성향 분석] 아코디언 요소
+    const guidePddToggle = document.getElementById('guide-pdd-toggle');
+    const guidePddHeadline = document.getElementById('guide-pdd-headline');
+    const guidePddArrow = document.getElementById('guide-pdd-arrow');
+    const guidePddPanel = document.getElementById('guide-pdd-panel');
+    const guidePddContent = document.getElementById('guide-pdd-content');
+
     // ─────────────────────────────────────────────
     // 화면 전환 공통 헬퍼
     // 구조 자체가 top-정렬(flex-start) + min-h-[80vh] 내부 래퍼로 바뀌었기 때문에
@@ -2758,6 +3006,21 @@
       const codes = codeTable[safeMbti];
       guideSecretCode.textContent = codes && codes.length ? `SECRET CODE · ${codes[0]}` : '';
 
+      // [남성/여성 MBTI 심층 성향 분석] — 유저의 성별과 MBTI에 맞는 항목을 채워두고,
+      // 아코디언 자체는 매번 접힌 상태로 리셋한다(다른 유형을 다시 열었을 때 이전에
+      // 펼쳐뒀던 상태가 그대로 남아있으면 어색하기 때문).
+      const pddTable = isFemale ? personalityDeepDiveData.female : personalityDeepDiveData.male;
+      const pddSafeMbti = pddTable && pddTable[safeMbti] ? safeMbti : Object.keys(pddTable || {})[0];
+      const pddData = pddTable ? pddTable[pddSafeMbti] : null;
+      if (pddData) {
+        guidePddHeadline.textContent = `🔮 ${pddSafeMbti} 심층 성향 & 연애 본능 분석 (클릭하여 펼치기)`;
+        guidePddContent.innerHTML = pddData.content; // 고정 정적 문자열(유저 입력 아님) — innerHTML 안전
+      }
+      guidePddPanel.classList.remove('pdd-open');
+      guidePddArrow.classList.remove('pdd-open');
+      guidePddArrow.textContent = '▼';
+      guidePddToggle.setAttribute('aria-expanded', 'false');
+
       guideModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden'; // 모달 열려있는 동안 배경 스크롤 방지
     }
@@ -2766,6 +3029,13 @@
       guideModal.classList.add('hidden');
       document.body.style.overflow = '';
     }
+
+    guidePddToggle.addEventListener('click', () => {
+      const isOpen = guidePddPanel.classList.toggle('pdd-open');
+      guidePddArrow.classList.toggle('pdd-open', isOpen);
+      guidePddArrow.textContent = isOpen ? '▲' : '▼';
+      guidePddToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
 
     barGuideBtn.addEventListener('click', () => openGuideModal(currentBarMbti, currentBarGender));
 
@@ -2793,6 +3063,15 @@
       const codeTable = isFemale ? FEMALE_ENTRY_CODES : MALE_ENTRY_CODES;
       const codes = codeTable[safeMbti];
       const codeLine = codes && codes.length ? `SECRET CODE · ${codes[0]}` : '';
+
+      // [남성/여성 MBTI 심층 성향 분석] — 다운로드 문서에서는 아코디언이 의미 없으니
+      // (이미 정적 파일이라 접혀있을 이유가 없다) 그냥 펼쳐진 상태로 맨 아래에 넣는다.
+      const pddTable = isFemale ? personalityDeepDiveData.female : personalityDeepDiveData.male;
+      const pddSafeMbti = pddTable && pddTable[safeMbti] ? safeMbti : Object.keys(pddTable || {})[0];
+      const pddData = pddTable ? pddTable[pddSafeMbti] : null;
+      const pddSectionHtml = pddData
+        ? `<div class="section pdd-deepdive"><h2>🔮 ${escapeHtml(pddSafeMbti)} 심층 성향 & 연애 본능 분석</h2>${pddData.content}</div>`
+        : '';
 
       return `<!DOCTYPE html>
 <html lang="ko">
@@ -2831,6 +3110,34 @@
   .mission h2 { color:#ff5ec4; }
   .code { text-align:center; font-size:11px; letter-spacing:0.15em; color:#fbbf24; font-weight:600; margin-top:8px; }
   .footer { text-align:center; margin-top:32px; font-size:11px; color:rgba(255,255,255,0.4); letter-spacing:0.1em; }
+
+  /* [남성/여성 MBTI 심층 성향 분석] — pddData.content가 이미 lsd-*/pdd-* 클래스를 쓴
+     완성된 HTML이라, 다운로드 문서는 항상 펼쳐진 상태로 보여주고 그 클래스들을 여기서
+     한 번 더 정의해준다(이 문서는 index.html의 <style>과 완전히 분리된 별도 파일이라
+     클래스가 자동으로 상속되지 않기 때문). */
+  .pdd-deepdive { background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.3); }
+  .pdd-deepdive h2 { color:#fbbf24; }
+  .lsd-hero-quote { display:block; font-style:italic; font-size:14px; line-height:1.7; color:#f0d9ff; text-align:center; padding:6px 4px 16px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.1); }
+  .pdd-section { margin-bottom:14px; }
+  .pdd-section:last-child { margin-bottom:0; }
+  .pdd-label { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; font-weight:700; color:#fbbf24; margin-bottom:8px; }
+  .pdd-p { margin:0 0 8px; line-height:1.75; color:#e9e2ff; }
+  .pdd-p:last-child { margin-bottom:0; }
+  .pdd-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .pdd-list li { line-height:1.7; color:#e9e2ff; }
+  .pdd-list strong { color:#ff9ed6; }
+  .pdd-quote-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .pdd-line-tag { display:inline-block; font-size:10px; letter-spacing:0.1em; color:#b26bff; border:1px solid rgba(178,107,255,0.4); border-radius:999px; padding:2px 10px; margin-bottom:4px; }
+  .lsd-quote { margin:0 0 10px; padding:10px 14px; border-left:3px solid rgba(178,107,255,0.5); background:rgba(0,0,0,0.2); border-radius:8px; font-style:italic; color:#f5eaff; line-height:1.7; }
+  .pdd-style-grid { display:flex; flex-direction:column; gap:10px; }
+  .pdd-style-item { border-radius:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); padding:10px 12px; }
+  .pdd-style-label { font-size:11px; color:#d9c9ff; margin-bottom:3px; }
+  .pdd-style-brand { font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; }
+  .pdd-style-brand strong { color:#fbbf24; }
+  .pdd-style-desc { font-size:12.5px; color:#cbb8f0; line-height:1.6; }
+  .pdd-weapon-item { margin-bottom:12px; }
+  .pdd-weapon-item:last-child { margin-bottom:0; }
+  .pdd-weapon-label { font-size:12.5px; font-weight:700; color:#ff9ed6; margin-bottom:6px; }
 </style>
 </head>
 <body>
@@ -2877,6 +3184,7 @@
       <h2>🍸 오늘 밤 미드나잇 미션</h2>
       <p>${escapeHtml(data.midnightMission)}</p>
     </div>
+    ${pddSectionHtml}
     ${codeLine ? `<p class="code">${escapeHtml(codeLine)}</p>` : ''}
     <p class="footer">NEO-TAROT · neo-tarot-seven.vercel.app</p>
   </div>
