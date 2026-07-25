@@ -484,17 +484,34 @@
         </div>
       </div>
 
-      <!-- 궁합 미니 카드 -->
+      <!-- 궁합 미니 카드 — 클릭하면 상대방의 낮/밤 비주얼 카드를 모달로 보여준다.
+           찰떡 궁합 = 낮(day) 이미지, 파국 궁합 = 밤(night) 이미지. 이미지 성별은 항상 결과 유저의
+           "반대 성별"로 매핑한다(연애 상대이므로). 순수 <div>를 role="button"으로 클릭 가능하게
+           만들어 기존 시각 스타일(rounded-2xl/border/bg 등 Tailwind 클래스)을 그대로 유지한다. -->
       <div class="w-full grid grid-cols-2 gap-4">
-        <div class="rounded-2xl border border-neonpurple/40 bg-neonpurple/5 p-4 flex flex-col items-center text-center gap-1.5">
+        <div
+          id="best-match-card"
+          role="button"
+          tabindex="0"
+          aria-haspopup="dialog"
+          class="rounded-2xl border border-neonpurple/40 bg-neonpurple/5 p-4 flex flex-col items-center text-center gap-1.5 cursor-pointer select-none transition-all duration-300 hover:bg-neonpurple/10 hover:border-neonpurple active:scale-95"
+        >
           <span class="text-xl">🔮</span>
           <span class="text-[11px] text-purple-200 tracking-widest uppercase">찰떡 궁합</span>
           <span id="best-match-value" class="font-display text-sm sm:text-base text-white glow-text leading-snug">INFP (치유의 별)</span>
+          <span class="text-[10px] text-purple-300/60 tracking-wide mt-0.5">👆 눌러서 비주얼 보기</span>
         </div>
-        <div class="rounded-2xl border border-neonpink/40 bg-neonpink/5 p-4 flex flex-col items-center text-center gap-1.5">
+        <div
+          id="worst-match-card"
+          role="button"
+          tabindex="0"
+          aria-haspopup="dialog"
+          class="rounded-2xl border border-neonpink/40 bg-neonpink/5 p-4 flex flex-col items-center text-center gap-1.5 cursor-pointer select-none transition-all duration-300 hover:bg-neonpink/10 hover:border-neonpink active:scale-95"
+        >
           <span class="text-xl">⚡</span>
           <span class="text-[11px] text-purple-200 tracking-widest uppercase">파국 궁합</span>
           <span id="worst-match-value" class="font-display text-sm sm:text-base text-white glow-text leading-snug">ENFP (설렘의 연인)</span>
+          <span class="text-[10px] text-purple-300/60 tracking-wide mt-0.5">👆 눌러서 비주얼 보기</span>
         </div>
       </div>
 
@@ -861,6 +878,53 @@
           loading="lazy"
         ></iframe>
       </div>
+    </div>
+  </div>
+
+  <!-- 궁합(찰떡/파국) 상대방 낮/밤 비주얼 카드 모달.
+       padlet-modal과 동일한 opacity/scale 트랜지션 패턴을 재사용한다(부드럽게 열리고 닫힘).
+       [찰떡 궁합] 카드 클릭 → 상대(반대 성별) MBTI의 "낮" 이미지, [파국 궁합] 클릭 → "밤" 이미지를
+       cards/ 폴더에서 1~8번 중 랜덤으로 하나 뽑아 보여준다. 이미지 자체 또는 하단
+       [🎲 다른 비주얼 보기] 버튼을 누를 때마다 같은 유형 안에서 새 번호로 다시 뽑는다. -->
+  <div
+    id="compat-visual-modal"
+    class="fixed inset-0 z-[60] flex items-center justify-center px-4 py-6 opacity-0 pointer-events-none transition-opacity duration-300"
+  >
+    <div id="compat-visual-modal-backdrop" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+    <div
+      id="compat-visual-modal-panel"
+      class="relative w-full max-w-sm rounded-2xl border border-neonpurple/40 bg-midnight shadow-neonStrong p-4 sm:p-5 flex flex-col scale-95 transition-transform duration-300"
+    >
+      <div class="flex items-start justify-between mb-3 px-1">
+        <div>
+          <p id="compat-visual-modal-kicker" class="text-[11px] tracking-[0.3em] text-neonpurple font-semibold uppercase">🔮 찰떡 궁합 · DAY</p>
+          <h3 id="compat-visual-modal-title" class="mt-1 font-display text-base sm:text-lg text-white glow-text">INFP (치유의 별)</h3>
+        </div>
+        <button id="compat-visual-modal-close" type="button" aria-label="닫기" class="flex-shrink-0 text-white/50 hover:text-white text-2xl leading-none">✕</button>
+      </div>
+
+      <button
+        id="compat-visual-modal-image-btn"
+        type="button"
+        aria-label="눌러서 다른 비주얼 보기"
+        class="group relative w-full aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-white/5 cursor-pointer"
+      >
+        <img id="compat-visual-modal-image" src="" alt="" class="hidden w-full h-full object-cover" />
+        <div id="compat-visual-modal-fallback" class="absolute inset-0 flex items-center justify-center text-5xl">🌙</div>
+        <div class="absolute inset-0 flex items-end justify-center pb-3 bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/30 group-hover:opacity-100">
+          <span class="text-xs text-white/90 tracking-wide">👆 눌러서 다른 비주얼 보기</span>
+        </div>
+      </button>
+
+      <p id="compat-visual-modal-caption" class="mt-3 text-sm text-purple-100 leading-relaxed text-center"></p>
+
+      <button
+        id="compat-visual-modal-reroll"
+        type="button"
+        class="mt-4 w-full rounded-full px-5 py-3 text-sm font-semibold bg-white/10 border border-neonpurple/40 text-purple-100 hover:bg-neonpurple/20 hover:border-neonpurple transition-all duration-300 active:scale-95"
+      >
+        🎲 다른 비주얼 보기
+      </button>
     </div>
   </div>
 
@@ -2348,6 +2412,106 @@
     if (padletModalBackdrop) padletModalBackdrop.addEventListener('click', closePadletModal);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && padletModal && !padletModal.classList.contains('pointer-events-none')) closePadletModal();
+    });
+
+    // ─────────────────────────────────────────────
+    // 궁합(찰떡/파국) 미니 카드 → 상대방 낮/밤 비주얼 카드 모달
+    //
+    // - [찰떡 궁합] 클릭: data.match의 MBTI로 "낮(day)" 이미지를 연다.
+    // - [파국 궁합] 클릭: data.bad의 MBTI로 "밤(night)" 이미지를 연다.
+    // - 이미지 성별은 항상 결과 유저의 "반대 성별"로 매핑한다(궁합 상대이므로).
+    // - getCardImagePath()는 호출될 때마다 1~8번 중 랜덤으로 새로 뽑기 때문에, 카드를 다시
+    //   열거나 모달의 [🎲 다른 비주얼 보기]를 누를 때마다 자연스럽게 이미지가 바뀐다.
+    // ─────────────────────────────────────────────
+    const bestMatchCard = document.getElementById('best-match-card');
+    const worstMatchCard = document.getElementById('worst-match-card');
+    const compatVisualModal = document.getElementById('compat-visual-modal');
+    const compatVisualModalBackdrop = document.getElementById('compat-visual-modal-backdrop');
+    const compatVisualModalPanel = document.getElementById('compat-visual-modal-panel');
+    const compatVisualModalClose = document.getElementById('compat-visual-modal-close');
+    const compatVisualModalKicker = document.getElementById('compat-visual-modal-kicker');
+    const compatVisualModalTitle = document.getElementById('compat-visual-modal-title');
+    const compatVisualModalImageBtn = document.getElementById('compat-visual-modal-image-btn');
+    const compatVisualModalImage = document.getElementById('compat-visual-modal-image');
+    const compatVisualModalFallback = document.getElementById('compat-visual-modal-fallback');
+    const compatVisualModalCaption = document.getElementById('compat-visual-modal-caption');
+    const compatVisualModalReroll = document.getElementById('compat-visual-modal-reroll');
+
+    // 현재 모달에 띄운 상대의 (성별/MBTI/낮밤) — [다른 비주얼 보기]를 누르면 이 값은 그대로 두고
+    // 이미지 변형 번호(1~8)만 다시 뽑는다.
+    let compatVisualState = { gender: 'female', mbti: 'INFP', timeOfDay: 'day' };
+
+    // "INFP (치유의 별)" 형태의 매치 라벨 문자열에서 MBTI 4글자만 뽑아낸다.
+    function parseMbtiFromMatchLabel(label) {
+      const m = /^([A-Z]{4})/.exec(String(label || '').trim());
+      return m ? m[1] : 'INFP';
+    }
+
+    // compatVisualState를 기준으로 이미지를 새로 랜덤 로드한다(모달을 열 때 & 리롤할 때 공용).
+    function renderCompatVisualImage() {
+      const { gender, mbti, timeOfDay } = compatVisualState;
+      const src = getCardImagePath(gender, mbti, timeOfDay);
+      const altText = `${mbti} ${timeOfDay === 'day' ? '낮' : '밤'} 비주얼 카드`;
+      setCardFace(compatVisualModalImage, compatVisualModalFallback, src, altText);
+    }
+
+    function openCompatVisualModal(kind) {
+      // kind: 'match'(찰떡 궁합) | 'bad'(파국 궁합)
+      if (!resultMBTI) return; // 아직 결과가 산출되지 않은 상태에서는 아무 것도 하지 않는다.
+      const data = getResultData(resultMBTI, resultGender);
+      const label = kind === 'match' ? data.match : data.bad;
+      const mbti = parseMbtiFromMatchLabel(label);
+      const targetGender = resultGender === 'female' ? 'male' : 'female'; // 궁합 상대는 항상 반대 성별
+      const targetLabel = targetGender === 'male' ? '남자' : '여자';
+      const timeOfDay = kind === 'match' ? 'day' : 'night';
+
+      compatVisualState = { gender: targetGender, mbti, timeOfDay };
+
+      compatVisualModalKicker.textContent = kind === 'match' ? '🔮 찰떡 궁합 · DAY' : '⚡ 파국 궁합 · NIGHT';
+      compatVisualModalTitle.textContent = label || mbti;
+      compatVisualModalCaption.textContent = kind === 'match'
+        ? `오늘, ${targetLabel} ${mbti}의 낮의 얼굴을 마주해보세요.`
+        : `조심하세요. ${targetLabel} ${mbti}의 밤은, 파국이 될 만큼 매혹적입니다.`;
+
+      renderCompatVisualImage();
+
+      compatVisualModal.classList.remove('opacity-0', 'pointer-events-none');
+      compatVisualModal.classList.add('opacity-100');
+      requestAnimationFrame(() => {
+        compatVisualModalPanel.classList.remove('scale-95');
+        compatVisualModalPanel.classList.add('scale-100');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCompatVisualModal() {
+      compatVisualModal.classList.remove('opacity-100');
+      compatVisualModal.classList.add('opacity-0', 'pointer-events-none');
+      compatVisualModalPanel.classList.remove('scale-100');
+      compatVisualModalPanel.classList.add('scale-95');
+      document.body.style.overflow = '';
+    }
+
+    if (bestMatchCard) {
+      bestMatchCard.addEventListener('click', () => openCompatVisualModal('match'));
+      // role="button"인 <div>라 키보드 접근성을 위해 Enter/Space도 클릭과 동일하게 동작시킨다.
+      bestMatchCard.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCompatVisualModal('match'); }
+      });
+    }
+    if (worstMatchCard) {
+      worstMatchCard.addEventListener('click', () => openCompatVisualModal('bad'));
+      worstMatchCard.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCompatVisualModal('bad'); }
+      });
+    }
+    // 이미지 자체를 눌러도, 하단 [🎲 다른 비주얼 보기] 버튼을 눌러도 동일하게 리롤된다.
+    if (compatVisualModalImageBtn) compatVisualModalImageBtn.addEventListener('click', renderCompatVisualImage);
+    if (compatVisualModalReroll) compatVisualModalReroll.addEventListener('click', renderCompatVisualImage);
+    if (compatVisualModalClose) compatVisualModalClose.addEventListener('click', closeCompatVisualModal);
+    if (compatVisualModalBackdrop) compatVisualModalBackdrop.addEventListener('click', closeCompatVisualModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && compatVisualModal && !compatVisualModal.classList.contains('pointer-events-none')) closeCompatVisualModal();
     });
 
     // ─────────────────────────────────────────────
