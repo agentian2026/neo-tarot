@@ -1072,28 +1072,81 @@
       return `${CARD_IMAGE_BASE_PATH}${g}_${m}_${timeOfDay}_${variant}${CARD_IMAGE_FILENAME_SUFFIX}.webp`;
     }
 
+    // ─────────────────────────────────────────────
+    // 카드 이미지 노출 부위 가림 — 그림자/그라데이션 오버레이를 실제 픽셀로 "구워 넣은" 이미지
+    // 생성기. 원본 파일(cards/*.webp)은 서버에 절대 그대로 두고, 화면에 그리거나 저장/공유할
+    // 때만 이 함수를 거친 합성 결과(dataURL)를 사용한다 — 그래서 화면에서 보이는 카드와
+    // "인스타 스토리로 저장하기"로 실제 저장되는 파일이 항상 픽셀 단위로 100% 동일하다.
+    // (CSS 오버레이만으로는 부족한 이유: 저장 파일은 html2canvas가 별도의 숨겨진 스토리 전용
+    // 템플릿(#story-capture)을 캡처해서 만드는데, 그 템플릿은 화면에 보이는 카드와 별개의
+    // DOM/이미지라서 화면에만 CSS를 얹어선 저장 파일에 반영되지 않는다. 그래서 아예 픽셀
+    // 자체에 그라데이션을 구워 넣은 뒤, 그 결과물을 화면/저장 양쪽에 동일하게 꽂아 넣는다.)
+    // ─────────────────────────────────────────────
+    const CARD_OVERLAY_START_RATIO = 0.52; // 세로 52% 지점(대략 목선 아래)부터 그라데이션 시작
+    const CARD_OVERLAY_END_ALPHA = 0.94;   // 카드 맨 아래에서의 최종 어둡기(0=투명 ~ 1=완전 불투명)
+    const cardOverlayCache = new Map(); // 같은 src를 여러 번 합성하지 않도록 dataURL을 캐싱
+
+    function compositeCardImageOverlay(src) {
+      if (cardOverlayCache.has(src)) return cardOverlayCache.get(src);
+      const promise = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth || 1024;
+            canvas.height = img.naturalHeight || 1536;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            const overlayStartY = canvas.height * CARD_OVERLAY_START_RATIO;
+            const gradient = ctx.createLinearGradient(0, overlayStartY, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(8, 4, 16, 0)');
+            gradient.addColorStop(1, `rgba(8, 4, 16, ${CARD_OVERLAY_END_ALPHA})`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, overlayStartY, canvas.width, canvas.height - overlayStartY);
+
+            resolve(canvas.toDataURL('image/png'));
+          } catch (err) {
+            reject(err);
+          }
+        };
+        img.onerror = () => reject(new Error('image load failed: ' + src));
+        img.src = src;
+      });
+      // 실패한 시도는 캐시에서 바로 지워서 다음 호출(예: 카드를 다시 뒤집거나 재시도) 때
+      // 같은 실패가 영원히 반복되지 않고 새로 다시 시도되게 한다. 성공한 결과만 계속 캐싱한다.
+      promise.catch(() => cardOverlayCache.delete(src));
+      cardOverlayCache.set(src, promise);
+      return promise;
+    }
+
     // 카드 한쪽 면(이미지 + 폴백 아이콘/라벨)의 상태를 갱신한다.
-    // 이미지 로드에 성공하면 실제 카드 아트를 보여주고, 실패(파일 없음/네트워크 오류 등)하면
-    // 기존 아이콘·라벨 폴백을 그대로 노출해 화면이 깨지지 않도록 방지한다.
+    // 이미지 로드 + 그라데이션 합성에 성공하면 실제 카드 아트를 보여주고, 실패(파일 없음/
+    // 네트워크 오류 등)하면 기존 아이콘·라벨 폴백을 그대로 노출해 화면이 깨지지 않도록 한다.
     function setCardFace(imgEl, fallbackEl, src, altText) {
       fallbackEl.classList.remove('hidden');
       imgEl.classList.add('hidden');
       imgEl.alt = altText;
-      imgEl.onload = () => {
-        imgEl.classList.remove('hidden');
-        fallbackEl.classList.add('hidden');
-      };
-      imgEl.onerror = () => {
-        console.warn('[타로 카드 이미지 로드 실패]', src);
-        imgEl.classList.add('hidden');
-        fallbackEl.classList.remove('hidden');
-      };
-      // 같은 src를 다시 대입하면 브라우저가 load 이벤트를 재발생시키지 않는 경우가 있어
-      // (랜덤 변형 번호가 우연히 이전과 같을 때) 매번 새로 로드를 시도하도록 한 번 비워준다.
       imgEl.src = '';
-      requestAnimationFrame(() => {
-        imgEl.src = src;
-      });
+      compositeCardImageOverlay(src)
+        .then((dataUrl) => {
+          imgEl.onload = () => {
+            imgEl.classList.remove('hidden');
+            fallbackEl.classList.add('hidden');
+          };
+          imgEl.onerror = () => {
+            console.warn('[타로 카드 이미지 로드 실패]', src);
+            imgEl.classList.add('hidden');
+            fallbackEl.classList.remove('hidden');
+          };
+          imgEl.src = dataUrl;
+        })
+        .catch((err) => {
+          console.warn('[타로 카드 이미지 로드/합성 실패]', src, err);
+          imgEl.classList.add('hidden');
+          fallbackEl.classList.remove('hidden');
+        });
     }
 
     // 인스타 스토리 캡처용 이미지 로더 — setCardFace와 달리 Promise로 감싸서 await 가능하게 만든다.
@@ -1107,6 +1160,8 @@
     // 강제로 늘려버리는(가로로 퍼지는) 버그가 있어서, 로드 확인만 오프스크린 Image()
     // 객체로 하고 실제 화면에 보여줄 때는 CSS background-image + background-size:cover로
     // 그린다 — 이 방식은 html2canvas가 정확히 지원해서 비율이 절대 찌그러지지 않는다.
+    // ⚠️ 화면(setCardFace)과 저장 파일이 100% 동일하게 보이도록, 여기서도 원본 src가 아니라
+    // compositeCardImageOverlay()로 그라데이션을 구워 넣은 dataURL을 background-image로 쓴다.
     function loadStoryCardImage(imgEl, fallbackEl, src) {
       return new Promise((resolve) => {
         let settled = false;
@@ -1115,21 +1170,19 @@
           settled = true;
           resolve(loaded);
         };
-        const preloader = new Image();
-        preloader.crossOrigin = 'anonymous';
-        preloader.onload = () => {
-          imgEl.style.backgroundImage = `url("${src}")`;
-          imgEl.style.display = 'block';
-          fallbackEl.style.display = 'none';
-          finish(true);
-        };
-        preloader.onerror = () => {
-          console.warn('[인스타 스토리 카드 이미지 로드 실패]', src);
-          imgEl.style.display = 'none';
-          fallbackEl.style.display = 'flex';
-          finish(false);
-        };
-        preloader.src = src;
+        compositeCardImageOverlay(src)
+          .then((dataUrl) => {
+            imgEl.style.backgroundImage = `url("${dataUrl}")`;
+            imgEl.style.display = 'block';
+            fallbackEl.style.display = 'none';
+            finish(true);
+          })
+          .catch((err) => {
+            console.warn('[인스타 스토리 카드 이미지 로드/합성 실패]', src, err);
+            imgEl.style.display = 'none';
+            fallbackEl.style.display = 'flex';
+            finish(false);
+          });
         setTimeout(() => finish(false), 4000);
       });
     }
