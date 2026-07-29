@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-1031VYWPWC"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-
-gtag('config', 'G-1031VYWPWC');
-</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>네오-타로: 낮과 밤의 반전 매력</title>
@@ -912,15 +903,28 @@ gtag('config', 'G-1031VYWPWC');
         <button id="compat-visual-modal-close" type="button" aria-label="닫기" class="flex-shrink-0 text-white/50 hover:text-white text-2xl leading-none">✕</button>
       </div>
 
-      <div
+      <button
         id="compat-visual-modal-image-btn"
-        class="relative w-full aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-white/5"
+        type="button"
+        aria-label="눌러서 다른 비주얼 보기"
+        class="group relative w-full aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-white/5 cursor-pointer"
       >
         <img id="compat-visual-modal-image" src="" alt="" class="hidden w-full h-full object-cover" />
         <div id="compat-visual-modal-fallback" class="absolute inset-0 flex items-center justify-center text-5xl">🌙</div>
-      </div>
+        <div class="absolute inset-0 flex items-end justify-center pb-3 bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/30 group-hover:opacity-100">
+          <span class="text-xs text-white/90 tracking-wide">👆 눌러서 다른 비주얼 보기</span>
+        </div>
+      </button>
 
       <p id="compat-visual-modal-caption" class="mt-3 text-sm text-purple-100 leading-relaxed text-center"></p>
+
+      <button
+        id="compat-visual-modal-reroll"
+        type="button"
+        class="mt-4 w-full rounded-full px-5 py-3 text-sm font-semibold bg-white/10 border border-neonpurple/40 text-purple-100 hover:bg-neonpurple/20 hover:border-neonpurple transition-all duration-300 active:scale-95"
+      >
+        🎲 다른 비주얼 보기
+      </button>
     </div>
   </div>
 
@@ -1005,7 +1009,7 @@ gtag('config', 'G-1031VYWPWC');
 
     <div style="margin-top:auto; padding-top:30px; text-align:center;">
       <div style="font-size:24px; letter-spacing:0.15em; color:#ff5ec4; font-weight:700;">🔮 나의 밤의 타로 카드 확인하기</div>
-      <div style="margin-top:14px; font-size:22px; letter-spacing:0.1em; color:rgba(255,255,255,0.5);">neotarot.kr</div>
+      <div style="margin-top:14px; font-size:22px; letter-spacing:0.1em; color:rgba(255,255,255,0.5);">neo-tarot-seven.vercel.app</div>
     </div>
   </div>
 
@@ -1744,6 +1748,34 @@ gtag('config', 'G-1031VYWPWC');
         },
       },
     };
+
+    // ───────────────────────────────────────────────────
+    // 결과화면 최상단 요약 설명(#result-intro) 전용 데이터 — mbti_data_v1.md 출처.
+    // 남녀 구분 없이 MBTI 16종에만 종속되는 공통 필드라(resultData/femaleResultData의
+    // intro와는 별개), gender 분기 없이 mbtiIntroData[mbti]만으로 바로 채운다.
+    // resultIntro.innerHTML로 대입해서 <strong>/<p> 마크업(강조 문구·줄바꿈)이 그대로
+    // 살아나도록 한다 (기존 data.intro는 textContent로만 썼지만, 이 버전은 굵은 글씨와
+    // 문단 줄바꿈이 필요해 innerHTML로 전환했다).
+    // 참고: story-intro(인스타 스토리)/guide-modal/PDF 다운로드 문서는 이번 요청 범위인
+    // "결과 화면 최상단"에 해당하지 않아 원래의 data.intro(성별별 오컬트 톤)를 그대로 유지한다.
+    const mbtiIntroData = {
+    ISTJ: "<p class=\"mbti-intro-line\">남들 눈엔 규칙 잘 지키고 일처리 세상 제일 깔끔한 인간 신뢰의 정석.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"왜 나만 원칙 지키고 남들은 대충 살지...?\"</strong> 하고 속으로 피눈물 흘리며, 비효율의 극치를 견디다 멘탈 박살 나는 중.</p>",
+    ISFJ: "<p class=\"mbti-intro-line\">남한테 피해 줄까 봐 항상 남들보다 30분 일찍 준비 마치는 인간 성실.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아... 진짜 오늘 당장 퇴사할까?\"</strong> 하고 현관 앞에서 피눈물 흘리며, 남 챙기느라 정작 자기 영혼은 탈탈 털려 겨우 걸어가는 중.</p>",
+    INFJ: "<p class=\"mbti-intro-line\">남들 앞에서는 세상 온화하고 깊은 속내 들어주는 성인군자 미소.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"진짜 이 사람 마음속에서 정리할까 300번 고뇌 중...\"</strong> 이라며 속으로 피눈물 흘리고, 혼자 생각이 너무 많아 뇌 과부하 걸린 상태.</p>",
+    INTJ: "<p class=\"mbti-intro-line\">남들 보기엔 세상 냉정하고 완벽하게 다음 플랜 계산 중인 전략가.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"제발 나한테 말 걸지 마... 제발...\"</strong> 하고 속으로 피눈물 흘리며, 인간관계 에너지 0%라 영혼까지 탈탈 털린 채 가만히 서 있는 방전 상태.</p>",
+    ISTP: "<p class=\"mbti-intro-line\">남들 눈엔 상황 판단 빠르고 무슨 일 생겨도 세상 무던해 보이는 마이웨이.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"진짜 나한테 관여 좀 안 했으면 좋겠다...\"</strong> 하고 속으로 피눈물 흘리며, 인간관계 귀찮음 게이지 최고치 찍고 영혼 가출함.</p>",
+    ISFP: "<p class=\"mbti-intro-line\">남들 앞에서는 \"다 좋아~ 다 괜찮아~\" 하면서 세상 유순하게 맞춰주는 친절함.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아 진짜 집 가고 싶다... 침대 눕고 싶다...\"</strong> 하고 속으로 피눈물 흘리며, 약속 잡은 과거의 나를 원망하며 영혼 없이 앉아 있는 상태.</p>",
+    INFP: "<p class=\"mbti-intro-line\">남들 보기엔 세상 순수하고 상상력 넘치는 감성 가득 예술가.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아 나 오늘부터 진짜 새로 태어난다!\"</strong> 해놓고 5분 뒤 폰 보며 피눈물 흘리는, 상상만 태평양 급으로 하고 실천 못 해 혼자 자책 중.</p>",
+    INTP: "<p class=\"mbti-intro-line\">남들 보기엔 세상 평온하게 자기만의 지적 세계에 빠져 있는 연구원.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아... 귀찮아... 진짜 모든 게 끔찍하게 귀찮다...\"</strong> 하고 속으로 피눈물 흘리며, 마감 직전까지 벼락치기 하느라 뇌 손상 오는 중.</p>",
+    ESTP: "<p class=\"mbti-intro-line\">겉으로는 어떤 위기도 대범하게 넘어가는 순발력 최고 행동파.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아 망했다... 저질러 버렸는데 어떡하지...?\"</strong> 하고 속으로 피눈물 흘리며, 일단 사고는 쳤는데 대수습해야 해서 속으로 식은땀 흘리는 중.</p>",
+    ESFP: "<p class=\"mbti-intro-line\">겉으로는 어딜 가나 눈길 끌고 분위기 장악하는 세상 신난 인싸.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"나 혼자 남겨지면 진짜 어떡하지...?\"</strong> 하고 속으로 피눈물 흘리며, 남들 즐겁게 해주고 정작 집 와서 외로워서 쓰러지기 직전.</p>",
+    ENFP: "<p class=\"mbti-intro-line\">겉으로는 아이디어 폭발하고 세상 밝아서 우울함 따위 없어 보이는 인간 비타민.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"나 사실 지금 속으로 울고 있는데 아무도 모르지...?\"</strong> 하고 피눈물 흘리며, 신나게 놀다가 집 오자마자 혼자 침대에서 쓸쓸함에 고뇌하는 상태.</p>",
+    ENTP: "<p class=\"mbti-intro-line\">남들이 뭐라 하든 세상 자신감 넘치고 자신만의 논리로 무장한 자신감 대폭발러.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아 싸우는 거 졸잼인데... 근데 내 본업은 언제 다 하지?\"</strong> 하고 속으로 피눈물 흘리며, 벌려놓은 일 수습 못 해 혼자 멘탈 터진 상태.</p>",
+    ESTJ: "<p class=\"mbti-intro-line\">겉으로는 철두철미한 추진력으로 상황 완전 통제 중인 단호한 리더.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"아 진짜 내가 답답해서 직접 다 하고 만다!\"</strong> 하고 속으로 피눈물 흘리며, 말 안 듣는 사람들 챙기다 혼자 홧병 나서 속 터지기 직전.</p>",
+    ESFJ: "<p class=\"mbti-intro-line\">겉으로는 분위기 띄우고 모임의 중심 잡느라 바쁜 분위기 메이커.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"혹시 아까 내 말 때문에 분위기 싸해졌나...?\"</strong> 하고 속으로 피눈물 흘리며, 눈치 보느라 혼자 에너지 완전 고갈된 상태.</p>",
+    ENFJ: "<p class=\"mbti-intro-line\">겉으로는 사람들에게 따뜻한 에너지 뿌리고 다 다니는 세심한 천사.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"나 혼자만 이렇게 신경 쓰고 거절도 못 하는 건가...?\"</strong> 하고 속으로 피눈물 흘리며, 남 챙기다 자기 영혼은 기절하기 직전.</p>",
+    ENTJ: "<p class=\"mbti-intro-line\">겉으로는 완벽한 계획과 리더십으로 세상 다 씹어먹을 것 같은 냉철한 지휘관.</p><p class=\"mbti-intro-line mt-1\">정작 속으로는 <strong>\"왜 다들 일 처리를 이따위로 하지...?\"</strong> 하고 속으로 피눈물 흘리며, 남이 친 사고 수습하느라 혼자 영혼까지 태우고 있는 불쌍한 완벽주의자.</p>",
+};
 
     const resultData = {
       ESTJ: {
@@ -2554,6 +2586,9 @@ gtag('config', 'G-1031VYWPWC');
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCompatVisualModal('bad'); }
       });
     }
+    // 이미지 자체를 눌러도, 하단 [🎲 다른 비주얼 보기] 버튼을 눌러도 동일하게 리롤된다.
+    if (compatVisualModalImageBtn) compatVisualModalImageBtn.addEventListener('click', renderCompatVisualImage);
+    if (compatVisualModalReroll) compatVisualModalReroll.addEventListener('click', renderCompatVisualImage);
     if (compatVisualModalClose) compatVisualModalClose.addEventListener('click', closeCompatVisualModal);
     if (compatVisualModalBackdrop) compatVisualModalBackdrop.addEventListener('click', closeCompatVisualModal);
     document.addEventListener('keydown', (e) => {
@@ -2901,7 +2936,10 @@ gtag('config', 'G-1031VYWPWC');
       resultMbtiBadge.textContent = mbti;
       resultCardName.textContent = data.title;
       resultTagline.textContent = data.sub;
-      resultIntro.textContent = data.intro;
+      // 결과화면 최상단 요약 설명은 mbti_data_v1.md 기반 mbtiIntroData(성별 무관, MBTI 16종
+      // 공통)로 교체한다. 굵은 글씨(**...**)와 문단 줄바꿈이 있는 마크업이라 textContent가
+      // 아니라 innerHTML로 넣는다. 혹시 없는 유형이 들어오면 기존 data.intro로 안전하게 대체.
+      resultIntro.innerHTML = mbtiIntroData[mbti] || data.intro;
 
       // 결과 화면 하단 섹션 라벨: 남성용은 '은밀한 반전 매력/밤의 팩폭',
       // 여성용은 '공주 모드 위로/마녀 모드 각성'으로 톤앤매너를 완전히 바꾼다
@@ -3396,7 +3434,7 @@ gtag('config', 'G-1031VYWPWC');
     </div>
     ${pddSectionHtml}
     ${codeLine ? `<p class="code">${escapeHtml(codeLine)}</p>` : ''}
-    <p class="footer">NEO-TAROT · neotarot.kr</p>
+    <p class="footer">NEO-TAROT · neo-tarot-seven.vercel.app</p>
   </div>
 </body>
 </html>`;
