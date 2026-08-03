@@ -515,32 +515,65 @@
         </div>
       </div>
 
-      <!-- 5. 미드나잇 바 입장 패널: 결제하기 + 입장 코드 인라인 검증
-           디자인을 VIP PASS 스타일로 교체. 코드 입력/검증(result-code-input/-submit/-error)은
-           실제로 동작하는 기능이라 id와 로직은 그대로 두고, 감싸는 카드의 룩앤필과 문구만 교체했다.
-           (결제 "이후"에 들어오는 미드나잇 바 라운지 화면(#midnight-bar-screen)에는 이 디자인을
-           넣지 않는다 — 여기가 결제 "이전" 화면이라는 것을 확인했다.) -->
+      <!-- 5. CastNight 사전 등록 패널
+           기존 "결제하기(포스타입)" 버튼 대신, CastNight 유저 확보를 위한 이메일+성별+선호역할
+           수집 폼으로 교체. 등록 데이터는 CastNight 전용 Supabase 프로젝트(waitlist 테이블)에
+           직접 저장한다 (네오타로 자체 DB와는 무관). 기존 결제자를 위한 입장 코드 검증
+           (result-code-input/-submit/-error)은 접근 단절 방지를 위해 그대로 유지한다. -->
       <div style="padding: 22px 18px; background: rgba(25, 15, 40, 0.7); border: 1px solid rgba(232, 121, 249, 0.4); border-radius: 16px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(121, 40, 202, 0.25);">
 
-        <div style="font-size: 13px; color: #e879f9; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px;">
-          🌙 MIDNIGHT BAR VIP PASS
+        <div id="castnight-waitlist-form">
+          <div style="font-size: 13px; color: #e879f9; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px;">
+            🌙 CASTNIGHT
+          </div>
+
+          <h3 style="font-size: 16px; color: #ffffff; margin-bottom: 10px; font-weight: 600; line-height: 1.4;">
+            실제 사람과 롤플레이하는 가면 소개팅
+          </h3>
+
+          <p style="font-size: 13px; color: #d1d5db; line-height: 1.5; margin-bottom: 16px;">
+            할로윈, 당신의 가면을 공개합니다.<br />지금 사전 등록하고 가장 먼저 초대받으세요.
+          </p>
+
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <button type="button" id="cn-gender-female" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(178,107,255,0.4); background:transparent; color:#fff; cursor:pointer; font-size:13px;">여성</button>
+            <button type="button" id="cn-gender-male" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(178,107,255,0.4); background:transparent; color:#fff; cursor:pointer; font-size:13px;">남성</button>
+          </div>
+
+          <div id="cn-role-female" class="hidden" style="gap:8px; margin-bottom:10px;">
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="cn-role-witch" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(178,107,255,0.4); background:transparent; color:#fff; cursor:pointer; font-size:13px;">🌙 마녀</button>
+              <button type="button" id="cn-role-hunter" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(178,107,255,0.4); background:transparent; color:#fff; cursor:pointer; font-size:13px;">🏹 사냥꾼</button>
+            </div>
+          </div>
+
+          <div id="cn-role-male" class="hidden" style="gap:8px; margin-bottom:10px;">
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="cn-role-summon" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(178,107,255,0.4); background:transparent; color:#fff; cursor:pointer; font-size:13px;">✨ 소환수</button>
+              <button type="button" id="cn-role-vampire" style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(178,107,255,0.4); background:transparent; color:#fff; cursor:pointer; font-size:13px;">🩸 뱀파이어</button>
+            </div>
+          </div>
+
+          <input
+            id="cn-email-input" type="email" placeholder="이메일 주소" autocomplete="off"
+            class="code-input" style="width:100%; box-sizing:border-box; border-radius: 9999px; padding: 12px 16px; font-size: 13px; color:#fff; margin-bottom: 10px; text-align:center;"
+          />
+
+          <p id="cn-error" class="hidden" style="font-size:12px; color:#ff5ec4; margin-bottom:10px;"></p>
+
+          <button
+            id="cn-submit-btn"
+            type="button"
+            style="display: block; width: 100%; padding: 14px 0; background: linear-gradient(135deg, #7928ca, #4f46e5); color: #ffffff; font-size: 15px; font-weight: 600; border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(121, 40, 202, 0.4); cursor: pointer;"
+          >
+            🌙 사전 등록하기
+          </button>
         </div>
 
-        <h3 style="font-size: 16px; color: #ffffff; margin-bottom: 10px; font-weight: 600; line-height: 1.4;">
-          단 990원으로 여는 프라이빗 아지트!
-        </h3>
-
-        <p style="font-size: 13px; color: #d1d5db; line-height: 1.5; margin-bottom: 18px;">
-          연애 비법서 다운로드 + 네오 오컬트 클럽(NOC) 얼리버드 권한 + 매월 업데이트되는 시크릿 리포트까지 평생 소장하세요.
-        </p>
-
-        <button
-          id="pay-btn"
-          type="button"
-          style="display: block; width: 100%; padding: 14px 0; background: linear-gradient(135deg, #7928ca, #4f46e5); color: #ffffff; font-size: 15px; font-weight: 600; border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(121, 40, 202, 0.4); cursor: pointer;"
-        >
-          💳 결제하고 입장 코드 받기 (990원)
-        </button>
+        <div id="castnight-waitlist-done" class="hidden" style="text-align:center;">
+          <p style="font-size:18px; font-weight:700; color:#e9d5ff; margin:0;">🌙 등록 완료!</p>
+          <p style="font-size:13px; color:#c4b5fd; margin-top:8px;">할로윈, 당신의 가면을 준비할게요.</p>
+        </div>
 
         <div class="w-full flex flex-col gap-2" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 18px; padding-top: 14px;">
           <label for="result-code-input" class="text-[11px] tracking-widest text-purple-200/70 uppercase text-center">이미 입장 코드가 있으신가요?</label>
@@ -582,7 +615,7 @@
           </h3>
 
           <p style="font-size: 14px; color: #d1d5db; line-height: 1.6; margin-bottom: 20px;">
-              작은 버그 제보부터 서비스 비하인드 스토리, 그리고 앞으로 열릴 프라이빗 공간 <strong style="color: #e879f9;">'네오 오컬트 클럽(NOC)'</strong>의 소식까지 스레드에서 자유롭게 나눠주세요.
+              작은 버그 제보부터 서비스 비하인드 스토리, 그리고 앞으로 열릴 실제 사람과의 가면 롤플레이 공간 <strong style="color: #e879f9;">'CastNight'</strong>의 소식까지 스레드에서 자유롭게 나눠주세요.
           </p>
 
           <!-- 스레드 이동 버튼 -->
@@ -729,7 +762,7 @@
 
           <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 16px;">🌀</span>
-            <div><strong style="color: #ffffff;">NOC(네오 오컬트 클럽)</strong> — 정식 런칭 시 최우선 얼리버드 혜택 적용 예정 <span style="font-size: 11px; color: #c084fc; background: rgba(147, 51, 234, 0.3); padding: 2px 6px; border-radius: 4px; margin-left: 4px;">VIP PASS 소장</span></div>
+            <div><strong style="color: #ffffff;">CastNight</strong> — 정식 런칭 시 최우선 얼리버드 혜택 적용 예정 <span style="font-size: 11px; color: #c084fc; background: rgba(147, 51, 234, 0.3); padding: 2px 6px; border-radius: 4px; margin-left: 4px;">VIP PASS 소장</span></div>
           </div>
         </div>
       </div>
@@ -2430,7 +2463,19 @@
     const storyCardFallback = document.getElementById('story-card-fallback');
 
     // 결제 + 인라인 입장 코드 (결과 화면)
-    const payBtn = document.getElementById('pay-btn');
+    const castnightWaitlistForm = document.getElementById('castnight-waitlist-form');
+    const castnightWaitlistDone = document.getElementById('castnight-waitlist-done');
+    const cnGenderFemaleBtn = document.getElementById('cn-gender-female');
+    const cnGenderMaleBtn = document.getElementById('cn-gender-male');
+    const cnRoleFemaleGroup = document.getElementById('cn-role-female');
+    const cnRoleMaleGroup = document.getElementById('cn-role-male');
+    const cnRoleWitchBtn = document.getElementById('cn-role-witch');
+    const cnRoleHunterBtn = document.getElementById('cn-role-hunter');
+    const cnRoleSummonBtn = document.getElementById('cn-role-summon');
+    const cnRoleVampireBtn = document.getElementById('cn-role-vampire');
+    const cnEmailInput = document.getElementById('cn-email-input');
+    const cnError = document.getElementById('cn-error');
+    const cnSubmitBtn = document.getElementById('cn-submit-btn');
     const resultCodeInput = document.getElementById('result-code-input');
     const resultCodeSubmit = document.getElementById('result-code-submit');
     const resultCodeError = document.getElementById('result-code-error');
@@ -3121,12 +3166,79 @@
     });
 
     // ─────────────────────────────────────────────
-    // 결제 로직 — [결제하기] 버튼은 포스타입 유료 포스트 결제창을 새 탭으로 연다.
-    // 결제 자체(웹훅/검증)는 포스타입 쪽에서 처리되고, 구매자는 포스타입에서 전달받은
-    // 입장 코드를 들고 돌아와 아래 코드 검증 로직으로 입장한다.
+    // CastNight 사전 등록 로직 — 기존 "포스타입 결제하기" 대신, 이메일+성별+선호역할을
+    // CastNight 전용 Supabase 프로젝트(waitlist 테이블)에 직접 저장한다.
+    // 네오타로 자체 백엔드와는 무관하며, RLS로 insert만 허용되고 조회는 막혀있다.
     // ─────────────────────────────────────────────
-    payBtn.addEventListener('click', () => {
-      window.open(POSTYPE_URL, '_blank', 'noopener');
+    const CASTNIGHT_SUPABASE_URL = 'https://vwybarqglobrkuppgllx.supabase.co';
+    const CASTNIGHT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3eWJhcnFnbG9icmt1cHBnbGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMzYwNTksImV4cCI6MjEwMDgxMjA1OX0.2eOO4qhPXsOFdzV2lzXOYXPyYWv1nrET9xDuXMDjPCY';
+
+    let cnGender = '';
+    let cnRole = '';
+
+    function setCnGender(g) {
+      cnGender = g;
+      cnRole = '';
+      cnGenderFemaleBtn.style.background = g === 'female' ? '#4c1d95' : 'transparent';
+      cnGenderMaleBtn.style.background = g === 'male' ? '#4c1d95' : 'transparent';
+      cnRoleFemaleGroup.classList.toggle('hidden', g !== 'female');
+      cnRoleMaleGroup.classList.toggle('hidden', g !== 'male');
+      [cnRoleWitchBtn, cnRoleHunterBtn, cnRoleSummonBtn, cnRoleVampireBtn].forEach((b) => { b.style.background = 'transparent'; });
+    }
+
+    function setCnRole(r) {
+      cnRole = r;
+      const map = { witch: cnRoleWitchBtn, hunter: cnRoleHunterBtn, summon: cnRoleSummonBtn, vampire: cnRoleVampireBtn };
+      Object.values(map).forEach((b) => { b.style.background = 'transparent'; });
+      map[r].style.background = '#4c1d95';
+    }
+
+    cnGenderFemaleBtn.addEventListener('click', () => setCnGender('female'));
+    cnGenderMaleBtn.addEventListener('click', () => setCnGender('male'));
+    cnRoleWitchBtn.addEventListener('click', () => setCnRole('witch'));
+    cnRoleHunterBtn.addEventListener('click', () => setCnRole('hunter'));
+    cnRoleSummonBtn.addEventListener('click', () => setCnRole('summon'));
+    cnRoleVampireBtn.addEventListener('click', () => setCnRole('vampire'));
+
+    cnSubmitBtn.addEventListener('click', async () => {
+      const email = cnEmailInput.value.trim();
+      hideInlineError(cnError);
+
+      if (!email || !cnGender || !cnRole) {
+        showInlineError(cnError, '이메일, 성별, 선호 역할을 모두 선택/입력해주세요.');
+        return;
+      }
+
+      cnSubmitBtn.disabled = true;
+      cnSubmitBtn.textContent = '등록 중...';
+
+      try {
+        const res = await fetch(`${CASTNIGHT_SUPABASE_URL}/rest/v1/waitlist`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': CASTNIGHT_ANON_KEY,
+            'Authorization': `Bearer ${CASTNIGHT_ANON_KEY}`,
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({
+            email,
+            gender: cnGender,
+            preferred_role: cnRole,
+            mbti: resultMBTI || null,
+            source: 'neotarot',
+          }),
+        });
+
+        if (!res.ok) throw new Error('waitlist insert failed');
+
+        castnightWaitlistForm.classList.add('hidden');
+        castnightWaitlistDone.classList.remove('hidden');
+      } catch (err) {
+        showInlineError(cnError, '등록 중 문제가 발생했어요. 다시 시도해주세요.');
+        cnSubmitBtn.disabled = false;
+        cnSubmitBtn.textContent = '🌙 사전 등록하기';
+      }
     });
 
     // ─────────────────────────────────────────────
