@@ -573,6 +573,19 @@
         <div id="castnight-waitlist-done" class="hidden" style="text-align:center;">
           <p style="font-size:18px; font-weight:700; color:#e9d5ff; margin:0;">🌙 등록 완료!</p>
           <p style="font-size:13px; color:#c4b5fd; margin-top:8px;">할로윈, 당신의 가면을 준비할게요.</p>
+
+          <div style="margin-top:16px; padding:14px; background:rgba(255,255,255,0.06); border:1px dashed rgba(178,107,255,0.5); border-radius:12px;">
+            <p style="font-size:11px; color:#c4b5fd; letter-spacing:1px; margin:0 0 6px;">🔑 지금 바로 라운지 입장 코드</p>
+            <p style="font-size:20px; font-weight:700; color:#fbbf24; letter-spacing:2px; margin:0;">NEO777</p>
+          </div>
+
+          <button
+            id="cn-enter-lounge-btn"
+            type="button"
+            style="display:block; width:100%; margin-top:14px; padding: 14px 0; background: linear-gradient(135deg, #7928ca, #4f46e5); color: #ffffff; font-size: 15px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer;"
+          >
+            🔮 지금 라운지 입장하기
+          </button>
         </div>
 
         <div class="w-full flex flex-col gap-2" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 18px; padding-top: 14px;">
@@ -2476,6 +2489,7 @@
     const cnEmailInput = document.getElementById('cn-email-input');
     const cnError = document.getElementById('cn-error');
     const cnSubmitBtn = document.getElementById('cn-submit-btn');
+    const cnEnterLoungeBtn = document.getElementById('cn-enter-lounge-btn');
     const resultCodeInput = document.getElementById('result-code-input');
     const resultCodeSubmit = document.getElementById('result-code-submit');
     const resultCodeError = document.getElementById('result-code-error');
@@ -3239,6 +3253,10 @@
         cnSubmitBtn.disabled = false;
         cnSubmitBtn.textContent = '🌙 사전 등록하기';
       }
+    });
+
+    cnEnterLoungeBtn.addEventListener('click', () => {
+      tryEnterMidnightBar('NEO777', resultScreen, resultCodeError);
     });
 
     // ─────────────────────────────────────────────
