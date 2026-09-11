@@ -3,6 +3,8 @@ import { evaluateRelationshipOnServer } from '../../../src/backend/relationship-
 const LOCAL_ALLOWED_ORIGINS = new Set([
   'http://127.0.0.1:4174',
   'http://localhost:4174',
+  'https://www.neotarot.kr',
+  'https://neotarot.kr',
 ]);
 
 function corsHeaders(origin: string | null) {
@@ -28,4 +30,3 @@ Deno.serve(async (request: Request) => {
     return new Response(JSON.stringify({ status: 'ERROR', error: 'SERVER_ERROR' }), { status: 500, headers });
   }
 });
-

@@ -1,6 +1,6 @@
 import { handleInviteOperation } from '../../../src/backend/invite-service.mjs';
 
-const LOCAL_ALLOWED_ORIGINS = new Set(['http://127.0.0.1:4174', 'http://localhost:4174']);
+const LOCAL_ALLOWED_ORIGINS = new Set(['http://127.0.0.1:4174', 'http://localhost:4174', 'https://www.neotarot.kr', 'https://neotarot.kr']);
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
